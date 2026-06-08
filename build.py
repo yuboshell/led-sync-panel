@@ -98,38 +98,6 @@ def svg_vernier():
     s.append(txt(20, 234, "unambiguous range exceed the largest possible offset. In binary, the high bits ARE the coarse scale.", 12.5, INK))
     return wrap("".join(s), 720, 250)
 
-# ---------- Diagram 4: electronics block ----------
-def svg_block():
-    s = [txt(20, 26, "Electronics (one clock drives every LED)", 14, INK, "start", "bold")]
-    def box(x, y, w, h, l1, l2=""):
-        g = [f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="6" fill="#f8fafc" stroke="{INK}"/>']
-        if l2:
-            g.append(txt(x+w/2, y+h/2-4, l1, 12.5, INK, "middle", "bold"))
-            g.append(txt(x+w/2, y+h/2+14, l2, 10.5, MUTE, "middle"))
-        else:
-            g.append(txt(x+w/2, y+h/2+4, l1, 12.5, INK, "middle", "bold"))
-        return "".join(g)
-    def arrow(x1, y1, x2, y2, lbl=""):
-        g = [f'<line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" stroke="{INK}" stroke-width="1.6"/>',
-             f'<polygon points="{x2},{y2} {x2-8},{y2-4} {x2-8},{y2+4}" fill="{INK}"/>']
-        if lbl:
-            g.append(txt((x1+x2)/2, y1-8, lbl, 10, MUTE, "middle"))
-        return "".join(g)
-    s.append(box(20, 60, 150, 56, "Teensy 4.0", "hardware timer @ τ"))
-    s.append(arrow(170, 88, 250, 88, "SPI"))
-    s.append(box(250, 60, 160, 56, "LED driver", "TLC5947 / APA102"))
-    s.append(arrow(410, 88, 470, 88))
-    s.append(box(470, 60, 170, 56, "LED bar", "on the flat panel"))
-    # audit branch
-    s.append(arrow(555, 116, 555, 158))
-    s.append(box(470, 158, 170, 50, "photodiode → scope /", "logic analyser (audit)"))
-    s.append(txt(555, 228, "records step period + jitter", 10, MUTE, "middle"))
-    # power
-    s.append(box(250, 158, 160, 50, "5 V supply"))
-    s.append(arrow(330, 158, 330, 116))
-    s.append(txt(300, 246, "common LATCH: all LEDs change together (sub-µs skew)", 11, MUTE, "middle"))
-    return wrap("".join(s), 720, 262)
-
 # ---------- Diagram 5: pictorial wiring (real product photos + links) ----------
 def svg_wiring():
     s = [txt(20, 22, "How the parts connect (click any photo to open its store page)", 13.5, INK, "start", "bold")]
@@ -140,13 +108,6 @@ def svg_wiring():
                 + txt(x+w/2, y+h+13, name, 11, "#0f4c81", "middle", "bold")
                 + txt(x+w/2, y+h+27, price, 9.5, MUTE, "middle")
                 + '</a>')
-    def onode(x, y, name, sub, href, w=132, h=84):
-        return (f'<a href="{href}" target="_blank">'
-                f'<rect x="{x}" y="{y}" width="{w}" height="{h+34}" rx="7" fill="#f8fafc" stroke="{LINE}" stroke-dasharray="5 3"/>'
-                + txt(x+w/2, y+h/2-3, name, 11, "#0f4c81", "middle", "bold")
-                + txt(x+w/2, y+h/2+13, "(optional)", 9.5, MUTE, "middle")
-                + txt(x+w/2, y+h+13, sub, 8.5, MUTE, "middle")
-                + '</a>')
     def harrow(x1, x2, y, lbl):
         return (f'<line x1="{x1}" y1="{y}" x2="{x2-7}" y2="{y}" stroke="{INK}" stroke-width="1.7"/>'
                 f'<polygon points="{x2},{y} {x2-8},{y-4} {x2-8},{y+4}" fill="{INK}"/>'
@@ -155,20 +116,12 @@ def svg_wiring():
     s.append(pnode(360, 170, "sn74hc595.jpg", "Shift register ×3–4", "static latch · SN74HC595", "https://www.sparkfun.com/products/13699"))
     s.append(pnode(700, 170, "led-red-10mm.jpg", "Direct-emission LEDs", "10 mm red ×N · + resistor", "https://www.sparkfun.com/super-bright-led-red-10mm.html"))
     s.append(pnode(40, 24, "psu-5v4a.jpg", "Regulated 5 V supply", "powers the rail", "https://www.adafruit.com/product/1466"))
-    s.append(pnode(234, 352, "saleae-logic8.png", "Logic analyzer", "Saleae / clone · audit", "https://www.saleae.com/products/logic-8"))
-    s.append(onode(700, 352, "Photodiode &#8594; scope", "Thorlabs DET10A2 / BPW34", "https://www.thorlabs.com/thorproduct.cfm?partnumber=DET10A2"))
     s.append(harrow(172, 360, 212, "SPI: SER &#183; SRCLK &#183; RCLK"))
     s.append(harrow(492, 700, 212, "static outputs &#8594; resistors"))
     s.append(f'<polyline points="106,144 106,157 426,157 426,167" fill="none" stroke="{INK}" stroke-width="1.6"/>')
     s.append(f'<polygon points="426,170 422,162 430,162" fill="{INK}"/>')
     s.append(txt(250, 151, "5 V", 9.5, MUTE, "middle"))
-    s.append(f'<line x1="300" y1="213" x2="300" y2="352" stroke="{INK}" stroke-width="1.4" stroke-dasharray="5 4"/>')
-    s.append(f'<circle cx="300" cy="212" r="3" fill="{INK}"/>')
-    s.append(txt(312, 300, "taps RCLK &#8594; step + jitter", 9.5, MUTE, "start"))
-    s.append(f'<line x1="766" y1="256" x2="766" y2="350" stroke="{INK}" stroke-width="1.4" stroke-dasharray="5 4"/>')
-    s.append(f'<polygon points="766,352 762,344 770,344" fill="{INK}"/>')
-    s.append(txt(776, 305, "optical witness", 9.5, MUTE, "start"))
-    return wrap("".join(s), 900, 478)
+    return wrap("".join(s), 900, 290)
 
 # ---------- Diagram 6: physical build (breadboard driver + LED panel) ----------
 def svg_layout():
@@ -243,7 +196,6 @@ DIAGRAMS = {
     "geometry": svg_geometry(),
     "encoding": svg_encoding(),
     "vernier":  svg_vernier(),
-    "block":    svg_block(),
     "layout":   svg_layout(),
     "wiring":   svg_wiring(),
 }
@@ -289,7 +241,7 @@ def card(img, name, price, role, href):
 
 P = []  # page body parts
 P.append('<h1>Multi-camera sync evaluation: a large flat LED time-code panel</h1>')
-P.append('<div class="meta">DIY design plan &middot; updated 2026-06-07 &middot; working draft &middot; '
+P.append('<div class="meta">DIY design plan &middot; updated 2026-06-08 &middot; working draft &middot; '
          'step-time 200&nbsp;µs, driver 74HC595, range &ge;1&nbsp;s, coarse row included (datasheet-audited) &middot; 11&times;Pixel&nbsp;7 / Argus rig</div>')
 P.append('<p class="lead">Build a large, flat LED panel that shows a fast-advancing, '
          'visually-decodable <b>time code</b>. All 11 cameras film it at once; each frame decodes '
@@ -352,7 +304,7 @@ P.append("""<h3>Step-time: τ = 200 µs (decided 2026-06-03)</h3>
 <p><b>Build choice:</b> drive the LEDs with <b>74HC595 shift registers</b> (static latch, no PWM), which switch cleanly at <b>both 200 µs and 20 µs</b>. Operate at 200 µs and cross-validate at 20 µs: two step sizes agreeing on the same offset is a strong validation result. First measure the actual Pixel 7 line time (readout ÷ rows); the sweet spot is τ ≈ 5–15× that.</p>""")
 P.append('<h2>5. Electronics</h2>')
 P.append(f'<figure>{DIAGRAMS["layout"]}<figcaption><b>Figure 5. Physical build.</b> The breadboard carries only the microcontroller, the static-latch shift register(s) and the current-limit resistors; the 10&nbsp;mm LEDs are too wide to pack on it (~4 holes each), so they mount on the display panel at 3&ndash;5&nbsp;cm pitch and connect back by jumper wires.</figcaption></figure>')
-P.append(f'<figure>{DIAGRAMS["wiring"]}<figcaption><b>Figure 6. Parts and connections.</b> Click any photo to open its store page; dashed lines are the optional timing-audit branch.</figcaption></figure>')
+P.append(f'<figure>{DIAGRAMS["wiring"]}<figcaption><b>Figure 6. Parts and connections.</b> The basic chain — 5 V supply &rarr; microcontroller &rarr; shift register(s) &rarr; LEDs. Click any photo to open its store page.</figcaption></figure>')
 P.append('<p>The driver must switch the LEDs <b>statically</b> (no PWM) for a clean edge. That rules out PWM-based '
          'parts (PWM drivers and addressable strips like the TLC5947 and APA102/WS2812) and points to a <b>static-latch shift register</b> (outputs latch in ~13 ns on RCLK; the SN74HC595 is one part). '
          'LEDs are <b>direct-emission</b> (red/amber/green), <b>never white or PC-amber</b> (phosphor smears the edge). '
@@ -374,8 +326,6 @@ P.append(card("led-red-10mm.jpg", "Direct-emission LED (10 mm)", "~$1",
               "the measurement target · red AlInGaP, no phosphor, Vf 2.1–2.3 V · e.g. SparkFun COM-08862", "https://www.sparkfun.com/super-bright-led-red-10mm.html"))
 P.append(card("psu-5v4a.jpg", "Regulated 5 V supply", "$14.95",
               "powers the LED rail · e.g. Mean Well RS-25-5", "https://www.adafruit.com/product/1466"))
-P.append(card("saleae-logic8.png", "Logic analyzer", "~$199",
-              "audits the latch line · e.g. Saleae Logic 8, or a 24 MHz clone ~$10", "https://www.saleae.com/products/logic-8"))
 P.append('</div>')
 P.append('<h3>Rejected after reading the datasheet</h3>')
 P.append('<div class="gallery">')
@@ -387,10 +337,10 @@ P.append(card("cree-xpe2-amber.jpg", "Phosphor-converted amber LED ✗", "$5.14"
               "PC amber = phosphor, Vf 3.05 V → decay tail smears the edge · e.g. Cree XP-E2", "https://www.ledsupply.com/leds/cree-xlamp-xp-e2-color-high-power-led-star"))
 P.append('</div>')
 P.append('<p class="k">Full running evaluation log (every part considered + its verdict, kept across sessions): <code>wiki/analyses/sync-eval-equipment-log.md</code> in memex.</p>')
-P.append('<p class="k">Not pictured (generic): current-limit resistors (one per LED), an optional <b>current-buffer array</b> (e.g. ULN2803) '
-         'sink driver for full 20 mA brightness, an optional photodiode for the optical audit (BPW34 ~$1, or '
-         'Thorlabs DET10A2 ~$300), a <b>breadboard + jumper wires</b> (and a perfboard for the permanent build), and the 3D-printed or acrylic panel frame + diffuser. Ballpark total: '
-         '<b>~$120–$180 minimal</b> (the 595 chain is cheaper than the driver-IC paths), <b>~$600–$1,100 cornerstone</b>.</p>')
+P.append('<p class="k">Not pictured (generic): current-limit resistors (one per LED), a <b>current-buffer array</b> (e.g. ULN2803) '
+         'for full 20 mA brightness on the big panel, a <b>breadboard + jumper wires</b> (perfboard for the permanent build), '
+         'a <b>micro-USB cable</b> for the microcontroller, a <b>soldering iron + solder</b> (to fit the board&rsquo;s header pins and wire the LEDs to the panel), and the panel substrate + diffuser. '
+         'Ballpark for the basic rig: <b>~$120–$150 CAD</b>.</p>')
 
 P.append('<div class="note"><b>First LED order &mdash; how many?</b> The full panel is <b>~27 LEDs</b> '
          '(16 Gray bar + 1 parity + ~10 coarse row), driven by <b>3&ndash;4&times; static-latch shift registers</b> (8 outputs each; e.g. the SN74HC595). '
@@ -402,7 +352,6 @@ P.append('<div class="note"><b>First LED order &mdash; how many?</b> The full pa
 P.append('<h3>Returns &amp; de-risking (vendor policies checked 2026-06-06)</h3>')
 P.append('<table>'
          '<tr><th>Vendor (its parts)</th><th>Window</th><th>Opened but unsuitable</th><th>Defective</th></tr>'
-         '<tr style="background:#fffbeb"><td><a href="https://support.saleae.com/180-day-return-policy-and-3-year-warranty">Saleae</a> (analyser)</td><td><b>180 days</b></td><td>full refund incl. shipping (direct purchase only)</td><td>3-year warranty, any cause</td></tr>'
          '<tr><td><a href="https://learn.adafruit.com/how-do-i-return-my-order/adafruit-s-return-policy">Adafruit</a> (5V PSU)</td><td>30 days</td><td><b>unopened only</b>; 5% restock if &#8805;$500</td><td>replaced / refunded</td></tr>'
          '<tr><td><a href="https://www.sparkfun.com/returns">SparkFun</a> (74HC595, red LED)</td><td>30 days</td><td><b>unopened/unused only</b>; restock fee case-by-case</td><td>RMA by email</td></tr>'
          '<tr><td><a href="https://www.pjrc.com/teensy/troubleshoot.html">PJRC</a> (Teensy)</td><td>RMA by email</td><td>no change-of-mind policy</td><td>RMA replacement; buy direct (counterfeit risk)</td></tr>'
@@ -410,7 +359,7 @@ P.append('<table>'
 P.append('<p class="k"><b>Takeaway:</b> opened parts that work but do not suit are mostly <b>non-returnable</b> '
          '(Adafruit, SparkFun, and PJRC are unopened/RMA-only); defective items are covered everywhere. So <b>validate with '
          '1&ndash;2 units before bulk-buying</b> (especially the red LEDs, which cannot be returned once opened), and '
-         'rely on returns only for the expensive analyser (the Saleae 180-day refund) or genuinely dead parts. '
+         'rely on returns only for genuinely dead parts. '
          'You pay return shipping unless the item is defective. Policies change, so re-check before ordering.</p>')
 P.append('<h3>Canadian sourcing (Edmonton)</h3>')
 P.append('<p class="k">Buying from within Canada avoids USD exchange, cross-border shipping, and courier '
@@ -420,23 +369,21 @@ P.append('<table>'
          '<tr><td>Microcontroller board &mdash; <a href="https://ca.robotshop.com/products/teensy-40-usb-microcontroller-development-board">Teensy 4.0</a></td><td>1</td><td>RobotShop.ca / ABRA</td><td>~$34</td></tr>'
          '<tr><td>Static-latch shift register &mdash; <a href="https://www.digikey.ca/en/products/detail/texas-instruments/SN74HC595N/277246">SN74HC595N</a></td><td>4</td><td>DigiKey.ca / ABRA</td><td>~$2.50 ea</td></tr>'
          '<tr><td>Direct-emission LED, 10 mm (625 nm AlInGaP)</td><td>~40</td><td>DigiKey.ca / ABRA</td><td>~$20</td></tr>'
-         '<tr><td>Current-limit resistors + current-buffer array (ULN2803, opt.) + photodiode (BPW34, opt.)</td><td>—</td><td>DigiKey.ca / Mouser.ca</td><td>~$10</td></tr>'
+         '<tr><td>Current-limit resistors + current-buffer array (ULN2803, for the bright panel)</td><td>—</td><td>DigiKey.ca / Mouser.ca</td><td>~$10</td></tr>'
          '<tr><td>Regulated 5 V supply &mdash; <a href="https://www.digikey.ca/en/products/detail/mean-well-usa-inc/RS-25-5/7706180">Mean Well RS-25-5</a> (5 V 5 A)</td><td>1</td><td>DigiKey.ca / Amazon.ca</td><td>~$20</td></tr>'
-         '<tr><td>Logic analyzer (24 MHz USB clone)</td><td>1</td><td>Amazon.ca</td><td>~$18</td></tr>'
+         '<tr><td>Micro-USB cable &mdash; program + power the board</td><td>1</td><td>Amazon.ca / on hand</td><td>~$8</td></tr>'
          '<tr><td><b>Breadboard + jumper (Dupont) wires</b> + perfboard (permanent build)</td><td>—</td><td>Amazon.ca / local</td><td>~$18</td></tr>'
+         '<tr><td>Soldering iron + solder (header pins + panel wiring; skip if owned)</td><td>—</td><td>Amazon.ca / local</td><td>~$25</td></tr>'
          '<tr><td>Panel substrate (acrylic / foam-board) + hook-up wire</td><td>—</td><td>Amazon.ca / local</td><td>~$20</td></tr>'
          '</table>')
 P.append('<p class="k"><b>One-stop:</b> DigiKey.ca or Mouser.ca for the commodity parts (duties handled, fast to '
-         'Alberta), plus ABRA Electronics (Montreal) or RobotShop.ca for the Teensy. Total ≈ $150 CAD. Ordering '
+         'Alberta), plus ABRA Electronics (Montreal) or RobotShop.ca for the Teensy. Total ≈ $140 CAD for parts (+ ~$25 for a soldering iron if you don&rsquo;t own one). Ordering '
          'US-direct (PJRC / SparkFun / Adafruit) risks courier brokerage fees, so prefer the Canadian sources above.</p>')
-P.append('<h2>7. Timing integrity (cornerstone-defensible)</h2>')
-P.append('<ul>'
-         '<li>The Teensy crystal (±30 ppm) drifts &lt;0.1 ms over a multi-second sweep — ample for sub-ms.</li>'
-         '<li>Capture the <b>latch line</b> on a logic analyser and a photodiode on one LED to a scope; record '
-         'step period, jitter, rise/fall <b>once</b> as the audit artifact.</li>'
-         '<li><b>Cross-validate</b> against an independent method on the same capture (the single-LED edge method, '
-         'or Twist-n-Sync gyro sync). Agreement of two independent methods is what makes a DIY instrument publishable.</li>'
-         '</ul>')
+P.append('<h2>7. Timing integrity</h2>')
+P.append('<p>The clock itself is already trustworthy: the microcontroller crystal (±30 ppm) drifts &lt;0.1 ms over a '
+         'multi-second sweep, ample for sub-ms. The formal timing <b>audit and cross-validation</b> — recording the exact '
+         'step period and jitter, and agreeing with an independent method — are a <b>later phase</b>, deferred until the basic '
+         'rig decodes correctly, so the audit gear is left off this build and its purchase list.</p>')
 
 P.append('<h2>8. Decoding pipeline</h2>')
 P.append('<p>Per camera: locate the panel, threshold each LED on/off, decode Gray&rarr;binary&rarr;timestamp; '
