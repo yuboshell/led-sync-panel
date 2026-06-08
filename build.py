@@ -170,11 +170,80 @@ def svg_wiring():
     s.append(txt(776, 305, "optical witness", 9.5, MUTE, "start"))
     return wrap("".join(s), 900, 478)
 
+# ---------- Diagram 6: physical build (breadboard driver + LED panel) ----------
+def svg_layout():
+    s = [txt(20, 24, "Physical build: the driver sits on the breadboard, the 10 mm LEDs live on the panel", 13.5, INK, "start", "bold")]
+    # 5 V supply
+    s.append(f'<rect x="40" y="92" width="78" height="26" rx="4" fill="#fff" stroke="{LINE}"/>')
+    s.append(txt(79, 109, "5 V supply", 9.5, INK, "middle"))
+    # breadboard body
+    bx, by, bw, bh = 40, 150, 300, 150
+    s.append(f'<rect x="{bx}" y="{by}" width="{bw}" height="{bh}" rx="9" fill="#f5f5f3" stroke="{LINE}"/>')
+    s.append(txt(bx + bw/2, by + bh + 16, "breadboard — driver only", 10, MUTE, "middle"))
+    hx = bx + 20
+    def hrow(y, n=20):
+        return "".join(f'<circle cx="{hx+i*13}" cy="{y}" r="1.7" fill="#cfcfcf"/>' for i in range(n))
+    s.append(f'<line x1="{hx}" y1="{by+13}" x2="{hx+19*13}" y2="{by+13}" stroke="#dc2626" stroke-width="1.1"/>')
+    s.append(hrow(by+24)); s.append(hrow(by+bh-24))
+    s.append(f'<line x1="{hx}" y1="{by+bh-13}" x2="{hx+19*13}" y2="{by+bh-13}" stroke="#2563eb" stroke-width="1.1"/>')
+    # 74HC595 DIP
+    dipx, dipy, dipw = hx+14, by+66, 11*13
+    s.append(f'<rect x="{dipx}" y="{dipy}" width="{dipw}" height="30" rx="3" fill="#222"/>')
+    s.append(f'<circle cx="{dipx+8}" cy="{dipy+15}" r="3" fill="none" stroke="#666"/>')
+    s.append(txt(dipx+dipw/2, dipy+19, "74HC595", 9, "#e5e7eb", "middle", "bold"))
+    # resistors row
+    for i in range(8):
+        rx = dipx + 10 + i*16
+        s.append(f'<rect x="{rx}" y="{dipy-20}" width="6" height="13" rx="2" fill="#d6b06a" stroke="#a07d3a" stroke-width="0.5"/>')
+    s.append(txt(dipx+dipw/2, dipy-26, "8 × current-limit resistors", 8.5, MUTE, "middle"))
+    # Teensy
+    s.append(f'<rect x="{bx+8}" y="{by+bh-44}" width="66" height="28" rx="4" fill="#0b7261"/>')
+    s.append(txt(bx+41, by+bh-26, "Teensy 4.0", 8.5, "#e6fffb", "middle", "bold"))
+    s.append(f'<path d="M{bx+74},{by+bh-34} L{dipx+10},{dipy+30}" fill="none" stroke="{INK}" stroke-width="1"/>')
+    s.append(txt(bx+78, by+bh-36, "SER·SRCLK·RCLK", 8, MUTE, "start"))
+    s.append(f'<path d="M79,118 L79,{by+13} L{hx},{by+13}" fill="none" stroke="#dc2626" stroke-width="1.1"/>')
+    # ribbon to panel
+    for i in range(8):
+        s.append(f'<path d="M{dipx+13+i*16},{dipy-20} C360,{160+i*6} 430,{110+i*20} 470,{120+i*20}" fill="none" stroke="{LINE}" stroke-width="1"/>')
+    s.append(txt(405, 138, "jumper wires", 9, MUTE, "middle"))
+    # LED panel
+    px, py, pw, ph = 470, 84, 408, 250
+    s.append(f'<rect x="{px}" y="{py}" width="{pw}" height="{ph}" rx="10" fill="{PANEL}"/>')
+    s.append(txt(px+pw/2, py-8, "LED display panel — every camera films this", 10.5, MUTE, "middle"))
+    lit = {1,2,5,8,11,14}
+    dx, dp, ry = px+30, 21, py+74
+    s.append(txt(dx, ry-20, "16-bit Gray bar", 9, "#cbd5e1", "start"))
+    for i in range(16):
+        cx = dx+i*dp
+        c = AMBER if i in lit else "#7f1d1d"
+        s.append(f'<circle cx="{cx}" cy="{ry}" r="8" fill="{c}"/>')
+        s.append(f'<circle cx="{cx-2.4}" cy="{ry-2.4}" r="2" fill="#fff" opacity="0.45"/>')
+    pcx = dx+16*dp+8
+    s.append(f'<circle cx="{pcx}" cy="{ry}" r="8" fill="#7f1d1d" stroke="#cbd5e1" stroke-dasharray="2 2"/>')
+    s.append(txt(pcx, ry+22, "parity", 8.5, "#cbd5e1", "middle"))
+    cry = py+158
+    s.append(txt(dx, cry-22, "coarse row", 9, "#cbd5e1", "start"))
+    for i in range(10):
+        cx = dx+i*36
+        c = AMBER if i==6 else "#7f1d1d"
+        s.append(f'<circle cx="{cx}" cy="{cry}" r="11" fill="{c}"/>')
+        s.append(f'<circle cx="{cx-3}" cy="{cry-3}" r="2.6" fill="#fff" opacity="0.45"/>')
+    scx = dx+9*36
+    s.append(f'<line x1="{scx-11}" y1="{cry+24}" x2="{scx+11}" y2="{cry+24}" stroke="#cbd5e1" stroke-width="1"/>')
+    s.append(f'<line x1="{scx-11}" y1="{cry+21}" x2="{scx-11}" y2="{cry+27}" stroke="#cbd5e1" stroke-width="1"/>')
+    s.append(f'<line x1="{scx+11}" y1="{cry+21}" x2="{scx+11}" y2="{cry+27}" stroke="#cbd5e1" stroke-width="1"/>')
+    s.append(txt(scx, cry+38, "10 mm", 8.5, "#cbd5e1", "middle"))
+    # callout
+    s.append(txt(40, 360, "A 10 mm dome is ≈ 4 breadboard holes wide, so a 16-LED bar will not pack onto a breadboard —", 11.5, INK, "start"))
+    s.append(txt(40, 378, "only the Teensy + 74HC595 + resistors sit on the board; the LEDs mount on the panel at 3–5 cm pitch, wired back by jumpers.", 11.5, INK, "start"))
+    return wrap("".join(s), 900, 396)
+
 DIAGRAMS = {
     "geometry": svg_geometry(),
     "encoding": svg_encoding(),
     "vernier":  svg_vernier(),
     "block":    svg_block(),
+    "layout":   svg_layout(),
     "wiring":   svg_wiring(),
 }
 
@@ -219,8 +288,8 @@ def card(img, name, price, role, href):
 
 P = []  # page body parts
 P.append('<h1>Multi-camera sync evaluation: a large flat LED time-code panel</h1>')
-P.append('<div class="meta">DIY design plan &middot; updated 2026-06-06 &middot; working draft &middot; '
-         'step-time 200&nbsp;µs, driver 74HC595 (datasheet-audited); range + coarse-row pending &middot; 11&times;Pixel&nbsp;7 / Argus rig</div>')
+P.append('<div class="meta">DIY design plan &middot; updated 2026-06-07 &middot; working draft &middot; '
+         'step-time 200&nbsp;µs, driver 74HC595, range &ge;1&nbsp;s, coarse row included (datasheet-audited) &middot; 11&times;Pixel&nbsp;7 / Argus rig</div>')
 P.append('<p class="lead">Build a large, flat LED panel that shows a fast-advancing, '
          'visually-decodable <b>time code</b>. All 11 cameras film it at once; each frame decodes '
          'to a timestamp; the spread of timestamps across cameras <i>is</i> the inter-camera offset. '
@@ -243,8 +312,9 @@ P.append('<p class="k">How it encodes time: in the timing modes a single lit LED
 P.append('<h2>2. Geometry &mdash; Option C: one large flat panel</h2>')
 P.append('<p>You will place the cameras to face one large flat panel, so a single planar matrix is all '
          'that is needed (no prism, no multi-face latching). The only requirement is that the panel be '
-         'large/bright enough for every camera to resolve individual LEDs. Rule of thumb: ~1&nbsp;cm LED blobs '
-         'at ~3&ndash;5&nbsp;cm pitch make a 16-LED bar ~0.5&ndash;0.8&nbsp;m wide, cleanly resolved by a Pixel&nbsp;7 out to ~5&nbsp;m.</p>')
+         'large/bright enough for every camera to resolve individual LEDs. Rule of thumb: ~1&nbsp;cm (10&nbsp;mm) LEDs '
+         'at ~3&ndash;5&nbsp;cm pitch make a 16-LED bar ~0.5&ndash;0.8&nbsp;m wide, cleanly resolved by a Pixel&nbsp;7 out to ~5&nbsp;m. '
+         'Each 10&nbsp;mm dome is ~4 breadboard holes wide, so the LEDs mount on the panel surface (acrylic / foam-board / 3D-printed grid), not the breadboard &mdash; see &sect;5.</p>')
 P.append(f'<figure>{DIAGRAMS["geometry"]}</figure>')
 
 P.append('<h2>3. Encoding &mdash; Gray-coded bar + parity + coarse row</h2>')
@@ -280,6 +350,7 @@ P.append("""<h3>Step-time: τ = 200 µs (decided 2026-06-03)</h3>
 </ul>
 <p><b>Build choice:</b> drive the LEDs with <b>74HC595 shift registers</b> (static latch, no PWM), which switch cleanly at <b>both 200 µs and 20 µs</b>. Operate at 200 µs and cross-validate at 20 µs: two step sizes agreeing on the same offset is a strong validation result. First measure the actual Pixel 7 line time (readout ÷ rows); the sweet spot is τ ≈ 5–15× that.</p>""")
 P.append('<h2>5. Electronics</h2>')
+P.append(f'<figure>{DIAGRAMS["layout"]}<figcaption>Physical layout. The breadboard carries only the Teensy, the 74HC595 shift register(s) and the current-limit resistors; the 10&nbsp;mm LEDs are too wide to pack on it (~4 holes each), so they mount on the display panel at 3&ndash;5&nbsp;cm pitch and connect back by jumper wires.</figcaption></figure>')
 P.append(f'<figure>{DIAGRAMS["wiring"]}<figcaption>The chosen build, wired up. Click any photo to open its store page; dashed lines are the optional audit branch.</figcaption></figure>')
 P.append('<p>The driver must switch the LEDs <b>statically</b> (no PWM) for a clean edge. That rules out PWM-based '
          'parts (TLC5947, APA102/WS2812) and points to <b>74HC595 shift registers</b> (outputs latch in ~13 ns on RCLK). '
@@ -320,6 +391,13 @@ P.append('<p class="k">Not pictured (generic): current-limit resistors (one per 
          'Thorlabs DET10A2 ~$300), and the 3D-printed or acrylic panel frame + diffuser. Ballpark total: '
          '<b>~$120–$180 minimal</b> (the 595 chain is cheaper than the driver-IC paths), <b>~$600–$1,100 cornerstone</b>.</p>')
 
+P.append('<div class="note"><b>First LED order &mdash; how many?</b> The full panel is <b>~27 LEDs</b> '
+         '(16 Gray bar + 1 parity + ~10 coarse row), driven by <b>3&ndash;4&times; 74HC595</b> (8 outputs each). '
+         'Buy <b>~40 LEDs</b> (~$20&ndash;40): enough to build and film the complete panel for a comprehensive '
+         'multi-camera test, plus ~13 spares (LEDs crack on insertion or die while you tune the resistor value). '
+         'A failed approach costs &lt;&nbsp;$40. Extra caution: order <b>3&ndash;5 first</b> to eyeball brightness '
+         'and colour on a Pixel&nbsp;7 (LEDs cannot be returned once opened), then buy the rest. Buy <b>4&times; 74HC595</b> '
+         'and a <b>spare Teensy</b> while you are at it &mdash; both are cheap and the long-lead items if one fails.</div>')
 P.append('<h3>Returns &amp; de-risking (vendor policies checked 2026-06-06)</h3>')
 P.append('<table>'
          '<tr><th>Vendor (its parts)</th><th>Window</th><th>Opened but unsuitable</th><th>Defective</th></tr>'
