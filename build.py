@@ -163,9 +163,7 @@ def svg_layout():
     s.append(f'<line x1="{scx+11}" y1="{cry+21}" x2="{scx+11}" y2="{cry+27}" stroke="#cbd5e1" stroke-width="1"/>')
     s.append(txt(scx, cry+38, "10 mm", 8.5, "#cbd5e1", "middle"))
     # callout
-    s.append(txt(40, 360, "A 10 mm dome is ≈ 4 breadboard holes wide, so a 16-LED bar will not pack onto a breadboard —", 11.5, INK, "start"))
-    s.append(txt(40, 378, "only the microcontroller + shift register + resistors sit on the board; the LEDs mount on the panel at 3–5 cm pitch, wired back by jumpers.", 11.5, INK, "start"))
-    return wrap("".join(s), 900, 396)
+    return wrap("".join(s), 900, 350)
 
 DIAGRAMS = {
     "geometry": svg_geometry(),
@@ -298,7 +296,7 @@ P.append('<table><tr><th>Part</th><th>Its job in the rig</th></tr>'
          '<tr><td><b>Current-buffer array</b> <span class="k">(ULN2803, big panel only)</span></td><td>Muscle. Lets every LED run at full brightness without overloading the shift register; skip it for the first few-LED test.</td></tr>'
          '<tr><td><b>Regulated 5 V supply</b></td><td>Power. Feeds the LED rail — the USB port alone cannot drive ~40 bright LEDs.</td></tr>'
          '<tr><td><b>Breadboard + jumper wires</b></td><td>The chassis. Holds the chips and carries signals out to the panel; no soldering for the first prototype.</td></tr>'
-         '<tr><td><b>Panel substrate</b> <span class="k">(acrylic / foam-board)</span></td><td>The canvas. The flat surface the LEDs mount on at 3&ndash;5&nbsp;cm pitch so every camera resolves them &mdash; any rigid flat sheet (acrylic, foam-board, even pegboard); no specific part to buy, so the list has no link.</td></tr>'
+         '<tr><td><b>Panel board</b> <span class="k">(acrylic / foam-board)</span></td><td>The canvas. The flat surface the LEDs mount on at 3&ndash;5&nbsp;cm pitch so every camera resolves them &mdash; any rigid flat sheet (acrylic, foam-board, even pegboard); no specific part to buy, so the list has no link.</td></tr>'
          '<tr><td><b>Micro-USB cable</b></td><td>Programs the microcontroller and powers the small bench test.</td></tr>'
          '</table>')
 P.append('<h3>How the driver works, in plain words</h3>')
@@ -350,7 +348,7 @@ P.append('</div>')
 P.append('<p class="k">Full running evaluation log (every part considered + its verdict, kept across sessions): <code>wiki/analyses/sync-eval-equipment-log.md</code> in memex.</p>')
 P.append('<p class="k">Not pictured (generic): current-limit resistors (one per LED), a <b>current-buffer array</b> (e.g. ULN2803) '
          'for full 20 mA brightness on the big panel, a <b>breadboard + jumper wires</b> (perfboard for the permanent build), '
-         'a <b>micro-USB cable</b> for the microcontroller, a <b>soldering iron + solder</b> (to fit the board&rsquo;s header pins and wire the LEDs to the panel), and the panel substrate + diffuser. '
+         'a <b>micro-USB cable</b> for the microcontroller, a <b>soldering iron + solder</b> (to fit the board&rsquo;s header pins and wire the LEDs to the panel), and the panel board + diffuser. '
          'Ballpark for the basic rig: <b>~$120–$150 CAD</b>.</p>')
 
 P.append('<div class="note"><b>First LED order &mdash; how many?</b> The full panel is <b>~27 LEDs</b> '
@@ -385,7 +383,7 @@ P.append('<table>'
          '<tr><td>Micro-USB cable &mdash; program + power the board</td><td>1</td><td>Amazon.ca / on hand</td><td>~$8</td></tr>'
          '<tr><td><b>Breadboard + jumper (Dupont) wires</b> + perfboard (permanent build)</td><td>—</td><td>Amazon.ca / local</td><td>~$18</td></tr>'
          '<tr><td>Soldering iron + solder (header pins + panel wiring; skip if owned)</td><td>—</td><td>Amazon.ca / local</td><td>~$25</td></tr>'
-         '<tr><td>Panel substrate (acrylic / foam-board) + hook-up wire</td><td>—</td><td>Amazon.ca / local</td><td>~$20</td></tr>'
+         '<tr><td>Panel board (acrylic / foam-board) + hook-up wire</td><td>—</td><td>Amazon.ca / local</td><td>~$20</td></tr>'
          '</table>')
 P.append('<p class="k"><b>One-stop:</b> DigiKey.ca or Mouser.ca for the commodity parts (duties handled, fast to '
          'Alberta), plus ABRA Electronics (Montreal) or RobotShop.ca for the Teensy. Total ≈ $140 CAD for parts (+ ~$25 for a soldering iron if you don&rsquo;t own one). Ordering '
@@ -425,7 +423,7 @@ P.append('<div class="slide">'
          '<tr><td>Regulated 5&nbsp;V supply <span class="k">(RS-25-5)</span></td><td>1</td><td>$20</td></tr>'
          '<tr><td>Breadboard + jumper wires</td><td>&mdash;</td><td>$18</td></tr>'
          '<tr><td>Micro-USB cable</td><td>1</td><td>$8</td></tr>'
-         '<tr><td>Panel substrate <span class="k">(acrylic / foam)</span></td><td>&mdash;</td><td>$20</td></tr>'
+         '<tr><td>Panel board <span class="k">(acrylic / foam)</span></td><td>&mdash;</td><td>$20</td></tr>'
          '<tr><td>Soldering iron + solder <span class="k">(if needed)</span></td><td>&mdash;</td><td>$25</td></tr>'
          '<tr class="tot"><td>Total</td><td></td><td>~$140 (+$25)</td></tr>'
          '</table></div>'
