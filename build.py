@@ -98,31 +98,6 @@ def svg_vernier():
     s.append(txt(20, 234, "unambiguous range exceed the largest possible offset. In binary, the high bits ARE the coarse scale.", 12.5, INK))
     return wrap("".join(s), 720, 250)
 
-# ---------- Diagram 5: pictorial wiring (real product photos + links) ----------
-def svg_wiring():
-    s = [txt(20, 22, "How the parts connect (click any photo to open its store page)", 13.5, INK, "start", "bold")]
-    def pnode(x, y, img, name, price, href, w=132, h=84):
-        return (f'<a href="{href}" target="_blank">'
-                f'<rect x="{x}" y="{y}" width="{w}" height="{h+34}" rx="7" fill="#fff" stroke="{LINE}"/>'
-                f'<image href="assets/{img}" x="{x+6}" y="{y+5}" width="{w-12}" height="{h-10}" preserveAspectRatio="xMidYMid meet"/>'
-                + txt(x+w/2, y+h+13, name, 11, "#0f4c81", "middle", "bold")
-                + txt(x+w/2, y+h+27, price, 9.5, MUTE, "middle")
-                + '</a>')
-    def harrow(x1, x2, y, lbl):
-        return (f'<line x1="{x1}" y1="{y}" x2="{x2-7}" y2="{y}" stroke="{INK}" stroke-width="1.7"/>'
-                f'<polygon points="{x2},{y} {x2-8},{y-4} {x2-8},{y+4}" fill="{INK}"/>'
-                + txt((x1+x2)/2, y-8, lbl, 9.5, MUTE, "middle"))
-    s.append(pnode(40, 170, "teensy40.jpg", "Microcontroller", "the clock · Teensy 4.0", "https://www.pjrc.com/store/teensy40.html"))
-    s.append(pnode(360, 170, "sn74hc595.jpg", "Shift register ×3–4", "static latch · SN74HC595", "https://www.sparkfun.com/products/13699"))
-    s.append(pnode(700, 170, "led-red-10mm.jpg", "Direct-emission LEDs", "10 mm red ×N · + resistor", "https://www.sparkfun.com/super-bright-led-red-10mm.html"))
-    s.append(pnode(40, 24, "psu-5v4a.jpg", "Regulated 5 V supply", "powers the rail", "https://www.adafruit.com/product/1466"))
-    s.append(harrow(172, 360, 212, "SPI: SER &#183; SRCLK &#183; RCLK"))
-    s.append(harrow(492, 700, 212, "static outputs &#8594; resistors"))
-    s.append(f'<polyline points="106,144 106,157 426,157 426,167" fill="none" stroke="{INK}" stroke-width="1.6"/>')
-    s.append(f'<polygon points="426,170 422,162 430,162" fill="{INK}"/>')
-    s.append(txt(250, 151, "5 V", 9.5, MUTE, "middle"))
-    return wrap("".join(s), 900, 290)
-
 # ---------- Diagram 6: physical build (breadboard driver + LED panel) ----------
 def svg_layout():
     s = [txt(20, 24, "Physical build: the driver sits on the breadboard, the 10 mm LEDs live on the panel", 13.5, INK, "start", "bold")]
@@ -197,7 +172,6 @@ DIAGRAMS = {
     "encoding": svg_encoding(),
     "vernier":  svg_vernier(),
     "layout":   svg_layout(),
-    "wiring":   svg_wiring(),
 }
 
 # validate every SVG before writing the page
@@ -303,8 +277,19 @@ P.append("""<h3>Step-time: τ = 200 µs (decided 2026-06-03)</h3>
 </ul>
 <p><b>Build choice:</b> drive the LEDs with <b>74HC595 shift registers</b> (static latch, no PWM), which switch cleanly at <b>both 200 µs and 20 µs</b>. Operate at 200 µs and cross-validate at 20 µs: two step sizes agreeing on the same offset is a strong validation result. First measure the actual Pixel 7 line time (readout ÷ rows); the sweet spot is τ ≈ 5–15× that.</p>""")
 P.append('<h2>5. Electronics</h2>')
-P.append(f'<figure>{DIAGRAMS["layout"]}<figcaption><b>Figure 5. Physical build.</b> The breadboard carries only the microcontroller, the static-latch shift register(s) and the current-limit resistors; the 10&nbsp;mm LEDs are too wide to pack on it (~4 holes each), so they mount on the display panel at 3&ndash;5&nbsp;cm pitch and connect back by jumper wires.</figcaption></figure>')
-P.append(f'<figure>{DIAGRAMS["wiring"]}<figcaption><b>Figure 6. Parts and connections.</b> The basic chain — 5 V supply &rarr; microcontroller &rarr; shift register(s) &rarr; LEDs. Click any photo to open its store page.</figcaption></figure>')
+P.append(f'<figure>{DIAGRAMS["layout"]}<figcaption><b>Figure 5. The rig — what sits where, and how it connects.</b> The breadboard carries only the microcontroller, the static-latch shift register(s) and the current-limit resistors; the 10&nbsp;mm LEDs are too wide to pack on it (~4 holes each), so they mount on the display panel at 3&ndash;5&nbsp;cm pitch and connect back by jumper wires. The signal path runs 5&nbsp;V supply &rarr; microcontroller &rarr; shift register(s) &rarr; LEDs; each part&rsquo;s photo, price and store link are in &sect;6.</figcaption></figure>')
+P.append('<h3>What each part does</h3>')
+P.append('<table><tr><th>Part</th><th>Its job in the rig</th></tr>'
+         '<tr><td><b>Microcontroller</b> <span class="k">(Teensy 4.0)</span></td><td>The clock. A hardware timer advances the time code every τ and shifts the new on/off pattern out over 3 SPI wires.</td></tr>'
+         '<tr><td><b>Static-latch shift register</b> <span class="k">(SN74HC595)</span></td><td>The fan-out. Turns those 3 wires into many parallel outputs that all switch at the same instant (no PWM) — one output per LED.</td></tr>'
+         '<tr><td><b>Direct-emission LEDs</b> <span class="k">(10 mm red)</span></td><td>The display. The time code the cameras film; on/off per LED, with no phosphor tail to smear the edge.</td></tr>'
+         '<tr><td><b>Current-limit resistors</b> <span class="k">(one per LED)</span></td><td>Protection. Set each LED&rsquo;s current so it stays bright but does not burn out.</td></tr>'
+         '<tr><td><b>Current-buffer array</b> <span class="k">(ULN2803, big panel only)</span></td><td>Muscle. Lets every LED run at full brightness without overloading the shift register; skip it for the first few-LED test.</td></tr>'
+         '<tr><td><b>Regulated 5 V supply</b></td><td>Power. Feeds the LED rail — the USB port alone cannot drive ~40 bright LEDs.</td></tr>'
+         '<tr><td><b>Breadboard + jumper wires</b></td><td>The chassis. Holds the chips and carries signals out to the panel; no soldering for the first prototype.</td></tr>'
+         '<tr><td><b>Panel substrate</b> <span class="k">(acrylic / foam-board)</span></td><td>The canvas. The flat surface the LEDs mount on at 3&ndash;5&nbsp;cm pitch so every camera resolves them.</td></tr>'
+         '<tr><td><b>Micro-USB cable</b></td><td>Programs the microcontroller and powers the small bench test.</td></tr>'
+         '</table>')
 P.append('<p>The driver must switch the LEDs <b>statically</b> (no PWM) for a clean edge. That rules out PWM-based '
          'parts (PWM drivers and addressable strips like the TLC5947 and APA102/WS2812) and points to a <b>static-latch shift register</b> (outputs latch in ~13 ns on RCLK; the SN74HC595 is one part). '
          'LEDs are <b>direct-emission</b> (red/amber/green), <b>never white or PC-amber</b> (phosphor smears the edge). '
