@@ -151,11 +151,11 @@ def svg_wiring():
         return (f'<line x1="{x1}" y1="{y}" x2="{x2-7}" y2="{y}" stroke="{INK}" stroke-width="1.7"/>'
                 f'<polygon points="{x2},{y} {x2-8},{y-4} {x2-8},{y+4}" fill="{INK}"/>'
                 + txt((x1+x2)/2, y-8, lbl, 9.5, MUTE, "middle"))
-    s.append(pnode(40, 170, "teensy40.jpg", "Teensy 4.0", "~$30 · USB-powered", "https://www.pjrc.com/store/teensy40.html"))
-    s.append(pnode(360, 170, "sn74hc595.jpg", "74HC595 ×2–3", "$1.05 ea · static latch", "https://www.sparkfun.com/products/13699"))
-    s.append(pnode(700, 170, "led-red-10mm.jpg", "direct-red 10mm ×N", "+ resistor · no phosphor", "https://www.sparkfun.com/super-bright-led-red-10mm.html"))
-    s.append(pnode(40, 24, "psu-5v4a.jpg", "5 V 4 A supply", "$14.95", "https://www.adafruit.com/product/1466"))
-    s.append(pnode(234, 352, "saleae-logic8.png", "Saleae Logic 8", "~$199 · audit", "https://www.saleae.com/products/logic-8"))
+    s.append(pnode(40, 170, "teensy40.jpg", "Microcontroller", "the clock · Teensy 4.0", "https://www.pjrc.com/store/teensy40.html"))
+    s.append(pnode(360, 170, "sn74hc595.jpg", "Shift register ×3–4", "static latch · SN74HC595", "https://www.sparkfun.com/products/13699"))
+    s.append(pnode(700, 170, "led-red-10mm.jpg", "Direct-emission LEDs", "10 mm red ×N · + resistor", "https://www.sparkfun.com/super-bright-led-red-10mm.html"))
+    s.append(pnode(40, 24, "psu-5v4a.jpg", "Regulated 5 V supply", "powers the rail", "https://www.adafruit.com/product/1466"))
+    s.append(pnode(234, 352, "saleae-logic8.png", "Logic analyzer", "Saleae / clone · audit", "https://www.saleae.com/products/logic-8"))
     s.append(onode(700, 352, "Photodiode &#8594; scope", "Thorlabs DET10A2 / BPW34", "https://www.thorlabs.com/thorproduct.cfm?partnumber=DET10A2"))
     s.append(harrow(172, 360, 212, "SPI: SER &#183; SRCLK &#183; RCLK"))
     s.append(harrow(492, 700, 212, "static outputs &#8594; resistors"))
@@ -353,51 +353,51 @@ P.append('<h2>5. Electronics</h2>')
 P.append(f'<figure>{DIAGRAMS["layout"]}<figcaption>Physical layout. The breadboard carries only the Teensy, the 74HC595 shift register(s) and the current-limit resistors; the 10&nbsp;mm LEDs are too wide to pack on it (~4 holes each), so they mount on the display panel at 3&ndash;5&nbsp;cm pitch and connect back by jumper wires.</figcaption></figure>')
 P.append(f'<figure>{DIAGRAMS["wiring"]}<figcaption>The chosen build, wired up. Click any photo to open its store page; dashed lines are the optional audit branch.</figcaption></figure>')
 P.append('<p>The driver must switch the LEDs <b>statically</b> (no PWM) for a clean edge. That rules out PWM-based '
-         'parts (TLC5947, APA102/WS2812) and points to <b>74HC595 shift registers</b> (outputs latch in ~13 ns on RCLK). '
+         'parts (PWM drivers and addressable strips like the TLC5947 and APA102/WS2812) and points to a <b>static-latch shift register</b> (outputs latch in ~13 ns on RCLK; the SN74HC595 is one part). '
          'LEDs are <b>direct-emission</b> (red/amber/green), <b>never white or PC-amber</b> (phosphor smears the edge). '
          'This static chain handles both 200 µs and 20 µs.</p>')
-P.append('<table><tr><th>Driver</th><th>Switching</th><th>Verdict (after datasheet review)</th></tr>'
-         '<tr style="background:#fffbeb"><td><b>74HC595 + discrete direct LEDs &nbsp;← chosen</b></td><td>static latch ~13 ns; no PWM</td><td>clean edges at 200 µs <i>and</i> 20 µs; ±6 mA/pin (add ULN2803 for full brightness)</td></tr>'
-         '<tr><td>APA102 / DotStar</td><td>8-bit PWM @ ~1 MHz osc</td><td>✗ ~256 µs PWM cycle smears the edge</td></tr>'
-         '<tr><td>TLC5947</td><td>12-bit PWM @ 4 MHz osc</td><td>✗ ~1 ms grayscale frame floor — far too slow</td></tr></table>')
+P.append('<table><tr><th>Driver approach</th><th>Switching</th><th>Verdict (after datasheet review)</th></tr>'
+         '<tr style="background:#fffbeb"><td><b>Static-latch shift register + discrete direct LEDs &nbsp;← chosen</b><br><span class="k">e.g. SN74HC595</span></td><td>static latch ~13 ns; no PWM</td><td>clean edges at 200 µs <i>and</i> 20 µs; ±6 mA/pin (add a current-buffer array, e.g. ULN2803, for full brightness)</td></tr>'
+         '<tr><td>PWM addressable LED <span class="k">(e.g. APA102 / DotStar)</span></td><td>8-bit PWM @ ~1 MHz osc</td><td>✗ ~256 µs PWM cycle smears the edge</td></tr>'
+         '<tr><td>PWM constant-current LED driver <span class="k">(e.g. TLC5947)</span></td><td>12-bit PWM @ 4 MHz osc</td><td>✗ ~1 ms grayscale frame floor — far too slow</td></tr></table>')
 
 P.append('<h2>6. Parts (verified against datasheets)</h2>')
 P.append('<div class="gallery">')
-P.append(card("commercial-led-panel.png", "IE / Imatest LED-Panel", "$3,980–$57,850",
-              "reference device (cloned, not bought)", "https://www.imatest.com/product/camera-timing-system-led-panel/"))
-P.append(card("teensy40.jpg", "Teensy 4.0", "~$25–$30",
-              "controller · Cortex-M7 @ 600 MHz", "https://www.pjrc.com/store/teensy40.html"))
-P.append(card("sn74hc595.jpg", "SN74HC595", "$1.05",
-              "static-latch shift register (×2–3); no PWM", "https://www.sparkfun.com/products/13699"))
-P.append(card("led-red-10mm.jpg", "Super-bright red 10mm", "~$1",
-              "the LEDs · direct AlInGaP, no phosphor (Vf 2.1–2.3 V)", "https://www.sparkfun.com/super-bright-led-red-10mm.html"))
-P.append(card("psu-5v4a.jpg", "5 V 4 A supply", "$14.95",
-              "powers the LED rail", "https://www.adafruit.com/product/1466"))
-P.append(card("saleae-logic8.png", "Saleae Logic 8", "~$199",
-              "timing audit (RCLK line); 24 MHz clones ~$10 also work", "https://www.saleae.com/products/logic-8"))
+P.append(card("commercial-led-panel.png", "Camera-timing reference panel", "$3,980–$57,850",
+              "the calibrated device we clone, not buy · IE / Imatest LED-Panel", "https://www.imatest.com/product/camera-timing-system-led-panel/"))
+P.append(card("teensy40.jpg", "Microcontroller board", "~$25–$30",
+              "the clock · Cortex-M7 @ 600 MHz · e.g. Teensy 4.0", "https://www.pjrc.com/store/teensy40.html"))
+P.append(card("sn74hc595.jpg", "Static-latch shift register", "$1.05",
+              "drives the LEDs · static latch ~13 ns, no PWM · ×3–4 · e.g. SN74HC595", "https://www.sparkfun.com/products/13699"))
+P.append(card("led-red-10mm.jpg", "Direct-emission LED (10 mm)", "~$1",
+              "the measurement target · red AlInGaP, no phosphor, Vf 2.1–2.3 V · e.g. SparkFun COM-08862", "https://www.sparkfun.com/super-bright-led-red-10mm.html"))
+P.append(card("psu-5v4a.jpg", "Regulated 5 V supply", "$14.95",
+              "powers the LED rail · e.g. Mean Well RS-25-5", "https://www.adafruit.com/product/1466"))
+P.append(card("saleae-logic8.png", "Logic analyzer", "~$199",
+              "audits the latch line · e.g. Saleae Logic 8, or a 24 MHz clone ~$10", "https://www.saleae.com/products/logic-8"))
 P.append('</div>')
 P.append('<h3>Rejected after reading the datasheet</h3>')
 P.append('<div class="gallery">')
-P.append(card("tlc5947.jpg", "TLC5947 ✗", "$14.95",
-              "PWM @ 4 MHz osc → ~1 ms frame floor (too slow)", "https://www.adafruit.com/product/1429"))
-P.append(card("dotstar.jpg", "APA102 / DotStar ✗", "$49.95",
-              "8-bit PWM @ ~1 MHz → ~256 µs edge smear", "https://www.adafruit.com/product/2241"))
-P.append(card("cree-xpe2-amber.jpg", "Cree XP-E2 amber ✗", "$5.14",
-              "PC Amber = phosphor (Vf 3.05 V) → smears the edge", "https://www.ledsupply.com/leds/cree-xlamp-xp-e2-color-high-power-led-star"))
+P.append(card("tlc5947.jpg", "PWM constant-current LED driver ✗", "$14.95",
+              "~1 ms grayscale floor, too slow · e.g. TLC5947", "https://www.adafruit.com/product/1429"))
+P.append(card("dotstar.jpg", "PWM addressable LED ✗", "$49.95",
+              "8-bit PWM @ ~1 MHz → ~256 µs edge smear · e.g. APA102 / DotStar", "https://www.adafruit.com/product/2241"))
+P.append(card("cree-xpe2-amber.jpg", "Phosphor-converted amber LED ✗", "$5.14",
+              "PC amber = phosphor, Vf 3.05 V → decay tail smears the edge · e.g. Cree XP-E2", "https://www.ledsupply.com/leds/cree-xlamp-xp-e2-color-high-power-led-star"))
 P.append('</div>')
 P.append('<p class="k">Full running evaluation log (every part considered + its verdict, kept across sessions): <code>wiki/analyses/sync-eval-equipment-log.md</code> in memex.</p>')
-P.append('<p class="k">Not pictured (generic): current-limit resistors (one per LED), an optional <b>ULN2803</b> '
+P.append('<p class="k">Not pictured (generic): current-limit resistors (one per LED), an optional <b>current-buffer array</b> (e.g. ULN2803) '
          'sink driver for full 20 mA brightness, an optional photodiode for the optical audit (BPW34 ~$1, or '
-         'Thorlabs DET10A2 ~$300), and the 3D-printed or acrylic panel frame + diffuser. Ballpark total: '
+         'Thorlabs DET10A2 ~$300), a <b>breadboard + jumper wires</b> (and a perfboard for the permanent build), and the 3D-printed or acrylic panel frame + diffuser. Ballpark total: '
          '<b>~$120–$180 minimal</b> (the 595 chain is cheaper than the driver-IC paths), <b>~$600–$1,100 cornerstone</b>.</p>')
 
 P.append('<div class="note"><b>First LED order &mdash; how many?</b> The full panel is <b>~27 LEDs</b> '
-         '(16 Gray bar + 1 parity + ~10 coarse row), driven by <b>3&ndash;4&times; 74HC595</b> (8 outputs each). '
+         '(16 Gray bar + 1 parity + ~10 coarse row), driven by <b>3&ndash;4&times; static-latch shift registers</b> (8 outputs each; e.g. the SN74HC595). '
          'Buy <b>~40 LEDs</b> (~$20&ndash;40): enough to build and film the complete panel for a comprehensive '
          'multi-camera test, plus ~13 spares (LEDs crack on insertion or die while you tune the resistor value). '
          'A failed approach costs &lt;&nbsp;$40. Extra caution: order <b>3&ndash;5 first</b> to eyeball brightness '
-         'and colour on a Pixel&nbsp;7 (LEDs cannot be returned once opened), then buy the rest. Buy <b>4&times; 74HC595</b> '
-         'and a <b>spare Teensy</b> while you are at it &mdash; both are cheap and the long-lead items if one fails.</div>')
+         'and colour on a Pixel&nbsp;7 (LEDs cannot be returned once opened), then buy the rest. Buy <b>4&times; the shift register (SN74HC595)</b> '
+         'and a <b>spare microcontroller board</b> while you are at it &mdash; both are cheap and the long-lead items if one fails. You also need a <b>breadboard + jumper (Dupont) wires</b> for the bench build.</div>')
 P.append('<h3>Returns &amp; de-risking (vendor policies checked 2026-06-06)</h3>')
 P.append('<table>'
          '<tr><th>Vendor (its parts)</th><th>Window</th><th>Opened but unsuitable</th><th>Defective</th></tr>'
@@ -416,16 +416,17 @@ P.append('<p class="k">Buying from within Canada avoids USD exchange, cross-bord
          'brokerage / customs fees (which can exceed a small order). Suggested split (~CAD, confirm on each page):</p>')
 P.append('<table>'
          '<tr><th>Item</th><th>Qty</th><th>Canadian source</th><th>~CAD</th></tr>'
-         '<tr><td><a href="https://ca.robotshop.com/products/teensy-40-usb-microcontroller-development-board">Teensy 4.0</a></td><td>1</td><td>RobotShop.ca / ABRA</td><td>~$34</td></tr>'
-         '<tr><td><a href="https://www.digikey.ca/en/products/detail/texas-instruments/SN74HC595N/277246">SN74HC595N</a> shift register</td><td>3</td><td>DigiKey.ca / ABRA</td><td>~$2.50 ea</td></tr>'
-         '<tr><td>Direct-red 10 mm LED (625 nm AlInGaP)</td><td>~24</td><td>DigiKey.ca / ABRA</td><td>~$12</td></tr>'
-         '<tr><td>Resistors + ULN2803 (opt.) + BPW34 (opt.)</td><td>—</td><td>DigiKey.ca / Mouser.ca</td><td>~$10</td></tr>'
-         '<tr><td><a href="https://www.digikey.ca/en/products/detail/mean-well-usa-inc/RS-25-5/7706180">Mean Well RS-25-5</a> (5 V 5 A)</td><td>1</td><td>DigiKey.ca / Amazon.ca</td><td>~$20</td></tr>'
-         '<tr><td>USB logic analyser (24 MHz clone)</td><td>1</td><td>Amazon.ca</td><td>~$18</td></tr>'
-         '<tr><td>Panel substrate + hook-up wire</td><td>—</td><td>Amazon.ca / local</td><td>~$20</td></tr>'
+         '<tr><td>Microcontroller board &mdash; <a href="https://ca.robotshop.com/products/teensy-40-usb-microcontroller-development-board">Teensy 4.0</a></td><td>1</td><td>RobotShop.ca / ABRA</td><td>~$34</td></tr>'
+         '<tr><td>Static-latch shift register &mdash; <a href="https://www.digikey.ca/en/products/detail/texas-instruments/SN74HC595N/277246">SN74HC595N</a></td><td>4</td><td>DigiKey.ca / ABRA</td><td>~$2.50 ea</td></tr>'
+         '<tr><td>Direct-emission LED, 10 mm (625 nm AlInGaP)</td><td>~40</td><td>DigiKey.ca / ABRA</td><td>~$20</td></tr>'
+         '<tr><td>Current-limit resistors + current-buffer array (ULN2803, opt.) + photodiode (BPW34, opt.)</td><td>—</td><td>DigiKey.ca / Mouser.ca</td><td>~$10</td></tr>'
+         '<tr><td>Regulated 5 V supply &mdash; <a href="https://www.digikey.ca/en/products/detail/mean-well-usa-inc/RS-25-5/7706180">Mean Well RS-25-5</a> (5 V 5 A)</td><td>1</td><td>DigiKey.ca / Amazon.ca</td><td>~$20</td></tr>'
+         '<tr><td>Logic analyzer (24 MHz USB clone)</td><td>1</td><td>Amazon.ca</td><td>~$18</td></tr>'
+         '<tr><td><b>Breadboard + jumper (Dupont) wires</b> + perfboard (permanent build)</td><td>—</td><td>Amazon.ca / local</td><td>~$18</td></tr>'
+         '<tr><td>Panel substrate (acrylic / foam-board) + hook-up wire</td><td>—</td><td>Amazon.ca / local</td><td>~$20</td></tr>'
          '</table>')
 P.append('<p class="k"><b>One-stop:</b> DigiKey.ca or Mouser.ca for the commodity parts (duties handled, fast to '
-         'Alberta), plus ABRA Electronics (Montreal) or RobotShop.ca for the Teensy. Total ≈ $120 CAD. Ordering '
+         'Alberta), plus ABRA Electronics (Montreal) or RobotShop.ca for the Teensy. Total ≈ $150 CAD. Ordering '
          'US-direct (PJRC / SparkFun / Adafruit) risks courier brokerage fees, so prefer the Canadian sources above.</p>')
 P.append('<h2>7. Timing integrity (cornerstone-defensible)</h2>')
 P.append('<ul>'
@@ -445,7 +446,7 @@ P.append('<p>Per camera: locate the panel, threshold each LED on/off, decode Gra
 P.append('<h2>9. Decisions (resolved)</h2>')
 P.append('<ul>'
          '<li><b>Step-time τ = 200 µs</b> operating point; fine timing from the rolling-shutter row fit; cross-validated at 20 µs (see §3).</li>'
-         '<li><b>Driver = 74HC595</b> static-latch shift registers (no PWM); the datasheet audit ruled out TLC5947 (~1 ms frame floor) and APA102 (~256 µs PWM smear).</li>'
+         '<li><b>Driver = static-latch shift register</b> (no PWM, ~13 ns latch; the SN74HC595 is one part); the datasheet audit ruled out the PWM options — a PWM constant-current driver (TLC5947, ~1 ms floor) and a PWM addressable LED (APA102, ~256 µs smear).</li>'
          '<li><b>Unambiguous range ≥ 1 s</b> — a 16-bit Gray bar gives ~1.3 s at 20 µs (≈ 13 s at 200 µs), far beyond any plausible inter-camera offset.</li>'
          '<li><b>Coarse spatial row: included</b> — a redundant, human-readable cross-check beside the Gray bar (mirrors the Google / ISO design).</li>'
          '</ul>')
