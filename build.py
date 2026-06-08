@@ -158,12 +158,12 @@ def svg_layout():
     for i in range(10):
         cx = dx+i*36
         c = C_LED if i==6 else "#7f1d1d"
-        s.append(f'<circle cx="{cx}" cy="{cry}" r="11" fill="{c}"/>')
-        s.append(f'<circle cx="{cx-3}" cy="{cry-3}" r="2.6" fill="#fff" opacity="0.45"/>')
+        s.append(f'<circle cx="{cx}" cy="{cry}" r="8" fill="{c}"/>')
+        s.append(f'<circle cx="{cx-2.4}" cy="{cry-2.4}" r="2" fill="#fff" opacity="0.45"/>')
     scx = dx+9*36
-    s.append(f'<line x1="{scx-11}" y1="{cry+24}" x2="{scx+11}" y2="{cry+24}" stroke="#cbd5e1" stroke-width="1"/>')
-    s.append(f'<line x1="{scx-11}" y1="{cry+21}" x2="{scx-11}" y2="{cry+27}" stroke="#cbd5e1" stroke-width="1"/>')
-    s.append(f'<line x1="{scx+11}" y1="{cry+21}" x2="{scx+11}" y2="{cry+27}" stroke="#cbd5e1" stroke-width="1"/>')
+    s.append(f'<line x1="{scx-8}" y1="{cry+24}" x2="{scx+8}" y2="{cry+24}" stroke="#cbd5e1" stroke-width="1"/>')
+    s.append(f'<line x1="{scx-8}" y1="{cry+21}" x2="{scx-8}" y2="{cry+27}" stroke="#cbd5e1" stroke-width="1"/>')
+    s.append(f'<line x1="{scx+8}" y1="{cry+21}" x2="{scx+8}" y2="{cry+27}" stroke="#cbd5e1" stroke-width="1"/>')
     s.append(txt(scx, cry+38, "10 mm", 8.5, "#cbd5e1", "middle"))
     # callout
     return wrap("".join(s), 900, 350)
@@ -261,7 +261,7 @@ P.append('<p>Do not read &ldquo;which of 100 dots&rdquo;; it is hard to resolve 
          '<b>Gray-coded binary bar</b>: a row of large LEDs showing a counter that increments every step '
          '<code>τ</code>. On/off per LED is robust to blur and oblique viewing; Gray coding means only one '
          'bit flips per step, so a code caught mid-transition is at most 1&nbsp;LSB off. A single <b>parity LED</b> '
-         'gives an integrity check.</p>')
+         'is switched so the number of lit LEDs is always even; a camera that reads an <b>odd</b> count knows a bit was misread (glare, an occlusion, or an LED caught mid-flip) and discards that frame.</p>')
 P.append(f'<figure>{DIAGRAMS["encoding"]}<figcaption><b>Figure 3. Readout layout.</b> A 16-bit Gray-coded bar (one bit per LED) plus a parity LED and a redundant coarse row; software thresholds each LED, converts Gray&rarr;binary, and reads <code>t = count &times; &tau;</code>.</figcaption></figure>')
 P.append('<table><tr><th>Bits / step τ</th><th>Unambiguous range</th><th>Resolution</th><th>LEDs</th></tr>'
          '<tr><td>16-bit @ τ = 20 µs</td><td>~1.3 s</td><td>20 µs</td><td>16</td></tr>'
