@@ -190,7 +190,8 @@ def svg_layout():
     dipx, dipy, dipw = hx+14, by+66, 11*13
     s.append(f'<rect x="{dipx}" y="{dipy}" width="{dipw}" height="30" rx="3" fill="#222"/>')
     s.append(f'<circle cx="{dipx+8}" cy="{dipy+15}" r="3" fill="none" stroke="#666"/>')
-    s.append(txt(dipx+dipw/2, dipy+19, "74HC595", 9, "#e5e7eb", "middle", "bold"))
+    s.append(txt(dipx+dipw/2, dipy+13, "shift register", 8.5, "#e5e7eb", "middle", "bold"))
+    s.append(txt(dipx+dipw/2, dipy+24, "74HC595", 7, "#9ca3af", "middle"))
     # resistors row
     for i in range(8):
         rx = dipx + 10 + i*16
@@ -198,7 +199,7 @@ def svg_layout():
     s.append(txt(dipx+dipw/2, dipy-26, "8 × current-limit resistors", 8.5, MUTE, "middle"))
     # Teensy
     s.append(f'<rect x="{bx+8}" y="{by+bh-44}" width="66" height="28" rx="4" fill="#0b7261"/>')
-    s.append(txt(bx+41, by+bh-26, "Teensy 4.0", 8.5, "#e6fffb", "middle", "bold"))
+    s.append(txt(bx+41, by+bh-26, "microcontroller", 7.5, "#e6fffb", "middle", "bold"))
     s.append(f'<path d="M{bx+74},{by+bh-34} L{dipx+10},{dipy+30}" fill="none" stroke="{INK}" stroke-width="1"/>')
     s.append(txt(bx+78, by+bh-36, "SER·SRCLK·RCLK", 8, MUTE, "start"))
     s.append(f'<path d="M79,118 L79,{by+13} L{hx},{by+13}" fill="none" stroke="#dc2626" stroke-width="1.1"/>')
@@ -235,7 +236,7 @@ def svg_layout():
     s.append(txt(scx, cry+38, "10 mm", 8.5, "#cbd5e1", "middle"))
     # callout
     s.append(txt(40, 360, "A 10 mm dome is ≈ 4 breadboard holes wide, so a 16-LED bar will not pack onto a breadboard —", 11.5, INK, "start"))
-    s.append(txt(40, 378, "only the Teensy + 74HC595 + resistors sit on the board; the LEDs mount on the panel at 3–5 cm pitch, wired back by jumpers.", 11.5, INK, "start"))
+    s.append(txt(40, 378, "only the microcontroller + shift register + resistors sit on the board; the LEDs mount on the panel at 3–5 cm pitch, wired back by jumpers.", 11.5, INK, "start"))
     return wrap("".join(s), 900, 396)
 
 DIAGRAMS = {
@@ -302,7 +303,7 @@ P.append('<p>The Image&nbsp;Engineering / Imatest <b>LED-Panel</b> (ISO&nbsp;157
          '<b>$3,980&ndash;$57,850</b>. It cannot face an 11-camera ring. We keep its principle and rebuild '
          'it large, flat, and multi-camera-friendly.</p>')
 P.append('<figure><img src="assets/commercial-led-panel.png" style="max-width:420px;width:100%;border:1px solid #e5e7eb;border-radius:8px">'
-         '<figcaption>The commercial reference: Image Engineering / Imatest LED-Panel V5. '
+         '<figcaption><b>Figure 1. The commercial reference panel.</b> Image Engineering / Imatest LED-Panel V5: '
          '110 LEDs (10&times;10 grid + a &times;100 row), step 20&nbsp;µs–10&nbsp;s, accuracy &lt;0.06%.</figcaption></figure>')
 P.append('<p class="k">How it encodes time: in the timing modes a single lit LED sweeps across the grid '
          'one position per step, and the &times;100 bottom row counts each wrap, giving a spatial '
@@ -315,7 +316,7 @@ P.append('<p>You will place the cameras to face one large flat panel, so a singl
          'large/bright enough for every camera to resolve individual LEDs. Rule of thumb: ~1&nbsp;cm (10&nbsp;mm) LEDs '
          'at ~3&ndash;5&nbsp;cm pitch make a 16-LED bar ~0.5&ndash;0.8&nbsp;m wide, cleanly resolved by a Pixel&nbsp;7 out to ~5&nbsp;m. '
          'Each 10&nbsp;mm dome is ~4 breadboard holes wide, so the LEDs mount on the panel surface (acrylic / foam-board / 3D-printed grid), not the breadboard &mdash; see &sect;5.</p>')
-P.append(f'<figure>{DIAGRAMS["geometry"]}</figure>')
+P.append(f'<figure>{DIAGRAMS["geometry"]}<figcaption><b>Figure 2. Panel geometry.</b> All 11 cameras are placed to face one large flat panel showing the time code &mdash; a single planar matrix, no prism or multi-face latching.</figcaption></figure>')
 
 P.append('<h2>3. Encoding &mdash; Gray-coded bar + parity + coarse row</h2>')
 P.append('<p>Do not read &ldquo;which of 100 dots&rdquo;; it is hard to resolve at distance. Use a '
@@ -323,7 +324,7 @@ P.append('<p>Do not read &ldquo;which of 100 dots&rdquo;; it is hard to resolve 
          '<code>τ</code>. On/off per LED is robust to blur and oblique viewing; Gray coding means only one '
          'bit flips per step, so a code caught mid-transition is at most 1&nbsp;LSB off. A single <b>parity LED</b> '
          'gives an integrity check.</p>')
-P.append(f'<figure>{DIAGRAMS["encoding"]}</figure>')
+P.append(f'<figure>{DIAGRAMS["encoding"]}<figcaption><b>Figure 3. Readout layout.</b> A 16-bit Gray-coded bar (one bit per LED) plus a parity LED and a redundant coarse row; software thresholds each LED, converts Gray&rarr;binary, and reads <code>t = count &times; &tau;</code>.</figcaption></figure>')
 P.append('<table><tr><th>Bits / step τ</th><th>Unambiguous range</th><th>Resolution</th><th>LEDs</th></tr>'
          '<tr><td>16-bit @ τ = 20 µs</td><td>~1.3 s</td><td>20 µs</td><td>16</td></tr>'
          '<tr style="background:#fffbeb"><td>16-bit @ τ = 200 µs &nbsp;<b>← operating point</b></td><td>~13 s</td><td>200 µs</td><td>16</td></tr></table>')
@@ -338,7 +339,7 @@ P.append('<p>Without a coarse scale, two cameras can show the <b>identical</b> f
          'trick as Google&rsquo;s slow bottom row (&times;10), the commercial &times;100 row, and a clock&rsquo;s '
          'hour/minute/second hands. In a binary bar you get it for free: the high-order bits <i>are</i> the '
          'slow row, so a 16-bit Gray bar already covers &gt;1&nbsp;s of offset.</p>')
-P.append(f'<figure>{DIAGRAMS["vernier"]}</figure>')
+P.append(f'<figure>{DIAGRAMS["vernier"]}<figcaption><b>Figure 4. The vernier.</b> Two cameras can show the identical fine reading yet sit a full fine-wrap apart; the coarse scale (in binary, the high-order bits) resolves the ambiguity.</figcaption></figure>')
 
 P.append("""<h3>Step-time: τ = 200 µs (decided 2026-06-03)</h3>
 <p>Match τ to the camera's rolling-shutter line time so each code value spans several rows. The Pixel 7 line time is ≈ 10–20 µs, so <b>200 µs</b> (~10–20 rows per code) is the operating point, not 20 µs.</p>
@@ -350,8 +351,8 @@ P.append("""<h3>Step-time: τ = 200 µs (decided 2026-06-03)</h3>
 </ul>
 <p><b>Build choice:</b> drive the LEDs with <b>74HC595 shift registers</b> (static latch, no PWM), which switch cleanly at <b>both 200 µs and 20 µs</b>. Operate at 200 µs and cross-validate at 20 µs: two step sizes agreeing on the same offset is a strong validation result. First measure the actual Pixel 7 line time (readout ÷ rows); the sweet spot is τ ≈ 5–15× that.</p>""")
 P.append('<h2>5. Electronics</h2>')
-P.append(f'<figure>{DIAGRAMS["layout"]}<figcaption>Physical layout. The breadboard carries only the Teensy, the 74HC595 shift register(s) and the current-limit resistors; the 10&nbsp;mm LEDs are too wide to pack on it (~4 holes each), so they mount on the display panel at 3&ndash;5&nbsp;cm pitch and connect back by jumper wires.</figcaption></figure>')
-P.append(f'<figure>{DIAGRAMS["wiring"]}<figcaption>The chosen build, wired up. Click any photo to open its store page; dashed lines are the optional audit branch.</figcaption></figure>')
+P.append(f'<figure>{DIAGRAMS["layout"]}<figcaption><b>Figure 5. Physical build.</b> The breadboard carries only the microcontroller, the static-latch shift register(s) and the current-limit resistors; the 10&nbsp;mm LEDs are too wide to pack on it (~4 holes each), so they mount on the display panel at 3&ndash;5&nbsp;cm pitch and connect back by jumper wires.</figcaption></figure>')
+P.append(f'<figure>{DIAGRAMS["wiring"]}<figcaption><b>Figure 6. Parts and connections.</b> Click any photo to open its store page; dashed lines are the optional timing-audit branch.</figcaption></figure>')
 P.append('<p>The driver must switch the LEDs <b>statically</b> (no PWM) for a clean edge. That rules out PWM-based '
          'parts (PWM drivers and addressable strips like the TLC5947 and APA102/WS2812) and points to a <b>static-latch shift register</b> (outputs latch in ~13 ns on RCLK; the SN74HC595 is one part). '
          'LEDs are <b>direct-emission</b> (red/amber/green), <b>never white or PC-amber</b> (phosphor smears the edge). '
