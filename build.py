@@ -205,6 +205,17 @@ a{color:#0f4c81}
 .note{background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:10px 14px;font-size:13.5px}
 .k{color:var(--mute);font-size:13px}
 ul{margin:6px 0 6px 0}
+.slide{border:1px solid var(--line);border-radius:8px;max-width:860px;aspect-ratio:16/9;margin:20px auto;padding:18px 26px;display:flex;flex-direction:column;background:#fff}
+.slide h3{margin:0 0 10px;padding:0;border:none;text-align:center;font-size:18px;color:var(--ink)}
+.slide-body{display:flex;gap:24px;flex:1;align-items:center;min-height:0}
+.slide-fig{flex:0 0 60%}
+.slide-fig svg{width:100%;height:auto}
+.slide-bom{flex:1}
+.slide-bom table{width:100%;border-collapse:collapse;font-size:12px;margin:0}
+.slide-bom th,.slide-bom td{border:none;border-bottom:1px solid var(--line);padding:4px 5px;text-align:left}
+.slide-bom th:nth-child(2),.slide-bom td:nth-child(2){text-align:center}
+.slide-bom th:last-child,.slide-bom td:last-child{text-align:right;white-space:nowrap}
+.slide-bom .tot td{border-top:2px solid var(--ink);border-bottom:none;font-weight:700}
 """
 
 def card(img, name, price, role, href):
@@ -399,6 +410,26 @@ P.append('<ul>'
          '<li><b>Coarse spatial row: included</b> — a redundant, human-readable cross-check beside the Gray bar (mirrors the Google / ISO design).</li>'
          '</ul>')
 
+P.append('<h2>10. One-slide summary</h2>')
+P.append('<p class="k">A single presentation slide: the build diagram on the left, the basic-rig bill of materials on the right.</p>')
+P.append('<div class="slide">'
+         '<h3>Multi-camera sync LED panel &mdash; build &amp; bill of materials (~CAD)</h3>'
+         '<div class="slide-body">'
+         f'<div class="slide-fig">{DIAGRAMS["layout"]}</div>'
+         '<div class="slide-bom"><table>'
+         '<tr><th>Part</th><th>Qty</th><th>~CAD</th></tr>'
+         '<tr><td>Microcontroller <span class="k">(Teensy 4.0)</span></td><td>1</td><td>$34</td></tr>'
+         '<tr><td>Static-latch shift register <span class="k">(SN74HC595)</span></td><td>4</td><td>$10</td></tr>'
+         '<tr><td>Direct-emission LEDs, 10&nbsp;mm</td><td>~40</td><td>$20</td></tr>'
+         '<tr><td>Current-limit resistors (+ ULN2803)</td><td>&mdash;</td><td>$10</td></tr>'
+         '<tr><td>Regulated 5&nbsp;V supply <span class="k">(RS-25-5)</span></td><td>1</td><td>$20</td></tr>'
+         '<tr><td>Breadboard + jumper wires</td><td>&mdash;</td><td>$18</td></tr>'
+         '<tr><td>Micro-USB cable</td><td>1</td><td>$8</td></tr>'
+         '<tr><td>Panel substrate <span class="k">(acrylic / foam)</span></td><td>&mdash;</td><td>$20</td></tr>'
+         '<tr><td>Soldering iron + solder <span class="k">(if needed)</span></td><td>&mdash;</td><td>$25</td></tr>'
+         '<tr class="tot"><td>Total</td><td></td><td>~$140 (+$25)</td></tr>'
+         '</table></div>'
+         '</div></div>')
 P.append('<h2>References</h2>')
 P.append('<ul>'
          '<li>Imatest Camera Timing System LED-Panel — <a href="https://www.imatest.com/product/camera-timing-system-led-panel/">product page</a> '
