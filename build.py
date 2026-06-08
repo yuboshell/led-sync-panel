@@ -12,6 +12,9 @@ INK   = "#1f2937"
 MUTE  = "#6b7280"
 LINE  = "#9ca3af"
 PANEL = "#111827"
+# functional part-tag colours (BOM <-> diagram projection)
+C_MCU="#0d9488"; C_SHIFT="#2563eb"; C_LED="#dc2626"; C_RES="#b45309"
+C_PSU="#16a34a"; C_BOARD="#7c3aed"; C_BB="#475569"
 
 def wrap(inner, w, h):
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" '
@@ -102,49 +105,49 @@ def svg_vernier():
 def svg_layout():
     s = [txt(20, 24, "Physical build: the driver sits on the breadboard, the 10 mm LEDs live on the panel", 13.5, INK, "start", "bold")]
     # 5 V supply
-    s.append(f'<rect x="40" y="92" width="78" height="26" rx="4" fill="#fff" stroke="{LINE}"/>')
-    s.append(txt(79, 109, "5 V supply", 9.5, INK, "middle"))
+    s.append(f'<rect x="40" y="92" width="78" height="26" rx="4" fill="#fff" stroke="{C_PSU}"/>')
+    s.append(txt(79, 109, "5 V supply", 9.5, C_PSU, "middle"))
     # breadboard body
     bx, by, bw, bh = 40, 150, 300, 150
-    s.append(f'<rect x="{bx}" y="{by}" width="{bw}" height="{bh}" rx="9" fill="#f5f5f3" stroke="{LINE}"/>')
-    s.append(txt(bx + bw/2, by + bh + 16, "breadboard — driver only", 10, MUTE, "middle"))
+    s.append(f'<rect x="{bx}" y="{by}" width="{bw}" height="{bh}" rx="9" fill="#f5f5f3" stroke="{C_BB}"/>')
+    s.append(txt(bx + bw/2, by + bh + 16, "breadboard — driver only", 10, C_BB, "middle"))
     hx = bx + 20
     def hrow(y, n=20):
         return "".join(f'<circle cx="{hx+i*13}" cy="{y}" r="1.7" fill="#cfcfcf"/>' for i in range(n))
-    s.append(f'<line x1="{hx}" y1="{by+13}" x2="{hx+19*13}" y2="{by+13}" stroke="#dc2626" stroke-width="1.1"/>')
+    s.append(f'<line x1="{hx}" y1="{by+13}" x2="{hx+19*13}" y2="{by+13}" stroke="{C_BB}" stroke-width="1.1"/>')
     s.append(hrow(by+24)); s.append(hrow(by+bh-24))
-    s.append(f'<line x1="{hx}" y1="{by+bh-13}" x2="{hx+19*13}" y2="{by+bh-13}" stroke="#2563eb" stroke-width="1.1"/>')
+    s.append(f'<line x1="{hx}" y1="{by+bh-13}" x2="{hx+19*13}" y2="{by+bh-13}" stroke="{C_BB}" stroke-width="1.1"/>')
     # 74HC595 DIP
     dipx, dipy, dipw = hx+14, by+66, 11*13
-    s.append(f'<rect x="{dipx}" y="{dipy}" width="{dipw}" height="30" rx="3" fill="#222"/>')
+    s.append(f'<rect x="{dipx}" y="{dipy}" width="{dipw}" height="30" rx="3" fill="{C_SHIFT}"/>')
     s.append(f'<circle cx="{dipx+8}" cy="{dipy+15}" r="3" fill="none" stroke="#666"/>')
     s.append(txt(dipx+dipw/2, dipy+13, "shift register", 8.5, "#e5e7eb", "middle", "bold"))
-    s.append(txt(dipx+dipw/2, dipy+24, "74HC595", 7, "#9ca3af", "middle"))
+    s.append(txt(dipx+dipw/2, dipy+24, "74HC595", 7, "#dbeafe", "middle"))
     # resistors row
     for i in range(8):
         rx = dipx + 10 + i*16
         s.append(f'<rect x="{rx}" y="{dipy-20}" width="6" height="13" rx="2" fill="#d6b06a" stroke="#a07d3a" stroke-width="0.5"/>')
-    s.append(txt(dipx+dipw/2, dipy-26, "8 × current-limit resistors", 8.5, MUTE, "middle"))
+    s.append(txt(dipx+dipw/2, dipy-26, "8 × current-limit resistors", 8.5, C_RES, "middle"))
     # Teensy
-    s.append(f'<rect x="{bx+8}" y="{by+bh-44}" width="66" height="28" rx="4" fill="#0b7261"/>')
+    s.append(f'<rect x="{bx+8}" y="{by+bh-44}" width="66" height="28" rx="4" fill="{C_MCU}"/>')
     s.append(txt(bx+41, by+bh-26, "microcontroller", 7.5, "#e6fffb", "middle", "bold"))
     s.append(f'<path d="M{bx+74},{by+bh-34} L{dipx+10},{dipy+30}" fill="none" stroke="{INK}" stroke-width="1"/>')
     s.append(txt(bx+78, by+bh-36, "SER·SRCLK·RCLK", 8, MUTE, "start"))
-    s.append(f'<path d="M79,118 L79,{by+13} L{hx},{by+13}" fill="none" stroke="#dc2626" stroke-width="1.1"/>')
+    s.append(f'<path d="M79,118 L79,{by+13} L{hx},{by+13}" fill="none" stroke="{C_PSU}" stroke-width="1.1"/>')
     # ribbon to panel
     for i in range(8):
-        s.append(f'<path d="M{dipx+13+i*16},{dipy-20} C360,{160+i*6} 430,{110+i*20} 470,{120+i*20}" fill="none" stroke="{LINE}" stroke-width="1"/>')
-    s.append(txt(405, 138, "jumper wires", 9, MUTE, "middle"))
+        s.append(f'<path d="M{dipx+13+i*16},{dipy-20} C360,{160+i*6} 430,{110+i*20} 470,{120+i*20}" fill="none" stroke="{C_BB}" stroke-width="1"/>')
+    s.append(txt(405, 138, "jumper wires", 9, C_BB, "middle"))
     # LED panel
     px, py, pw, ph = 470, 84, 408, 250
-    s.append(f'<rect x="{px}" y="{py}" width="{pw}" height="{ph}" rx="10" fill="{PANEL}"/>')
-    s.append(txt(px+pw/2, py-8, "LED display panel — every camera films this", 10.5, MUTE, "middle"))
+    s.append(f'<rect x="{px}" y="{py}" width="{pw}" height="{ph}" rx="10" fill="{PANEL}" stroke="{C_BOARD}" stroke-width="2"/>')
+    s.append(txt(px+pw/2, py-8, "LED display panel — every camera films this", 10.5, C_BOARD, "middle"))
     lit = {1,2,5,8,11,14}
     dx, dp, ry = px+30, 21, py+74
     s.append(txt(dx, ry-20, "16-bit Gray bar", 9, "#cbd5e1", "start"))
     for i in range(16):
         cx = dx+i*dp
-        c = AMBER if i in lit else "#7f1d1d"
+        c = C_LED if i in lit else "#7f1d1d"
         s.append(f'<circle cx="{cx}" cy="{ry}" r="8" fill="{c}"/>')
         s.append(f'<circle cx="{cx-2.4}" cy="{ry-2.4}" r="2" fill="#fff" opacity="0.45"/>')
     pcx = dx+16*dp+8
@@ -154,7 +157,7 @@ def svg_layout():
     s.append(txt(dx, cry-22, "coarse row", 9, "#cbd5e1", "start"))
     for i in range(10):
         cx = dx+i*36
-        c = AMBER if i==6 else "#7f1d1d"
+        c = C_LED if i==6 else "#7f1d1d"
         s.append(f'<circle cx="{cx}" cy="{cry}" r="11" fill="{c}"/>')
         s.append(f'<circle cx="{cx-3}" cy="{cry-3}" r="2.6" fill="#fff" opacity="0.45"/>')
     scx = dx+9*36
@@ -416,17 +419,19 @@ P.append('<div class="slide">'
          f'<div class="slide-fig">{DIAGRAMS["layout"]}</div>'
          '<div class="slide-bom"><table>'
          '<tr><th>Part</th><th>Qty</th><th>~CAD</th></tr>'
-         '<tr><td>Microcontroller <span class="k">(Teensy 4.0)</span></td><td>1</td><td>$34</td></tr>'
-         '<tr><td>Static-latch shift register <span class="k">(SN74HC595)</span></td><td>4</td><td>$10</td></tr>'
-         '<tr><td>Direct-emission LEDs, 10&nbsp;mm</td><td>~40</td><td>$20</td></tr>'
-         '<tr><td>Current-limit resistors (+ ULN2803)</td><td>&mdash;</td><td>$10</td></tr>'
-         '<tr><td>Regulated 5&nbsp;V supply <span class="k">(RS-25-5)</span></td><td>1</td><td>$20</td></tr>'
-         '<tr><td>Breadboard + jumper wires</td><td>&mdash;</td><td>$18</td></tr>'
-         '<tr><td>Micro-USB cable</td><td>1</td><td>$8</td></tr>'
-         '<tr><td>Panel board <span class="k">(acrylic / foam)</span></td><td>&mdash;</td><td>$20</td></tr>'
-         '<tr><td>Soldering iron + solder <span class="k">(if needed)</span></td><td>&mdash;</td><td>$25</td></tr>'
+         '<tr><td><b style="color:#0d9488">Microcontroller</b> <span class="k">(Teensy 4.0)</span></td><td>1</td><td>$34</td></tr>'
+         '<tr><td><b style="color:#2563eb">Static-latch shift register</b> <span class="k">(SN74HC595)</span></td><td>4</td><td>$10</td></tr>'
+         '<tr><td><b style="color:#dc2626">Direct-emission LEDs, 10&nbsp;mm</b></td><td>~40</td><td>$20</td></tr>'
+         '<tr><td><b style="color:#b45309">Current-limit resistors</b> <span class="k">(+ ULN2803)</span></td><td>&mdash;</td><td>$10</td></tr>'
+         '<tr><td><b style="color:#16a34a">Regulated 5&nbsp;V supply</b> <span class="k">(RS-25-5)</span></td><td>1</td><td>$20</td></tr>'
+         '<tr><td><b style="color:#475569">Breadboard + jumper wires</b></td><td>&mdash;</td><td>$18</td></tr>'
+         '<tr><td><b style="color:#7c3aed">Panel board</b> <span class="k">(acrylic / foam)</span></td><td>&mdash;</td><td>$20</td></tr>'
+         '<tr><td><span style="color:#9ca3af">Micro-USB cable</span> <span class="k">&#42;</span></td><td>1</td><td>$8</td></tr>'
+         '<tr><td><span style="color:#9ca3af">Soldering iron + solder</span> <span class="k">(if needed) &#42;</span></td><td>&mdash;</td><td>$25</td></tr>'
          '<tr class="tot"><td>Total</td><td></td><td>~$140 (+$25)</td></tr>'
-         '</table></div>'
+         '</table>'
+         '<p class="k" style="margin:8px 0 0;font-size:10.5px;line-height:1.45">Each <b>coloured</b> name marks the same-coloured part in the diagram. <b style="color:#9ca3af">&#42;</b> = not shown in the diagram (a tool / accessory).</p>'
+         '</div>'
          '</div></div>')
 P.append('<h2>References</h2>')
 P.append('<ul>'
