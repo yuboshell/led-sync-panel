@@ -227,12 +227,49 @@ def card(img, name, price, role, href):
 
 P = []  # page body parts
 P.append('<h1>Multi-camera sync evaluation: a large flat LED time-code panel</h1>')
-P.append('<div class="meta">DIY design plan &middot; updated 2026-06-08 &middot; working draft &middot; '
+P.append('<div class="meta">DIY design plan &middot; updated 2026-06-10 &middot; working draft &middot; '
          'step-time 200&nbsp;µs, driver 74HC595, range &ge;1&nbsp;s, coarse row included (datasheet-audited) &middot; 11&times;Pixel&nbsp;7 / Argus rig</div>')
 P.append('<p class="lead">Build a large, flat LED panel that shows a fast-advancing, '
          'visually-decodable <b>time code</b>. All 11 cameras film it at once; each frame decodes '
          'to a timestamp; the spread of timestamps across cameras <i>is</i> the inter-camera offset. '
          'One clock, many readers.</p>')
+
+P.append('<h2>Order list &mdash; the build at a glance</h2>')
+P.append('<p class="k">The whole rig on one screen: the build diagram, and the bill of materials as its '
+         'colour-coded legend with buy links. The design rationale is in &sect;1&ndash;&sect;9 below.</p>')
+P.append('<div class="slide">'
+         '<h3>Multi-camera sync LED panel &mdash; build &amp; bill of materials (~CAD)</h3>'
+         '<div class="slide-body">'
+         f'<div class="slide-fig">{DIAGRAMS["layout"]}</div>'
+         '<div class="slide-bom"><table>'
+         '<tr><th>Part</th><th>Qty</th><th>Buy</th><th>~CAD</th></tr>'
+         '<tr><td><b style="color:#0d9488">Microcontroller</b> <span class="k">(Teensy 4.0)</span></td><td>1</td>'
+         '<td><a href="https://ca.robotshop.com/products/teensy-40-usb-microcontroller-development-board">RobotShop.ca</a> / ABRA</td><td>$34</td></tr>'
+         '<tr><td><b style="color:#2563eb">Static-latch shift register</b> <span class="k">(SN74HC595N)</span></td><td>4</td>'
+         '<td><a href="https://www.digikey.ca/en/products/detail/texas-instruments/SN74HC595N/277246">DigiKey.ca</a> / ABRA</td><td>$10</td></tr>'
+         '<tr><td><b style="color:#dc2626">Direct-emission LEDs, 10&nbsp;mm</b> <span class="k">(red AlInGaP)</span></td><td>~40</td>'
+         '<td><a href="https://www.sparkfun.com/super-bright-led-red-10mm.html">SparkFun</a> / DigiKey.ca</td><td>$20</td></tr>'
+         '<tr><td><b style="color:#b45309">Current-limit resistors</b> <span class="k">(+ ULN2803)</span></td><td>&mdash;</td>'
+         '<td>DigiKey.ca / Mouser.ca</td><td>$10</td></tr>'
+         '<tr><td><b style="color:#16a34a">Regulated 5&nbsp;V supply</b> <span class="k">(Mean Well RS-25-5)</span></td><td>1</td>'
+         '<td><a href="https://www.digikey.ca/en/products/detail/mean-well-usa-inc/RS-25-5/7706180">DigiKey.ca</a> / Amazon.ca</td><td>$20</td></tr>'
+         '<tr><td><b style="color:#475569">Breadboard + jumper wires</b></td><td>&mdash;</td><td>Amazon.ca / local</td><td>$18</td></tr>'
+         '<tr><td><b style="color:#7c3aed">Panel board</b> <span class="k">(black foam-core 20&times;30&Prime;; later &#8539;&Prime; hardboard)</span></td><td>&mdash;</td>'
+         '<td>Dollarama / Home&nbsp;Depot</td><td>$5&ndash;15</td></tr>'
+         '<tr><td><span style="color:#9ca3af">Micro-USB cable</span> <span class="k">&#42;</span></td><td>1</td><td>Amazon.ca / on hand</td><td>$8</td></tr>'
+         '<tr><td><span style="color:#9ca3af">Soldering iron + solder</span> <span class="k">(if needed) &#42;</span></td><td>&mdash;</td><td>Amazon.ca / local</td><td>$25</td></tr>'
+         '<tr class="tot"><td>Total</td><td></td><td></td><td>~$130 (+$25)</td></tr>'
+         '</table>'
+         '<p class="k" style="margin:8px 0 0;font-size:10.5px;line-height:1.45">Each <b>coloured</b> name marks the '
+         'same-coloured part in the diagram. <b style="color:#9ca3af">&#42;</b> = not shown in the diagram (a tool / accessory). '
+         'A link opens the product page; unlinked rows are commodity items &mdash; any vendor works.</p>'
+         '</div>'
+         '</div></div>')
+P.append('<p class="k"><b>Ordering notes:</b> buying within Canada avoids USD exchange and courier brokerage / customs '
+         'fees (which can exceed a small order) &mdash; one-stop: DigiKey.ca or Mouser.ca for the commodity parts (duties '
+         'handled, fast to Alberta), plus ABRA Electronics (Montreal) or RobotShop.ca for the Teensy; confirm prices on each '
+         'page. Order the LEDs in two passes: <b>3&ndash;5 first</b> to eyeball brightness and colour on a Pixel&nbsp;7 '
+         '(opened LEDs are non-returnable), then the rest. Returns &amp; de-risking: &sect;6.</p>')
 
 P.append('<h2>1. Why not just buy the commercial panel</h2>')
 P.append('<p>The Image&nbsp;Engineering / Imatest <b>LED-Panel</b> (ISO&nbsp;15781) is the calibrated '
@@ -253,7 +290,7 @@ P.append('<p>You will place the cameras to face one large flat panel, so a singl
          'that is needed (no prism, no multi-face latching). The only requirement is that the panel be '
          'large/bright enough for every camera to resolve individual LEDs. Rule of thumb: ~1&nbsp;cm (10&nbsp;mm) LEDs '
          'at ~3&ndash;5&nbsp;cm pitch make a 16-LED bar ~0.5&ndash;0.8&nbsp;m wide, cleanly resolved by a Pixel&nbsp;7 out to ~5&nbsp;m. '
-         'Each 10&nbsp;mm dome is ~4 breadboard holes wide, so the LEDs mount on the panel surface (acrylic / foam-board / 3D-printed grid), not the breadboard &mdash; see &sect;5.</p>')
+         'Each 10&nbsp;mm dome is ~4 breadboard holes wide, so the LEDs mount on the panel surface (foam-core / hardboard / 3D-printed grid), not the breadboard &mdash; see &sect;5.</p>')
 P.append(f'<figure>{DIAGRAMS["geometry"]}<figcaption><b>Figure 2. Panel geometry.</b> All 11 cameras are placed to face one large flat panel showing the time code &mdash; a single planar matrix, no prism or multi-face latching.</figcaption></figure>')
 
 P.append('<h2>3. Encoding &mdash; Gray-coded bar + parity + coarse row</h2>')
@@ -299,14 +336,18 @@ P.append('<table><tr><th>Part</th><th>Its job in the rig</th></tr>'
          '<tr><td><b>Current-buffer array</b> <span class="k">(ULN2803, big panel only)</span></td><td>Muscle. Lets every LED run at full brightness without overloading the shift register; skip it for the first few-LED test.</td></tr>'
          '<tr><td><b>Regulated 5 V supply</b></td><td>Power. Feeds the LED rail — the USB port alone cannot drive ~40 bright LEDs.</td></tr>'
          '<tr><td><b>Breadboard + jumper wires</b></td><td>The chassis. Holds the chips and carries signals out to the panel; no soldering for the first prototype.</td></tr>'
-         '<tr><td><b>Panel board</b> <span class="k">(acrylic / foam-board)</span></td><td>The canvas. The flat surface the LEDs mount on at 3&ndash;5&nbsp;cm pitch so every camera resolves them &mdash; any rigid flat sheet (acrylic, foam-board, even pegboard); no specific part to buy, so the list has no link.</td></tr>'
+         '<tr><td><b>Panel board</b> <span class="k">(matte black sheet)</span></td><td>The canvas. The flat surface the LEDs mount on at '
+         '3&ndash;5&nbsp;cm pitch so every camera resolves them. Matte <b>black</b> maximises LED contrast and avoids glare into the camera '
+         'ring. First build: black <b>foam-core</b>, 20&times;30&Prime; (craft / dollar store, ~$5) &mdash; knife-cut the 10&nbsp;mm holes, the foam grips '
+         'the domes. Permanent build: <b>&#8539;&Prime; hardboard</b> (hardware store, cut to size, ~$12) &mdash; drill, hot-glue the LEDs from behind, '
+         'spray matte black. Avoid glossy acrylic: it cracks when drilled and reflects the room at the cameras. A commodity sheet, so the list has no link.</td></tr>'
          '<tr><td><b>Micro-USB cable</b></td><td>Programs the microcontroller and powers the small bench test.</td></tr>'
          '</table>')
 P.append('<h3>How the driver works, in plain words</h3>')
 P.append('<p>A <b>shift register</b> is a chip with a row of memory cells: you feed it bits one at a time, and each '
          'clock tick <i>shifts</i> them along the row (that is the &ldquo;shift&rdquo;; &ldquo;register&rdquo; just means the row of cells). '
          'After 8 ticks it holds 8 bits, which appear on its 8 output pins &mdash; so a few wires in become many on/off '
-         'lines out (chain three or four to reach 24&ndash;32 outputs, one per LED). <b>Latch</b> means the outputs hold '
+         'lines out (chain four to reach 32 outputs &mdash; one per LED, and this panel has ~27). <b>Latch</b> means the outputs hold '
          'steady while you load the next pattern; you then pulse a separate <i>latch</i> line and <b>all</b> outputs flip '
          'to the new pattern at the same instant. <b>Static</b> means each output then simply sits at a steady on or off '
          '&mdash; unlike a PWM driver, which rapidly pulses the pin to fake brightness and would smear the on/off edge the '
@@ -333,7 +374,7 @@ P.append(card("commercial-led-panel.png", "Camera-timing reference panel", "$3,9
 P.append(card("teensy40.jpg", "Microcontroller board", "~$25–$30",
               "the clock · Cortex-M7 @ 600 MHz · e.g. Teensy 4.0", "https://www.pjrc.com/store/teensy40.html"))
 P.append(card("sn74hc595.jpg", "Static-latch shift register", "$1.05",
-              "drives the LEDs · static latch ~13 ns, no PWM · ×3–4 · e.g. SN74HC595", "https://www.sparkfun.com/products/13699"))
+              "drives the LEDs · static latch ~13 ns, no PWM · ×4 · e.g. SN74HC595", "https://www.sparkfun.com/products/13699"))
 P.append(card("led-red-10mm.jpg", "Direct-emission LED (10 mm)", "~$1",
               "the measurement target · red AlInGaP, no phosphor, Vf 2.1–2.3 V · e.g. SparkFun COM-08862", "https://www.sparkfun.com/super-bright-led-red-10mm.html"))
 P.append(card("psu-5v4a.jpg", "Regulated 5 V supply", "$14.95",
@@ -355,7 +396,7 @@ P.append('<p class="k">Not pictured (generic): current-limit resistors (one per 
          'Ballpark for the basic rig: <b>~$120–$150 CAD</b>.</p>')
 
 P.append('<div class="note"><b>First LED order &mdash; how many?</b> The full panel is <b>~27 LEDs</b> '
-         '(16 Gray bar + 1 parity + ~10 coarse row), driven by <b>3&ndash;4&times; static-latch shift registers</b> (8 outputs each; e.g. the SN74HC595). '
+         '(16 Gray bar + 1 parity + ~10 coarse row), driven by <b>4&times; static-latch shift registers</b> (8 outputs each; e.g. the SN74HC595). '
          'Buy <b>~40 LEDs</b> (~$20&ndash;40): enough to build and film the complete panel for a comprehensive '
          'multi-camera test, plus ~13 spares (LEDs crack on insertion or die while you tune the resistor value). '
          'A failed approach costs &lt;&nbsp;$40. Extra caution: order <b>3&ndash;5 first</b> to eyeball brightness '
@@ -373,24 +414,7 @@ P.append('<p class="k"><b>Takeaway:</b> opened parts that work but do not suit a
          '1&ndash;2 units before bulk-buying</b> (especially the red LEDs, which cannot be returned once opened), and '
          'rely on returns only for genuinely dead parts. '
          'You pay return shipping unless the item is defective. Policies change, so re-check before ordering.</p>')
-P.append('<h3>Canadian sourcing (Edmonton)</h3>')
-P.append('<p class="k">Buying from within Canada avoids USD exchange, cross-border shipping, and courier '
-         'brokerage / customs fees (which can exceed a small order). Suggested split (~CAD, confirm on each page):</p>')
-P.append('<table>'
-         '<tr><th>Item</th><th>Qty</th><th>Canadian source</th><th>~CAD</th></tr>'
-         '<tr><td>Microcontroller board &mdash; <a href="https://ca.robotshop.com/products/teensy-40-usb-microcontroller-development-board">Teensy 4.0</a></td><td>1</td><td>RobotShop.ca / ABRA</td><td>~$34</td></tr>'
-         '<tr><td>Static-latch shift register &mdash; <a href="https://www.digikey.ca/en/products/detail/texas-instruments/SN74HC595N/277246">SN74HC595N</a></td><td>4</td><td>DigiKey.ca / ABRA</td><td>~$2.50 ea</td></tr>'
-         '<tr><td>Direct-emission LED, 10 mm (625 nm AlInGaP)</td><td>~40</td><td>DigiKey.ca / ABRA</td><td>~$20</td></tr>'
-         '<tr><td>Current-limit resistors + current-buffer array (ULN2803, for the bright panel)</td><td>—</td><td>DigiKey.ca / Mouser.ca</td><td>~$10</td></tr>'
-         '<tr><td>Regulated 5 V supply &mdash; <a href="https://www.digikey.ca/en/products/detail/mean-well-usa-inc/RS-25-5/7706180">Mean Well RS-25-5</a> (5 V 5 A)</td><td>1</td><td>DigiKey.ca / Amazon.ca</td><td>~$20</td></tr>'
-         '<tr><td>Micro-USB cable &mdash; program + power the board</td><td>1</td><td>Amazon.ca / on hand</td><td>~$8</td></tr>'
-         '<tr><td><b>Breadboard + jumper (Dupont) wires</b> + perfboard (permanent build)</td><td>—</td><td>Amazon.ca / local</td><td>~$18</td></tr>'
-         '<tr><td>Soldering iron + solder (header pins + panel wiring; skip if owned)</td><td>—</td><td>Amazon.ca / local</td><td>~$25</td></tr>'
-         '<tr><td>Panel board (acrylic / foam-board) + hook-up wire</td><td>—</td><td>Amazon.ca / local</td><td>~$20</td></tr>'
-         '</table>')
-P.append('<p class="k"><b>One-stop:</b> DigiKey.ca or Mouser.ca for the commodity parts (duties handled, fast to '
-         'Alberta), plus ABRA Electronics (Montreal) or RobotShop.ca for the Teensy. Total ≈ $140 CAD for parts (+ ~$25 for a soldering iron if you don&rsquo;t own one). Ordering '
-         'US-direct (PJRC / SparkFun / Adafruit) risks courier brokerage fees, so prefer the Canadian sources above.</p>')
+P.append('<p class="k"><b>Where to buy:</b> the order list at the top of the page carries the per-part vendors, buy links, quantities and prices.</p>')
 P.append('<h2>7. Timing integrity</h2>')
 P.append('<p>The clock itself is already trustworthy: the microcontroller crystal (±30 ppm) drifts &lt;0.1 ms over a '
          'multi-second sweep, ample for sub-ms. The formal timing <b>audit and cross-validation</b> — recording the exact '
@@ -411,28 +435,6 @@ P.append('<ul>'
          '<li><b>Coarse spatial row: included</b> — a redundant, human-readable cross-check beside the Gray bar (mirrors the Google / ISO design).</li>'
          '</ul>')
 
-P.append('<h2>10. One-slide summary</h2>')
-P.append('<p class="k">A single presentation slide: the build diagram on the left, the basic-rig bill of materials on the right.</p>')
-P.append('<div class="slide">'
-         '<h3>Multi-camera sync LED panel &mdash; build &amp; bill of materials (~CAD)</h3>'
-         '<div class="slide-body">'
-         f'<div class="slide-fig">{DIAGRAMS["layout"]}</div>'
-         '<div class="slide-bom"><table>'
-         '<tr><th>Part</th><th>Qty</th><th>~CAD</th></tr>'
-         '<tr><td><b style="color:#0d9488">Microcontroller</b> <span class="k">(Teensy 4.0)</span></td><td>1</td><td>$34</td></tr>'
-         '<tr><td><b style="color:#2563eb">Static-latch shift register</b> <span class="k">(SN74HC595)</span></td><td>4</td><td>$10</td></tr>'
-         '<tr><td><b style="color:#dc2626">Direct-emission LEDs, 10&nbsp;mm</b></td><td>~40</td><td>$20</td></tr>'
-         '<tr><td><b style="color:#b45309">Current-limit resistors</b> <span class="k">(+ ULN2803)</span></td><td>&mdash;</td><td>$10</td></tr>'
-         '<tr><td><b style="color:#16a34a">Regulated 5&nbsp;V supply</b> <span class="k">(RS-25-5)</span></td><td>1</td><td>$20</td></tr>'
-         '<tr><td><b style="color:#475569">Breadboard + jumper wires</b></td><td>&mdash;</td><td>$18</td></tr>'
-         '<tr><td><b style="color:#7c3aed">Panel board</b> <span class="k">(acrylic / foam)</span></td><td>&mdash;</td><td>$20</td></tr>'
-         '<tr><td><span style="color:#9ca3af">Micro-USB cable</span> <span class="k">&#42;</span></td><td>1</td><td>$8</td></tr>'
-         '<tr><td><span style="color:#9ca3af">Soldering iron + solder</span> <span class="k">(if needed) &#42;</span></td><td>&mdash;</td><td>$25</td></tr>'
-         '<tr class="tot"><td>Total</td><td></td><td>~$140 (+$25)</td></tr>'
-         '</table>'
-         '<p class="k" style="margin:8px 0 0;font-size:10.5px;line-height:1.45">Each <b>coloured</b> name marks the same-coloured part in the diagram. <b style="color:#9ca3af">&#42;</b> = not shown in the diagram (a tool / accessory).</p>'
-         '</div>'
-         '</div></div>')
 P.append('<h2>References</h2>')
 P.append('<ul>'
          '<li>Imatest Camera Timing System LED-Panel — <a href="https://www.imatest.com/product/camera-timing-system-led-panel/">product page</a> '
