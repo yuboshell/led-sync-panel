@@ -4,7 +4,8 @@ The design doc for a **multi-camera sync-evaluation LED time-code panel** — a 
 panel of LEDs showing a fast-advancing, decodable time code, filmed by all cameras
 at once so per-frame decode gives the inter-camera offset. Built for Yubo's
 11×Pixel 7 / Argus motion-capture rig. Split out of `memex` into its own repo on
-2026-06-07 (currently local-only).
+2026-06-07; public on GitHub since 2026-06-10
+(https://github.com/yubohuangai/led-sync-panel, doc served via GitHub Pages).
 
 ## What's here
 - `build.py` — **the source of truth.** A Python builder that generates `index.html`:
