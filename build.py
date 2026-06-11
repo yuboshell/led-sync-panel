@@ -316,13 +316,31 @@ P.append('<p class="k"><b>Ordering notes:</b> buying within Canada avoids USD ex
          'handled, fast to Alberta), plus ABRA Electronics (Montreal) or RobotShop.ca for the Teensy; confirm prices on each '
          'page. Order the LEDs in two passes: <b>3&ndash;5 first</b> to eyeball brightness and colour on a Pixel&nbsp;7 '
          '(opened LEDs are non-returnable), then the rest. Returns &amp; de-risking: &sect;3.</p>')
-P.append('<p class="k"><b>Hands-on help (Edmonton):</b> to handle real parts and get advice in person &mdash; '
-         '<a href="https://www.ualberta.ca/en/engineering/student-services/experiential-learning/elko-engineering-garage.html">Elko Engineering Garage</a> '
-         '(U of A, ETLC; free for university members; soldering benches, scopes, staff), '
-         '<a href="https://www.epl.ca/makerspace/">EPL Stanley A. Milner Fab Lab</a> (downtown library; free; beginner soldering training), '
-         '<a href="https://ents.ca/">ENTS</a> (community makerspace &mdash; a member-run shared workshop with an electronics lab; 12001 149 St NW; weekly tours), and '
-         '<a href="https://www.fatwiredist.ca/">Fatwire Distributors</a> (electronic-parts counter, 9325 63 Ave NW, Mon&ndash;Fri; call ahead about hobby quantities). '
-         'The former components store on Gateway Blvd (Active Electronics) has closed.</p>')
+P.append('<h3>Walk-in plan (Edmonton)</h3>')
+P.append('<p class="k">Where to handle real parts and get advice in person &mdash; shopping stops first, then places to build and learn:</p>')
+P.append('<table>'
+         '<tr><th>Place</th><th>Go for</th><th>Where / when</th></tr>'
+         '<tr><td><a href="https://www.fatwiredist.ca/">Fatwire Distributors</a></td>'
+         '<td>Components over the counter: shift registers, resistors, current-buffer array, possibly the LEDs. Call ahead about hobby quantities.</td>'
+         '<td>9325 63 Ave NW &middot; Mon&ndash;Fri &middot; call first</td></tr>'
+         '<tr><td>Dollarama / Staples / Michaels</td>'
+         '<td>Black foam-core 20&times;30&Prime; &mdash; the first-build panel board.</td>'
+         '<td>any location</td></tr>'
+         '<tr><td>Home Depot / Rona</td>'
+         '<td>&#8539;&Prime; hardboard cut to size (the permanent panel board), 10&nbsp;mm drill bit, matte-black spray.</td>'
+         '<td>any location</td></tr>'
+         '<tr><td><a href="https://www.ualberta.ca/en/engineering/student-services/experiential-learning/elko-engineering-garage.html">Elko Engineering Garage</a></td>'
+         '<td>Build and test with help: soldering benches, oscilloscopes, staff. Free for U&nbsp;of&nbsp;A members; do the online orientation first.</td>'
+         '<td>U of A &middot; ETLC</td></tr>'
+         '<tr><td><a href="https://www.epl.ca/makerspace/">EPL Milner Fab Lab</a></td>'
+         '<td>Free beginner soldering training / certification.</td>'
+         '<td>Stanley A. Milner Library, downtown</td></tr>'
+         '<tr><td><a href="https://ents.ca/">ENTS</a></td>'
+         '<td>Community makerspace (a member-run shared workshop with an electronics lab): advice, project help.</td>'
+         '<td>12001 149 St NW &middot; weekly tour</td></tr>'
+         '</table>')
+P.append('<p class="k">The former components store on Gateway Blvd (Active Electronics) has closed. '
+         'Bring this page along: &sect;2 is the shopping list, &sect;3 the part-by-part rationale.</p>')
 
 P.append('<h2>3. The driver &mdash; why a static-latch shift register, and the exact parts</h2>')
 P.append('<h3>How the driver works, in plain words</h3>')
