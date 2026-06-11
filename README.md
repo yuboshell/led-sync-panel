@@ -8,8 +8,9 @@ HTML files; use the link above.)
 Design plan for a DIY multi-camera sync-evaluation **LED time-code panel**: a flat
 panel of LEDs shows a fast-advancing, visually decodable time code; all cameras
 film it at once, and decoding each frame gives the inter-camera time offset.
-Built for an 11×Pixel 7 motion-capture rig. The doc opens with the order list
-(bill of materials + buy links); design rationale follows in §1–§9.
+Built for an 11×Pixel 7 motion-capture rig. The doc reads in show-an-expert
+order: §1 purpose, §2 connection diagram + order list (bill of materials with
+buy links), §3 the driver choice + exact parts, §4–§9 design rationale.
 
 ## Build
 

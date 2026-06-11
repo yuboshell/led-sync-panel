@@ -229,14 +229,30 @@ P = []  # page body parts
 P.append('<h1>Multi-camera sync evaluation: a large flat LED time-code panel</h1>')
 P.append('<div class="meta">DIY design plan &middot; updated 2026-06-10 &middot; working draft &middot; '
          'step-time 200&nbsp;µs, driver 74HC595, range &ge;1&nbsp;s, coarse row included (datasheet-audited) &middot; 11&times;Pixel&nbsp;7 / Argus rig</div>')
+P.append('<p class="k"><b>Reader&rsquo;s map:</b> &sect;1 what this tool is for &middot; '
+         '&sect;2 the wiring diagram + order list &middot; &sect;3 the driver choice + exact parts &middot; '
+         '&sect;4&ndash;&sect;9 the design rationale.</p>')
+P.append('<h2>1. Purpose &mdash; what this is for, and why DIY</h2>')
 P.append('<p class="lead">Build a large, flat LED panel that shows a fast-advancing, '
          'visually-decodable <b>time code</b>. All 11 cameras film it at once; each frame decodes '
          'to a timestamp; the spread of timestamps across cameras <i>is</i> the inter-camera offset. '
          'One clock, many readers.</p>')
+P.append('<p>The Image&nbsp;Engineering / Imatest <b>LED-Panel</b> (ISO&nbsp;15781) is the calibrated '
+         'reference we clone. But it is a <b>240&times;130&times;55&nbsp;mm, 1&nbsp;kg</b> benchtop unit with a '
+         '50&ndash;100&deg; viewing cone, built to be filmed by <b>one</b> camera at a time, and it costs '
+         '<b>$3,980&ndash;$57,850</b>. It cannot face an 11-camera ring. We keep its principle and rebuild '
+         'it large, flat, and multi-camera-friendly.</p>')
+P.append('<figure><img src="assets/commercial-led-panel.png" style="max-width:420px;width:100%;border:1px solid #e5e7eb;border-radius:8px">'
+         '<figcaption><b>Figure 1. The commercial reference panel.</b> Image Engineering / Imatest LED-Panel V5: '
+         '110 LEDs (10&times;10 grid + a &times;100 row), step 20&nbsp;µs–10&nbsp;s, accuracy &lt;0.06%.</figcaption></figure>')
+P.append('<p class="k">How it encodes time: in the timing modes a single lit LED sweeps across the grid '
+         'one position per step, and the &times;100 bottom row counts each wrap, giving a spatial '
+         'base-100 counter (range up to 1000 steps). The lit position decodes to '
+         '<code>elapsed = count × step</code>.</p>')
 
-P.append('<h2>Order list &mdash; the build at a glance</h2>')
+P.append('<h2>2. The build &mdash; connection diagram &amp; order list</h2>')
 P.append('<p class="k">The whole rig on one screen: the build diagram, and the bill of materials as its '
-         'colour-coded legend with buy links. The design rationale is in &sect;1&ndash;&sect;9 below.</p>')
+         'colour-coded legend with buy links. The design rationale is in &sect;4&ndash;&sect;9 below.</p>')
 P.append('<div class="slide">'
          '<h3>Multi-camera sync LED panel &mdash; build &amp; bill of materials (~CAD)</h3>'
          '<div class="slide-body">'
@@ -265,75 +281,11 @@ P.append('<div class="slide">'
          'A link opens the product page; unlinked rows are commodity items &mdash; any vendor works.</p>'
          '</div>'
          '</div></div>')
-P.append('<p class="k"><b>Ordering notes:</b> buying within Canada avoids USD exchange and courier brokerage / customs '
-         'fees (which can exceed a small order) &mdash; one-stop: DigiKey.ca or Mouser.ca for the commodity parts (duties '
-         'handled, fast to Alberta), plus ABRA Electronics (Montreal) or RobotShop.ca for the Teensy; confirm prices on each '
-         'page. Order the LEDs in two passes: <b>3&ndash;5 first</b> to eyeball brightness and colour on a Pixel&nbsp;7 '
-         '(opened LEDs are non-returnable), then the rest. Returns &amp; de-risking: &sect;6.</p>')
-P.append('<p class="k"><b>Hands-on help (Edmonton):</b> to handle real parts and get advice in person &mdash; '
-         '<a href="https://www.ualberta.ca/en/engineering/student-services/experiential-learning/elko-engineering-garage.html">Elko Engineering Garage</a> '
-         '(U of A, ETLC; free for university members; soldering benches, scopes, staff), '
-         '<a href="https://www.epl.ca/makerspace/">EPL Stanley A. Milner Fab Lab</a> (downtown library; free; beginner soldering training), '
-         '<a href="https://ents.ca/">ENTS</a> (community makerspace &mdash; a member-run shared workshop with an electronics lab; 12001 149 St NW; weekly tours), and '
-         '<a href="https://www.fatwiredist.ca/">Fatwire Distributors</a> (electronic-parts counter, 9325 63 Ave NW, Mon&ndash;Fri; call ahead about hobby quantities). '
-         'The former components store on Gateway Blvd (Active Electronics) has closed.</p>')
-
-P.append('<h2>1. Why not just buy the commercial panel</h2>')
-P.append('<p>The Image&nbsp;Engineering / Imatest <b>LED-Panel</b> (ISO&nbsp;15781) is the calibrated '
-         'reference we clone. But it is a <b>240&times;130&times;55&nbsp;mm, 1&nbsp;kg</b> benchtop unit with a '
-         '50&ndash;100&deg; viewing cone, built to be filmed by <b>one</b> camera at a time, and it costs '
-         '<b>$3,980&ndash;$57,850</b>. It cannot face an 11-camera ring. We keep its principle and rebuild '
-         'it large, flat, and multi-camera-friendly.</p>')
-P.append('<figure><img src="assets/commercial-led-panel.png" style="max-width:420px;width:100%;border:1px solid #e5e7eb;border-radius:8px">'
-         '<figcaption><b>Figure 1. The commercial reference panel.</b> Image Engineering / Imatest LED-Panel V5: '
-         '110 LEDs (10&times;10 grid + a &times;100 row), step 20&nbsp;µs–10&nbsp;s, accuracy &lt;0.06%.</figcaption></figure>')
-P.append('<p class="k">How it encodes time: in the timing modes a single lit LED sweeps across the grid '
-         'one position per step, and the &times;100 bottom row counts each wrap, giving a spatial '
-         'base-100 counter (range up to 1000 steps). The lit position decodes to '
-         '<code>elapsed = count × step</code>.</p>')
-
-P.append('<h2>2. Geometry &mdash; Option C: one large flat panel</h2>')
-P.append('<p>You will place the cameras to face one large flat panel, so a single planar matrix is all '
-         'that is needed (no prism, no multi-face latching). The only requirement is that the panel be '
-         'large/bright enough for every camera to resolve individual LEDs. Rule of thumb: ~1&nbsp;cm (10&nbsp;mm) LEDs '
-         'at ~3&ndash;5&nbsp;cm pitch make a 16-LED bar ~0.5&ndash;0.8&nbsp;m wide, cleanly resolved by a Pixel&nbsp;7 out to ~5&nbsp;m. '
-         'Each 10&nbsp;mm dome is ~4 breadboard holes wide, so the LEDs mount on the panel surface (foam-core / hardboard / 3D-printed grid), not the breadboard &mdash; see &sect;5.</p>')
-P.append(f'<figure>{DIAGRAMS["geometry"]}<figcaption><b>Figure 2. Panel geometry.</b> All 11 cameras are placed to face one large flat panel showing the time code &mdash; a single planar matrix, no prism or multi-face latching.</figcaption></figure>')
-
-P.append('<h2>3. Encoding &mdash; Gray-coded bar + parity + coarse row</h2>')
-P.append('<p>Do not read &ldquo;which of 100 dots&rdquo;; it is hard to resolve at distance. Use a '
-         '<b>Gray-coded binary bar</b>: a row of large LEDs showing a counter that increments every step '
-         '<code>τ</code>. On/off per LED is robust to blur and oblique viewing; Gray coding means only one '
-         'bit flips per step, so a code caught mid-transition is at most 1&nbsp;LSB off. A single <b>parity LED</b> '
-         'is switched so the number of lit LEDs is always even; a camera that reads an <b>odd</b> count knows a bit was misread (glare, an occlusion, or an LED caught mid-flip) and discards that frame.</p>')
-P.append(f'<figure>{DIAGRAMS["encoding"]}<figcaption><b>Figure 3. Readout layout.</b> A 16-bit Gray-coded bar (one bit per LED) plus a parity LED and a redundant coarse row; software thresholds each LED, converts Gray&rarr;binary, and reads <code>t = count &times; &tau;</code>.</figcaption></figure>')
-P.append('<table><tr><th>Bits / step τ</th><th>Unambiguous range</th><th>Resolution</th><th>LEDs</th></tr>'
-         '<tr><td>16-bit @ τ = 20 µs</td><td>~1.3 s</td><td>20 µs</td><td>16</td></tr>'
-         '<tr style="background:#fffbeb"><td>16-bit @ τ = 200 µs &nbsp;<b>← operating point</b></td><td>~13 s</td><td>200 µs</td><td>16</td></tr></table>')
-P.append('<p class="k">Sizing: <code>#codes = range / τ</code>; binary needs <code>ceil(log2(#codes))</code> '
-         'LEDs, base-W spatial needs <code>ceil(logW(#codes))</code> digits of W. For a 1&nbsp;s safety range: '
-         '<b>16 binary LEDs vs ~50 spatial LEDs</b>. You can interpolate below τ (down to the sensor line '
-         'time ~10 µs) using the row where the code increments within a rolling-shutter frame.</p>')
-
-P.append('<h2>4. The coarse scale is mandatory (your disambiguation point)</h2>')
-P.append('<p>Without a coarse scale, two cameras can show the <b>identical</b> fine reading while sitting '
-         'one fine-wrap period apart. The fix is the <b>vernier / positional-counter</b> principle, the same '
-         'trick as Google&rsquo;s slow bottom row (&times;10), the commercial &times;100 row, and a clock&rsquo;s '
-         'hour/minute/second hands. In a binary bar you get it for free: the high-order bits <i>are</i> the '
-         'slow row, so a 16-bit Gray bar already covers &gt;1&nbsp;s of offset.</p>')
-P.append(f'<figure>{DIAGRAMS["vernier"]}<figcaption><b>Figure 4. The vernier.</b> Two cameras can show the identical fine reading yet sit a full fine-wrap apart; the coarse scale (in binary, the high-order bits) resolves the ambiguity.</figcaption></figure>')
-
-P.append("""<h3>Step-time: τ = 200 µs (decided 2026-06-03)</h3>
-<p>Match τ to the camera's rolling-shutter line time so each code value spans several rows. The Pixel 7 line time is ≈ 10–20 µs, so <b>200 µs</b> (~10–20 rows per code) is the operating point, not 20 µs.</p>
-<ul>
-<li><b>The line time is the resolution floor.</b> One frame localises an event to ≈ one row (~10–20 µs); 20 µs already sits on that floor, so a finer step buys nothing the camera can resolve.</li>
-<li><b>Fine resolution comes from the rolling shutter, not a tiny step.</b> Fitting code-vs-row over thousands of rows reaches sub-µs precision at any τ. At 200 µs each code spans ~10–20 rows (clean, fittable, blur-tolerant); at 20 µs each spans ~1 row (a 2-row blur is a 2-LSB error).</li>
-<li><b>Exposure smear.</b> Fine bits stay crisp only if exposure ≲ τ. 200 µs allows ≤ 1/5000 s (easy against a bright panel); 20 µs would need ≤ 1/50000 s (impractical).</li>
-<li><b>Hardware.</b> A <b>static-latch</b> driver (74HC595 shift register) switches cleanly at any τ; PWM drivers (TLC5947, APA102) cannot — their brightness PWM smears the edge.</li>
-</ul>
-<p><b>Build choice:</b> drive the LEDs with <b>74HC595 shift registers</b> (static latch, no PWM), which switch cleanly at <b>both 200 µs and 20 µs</b>. Operate at 200 µs and cross-validate at 20 µs: two step sizes agreeing on the same offset is a strong validation result. First measure the actual Pixel 7 line time (readout ÷ rows); the sweet spot is τ ≈ 5–15× that.</p>""")
-P.append('<h2>5. Electronics</h2>')
-P.append(f'<figure>{DIAGRAMS["layout"]}<figcaption><b>Figure 5. The rig — what sits where, and how it connects.</b> The breadboard carries only the microcontroller, the static-latch shift register(s) and the current-limit resistors; the 10&nbsp;mm LEDs are too wide to pack on it (~4 holes each), so they mount on the display panel at 3&ndash;5&nbsp;cm pitch and connect back by jumper wires. The signal path runs 5&nbsp;V supply &rarr; microcontroller &rarr; shift register(s) &rarr; LEDs; each part&rsquo;s photo, price and store link are in &sect;6.</figcaption></figure>')
+P.append('<p class="k"><b>Reading the diagram:</b> the breadboard carries only the microcontroller, the static-latch '
+         'shift register(s) and the current-limit resistors; the 10&nbsp;mm LEDs are too wide to pack on it (~4 holes each), '
+         'so they mount on the display panel at 3&ndash;5&nbsp;cm pitch and connect back by jumper wires. The signal path '
+         'runs 5&nbsp;V supply &rarr; microcontroller &rarr; shift register(s) &rarr; LEDs. Each part&rsquo;s photo, price '
+         'and store link: &sect;3.</p>')
 P.append('<h3>What each part does</h3>')
 P.append('<table><tr><th>Part</th><th>Its job in the rig</th></tr>'
          '<tr><td><b>Microcontroller</b> <span class="k">(Teensy 4.0)</span></td><td>The clock. A hardware timer advances the time code every τ and shifts the new on/off pattern out over 3 SPI wires.</td></tr>'
@@ -350,6 +302,20 @@ P.append('<table><tr><th>Part</th><th>Its job in the rig</th></tr>'
          'spray matte black. Avoid glossy acrylic: it cracks when drilled and reflects the room at the cameras. A commodity sheet, so the list has no link.</td></tr>'
          '<tr><td><b>Micro-USB cable</b></td><td>Programs the microcontroller and powers the small bench test.</td></tr>'
          '</table>')
+P.append('<p class="k"><b>Ordering notes:</b> buying within Canada avoids USD exchange and courier brokerage / customs '
+         'fees (which can exceed a small order) &mdash; one-stop: DigiKey.ca or Mouser.ca for the commodity parts (duties '
+         'handled, fast to Alberta), plus ABRA Electronics (Montreal) or RobotShop.ca for the Teensy; confirm prices on each '
+         'page. Order the LEDs in two passes: <b>3&ndash;5 first</b> to eyeball brightness and colour on a Pixel&nbsp;7 '
+         '(opened LEDs are non-returnable), then the rest. Returns &amp; de-risking: &sect;3.</p>')
+P.append('<p class="k"><b>Hands-on help (Edmonton):</b> to handle real parts and get advice in person &mdash; '
+         '<a href="https://www.ualberta.ca/en/engineering/student-services/experiential-learning/elko-engineering-garage.html">Elko Engineering Garage</a> '
+         '(U of A, ETLC; free for university members; soldering benches, scopes, staff), '
+         '<a href="https://www.epl.ca/makerspace/">EPL Stanley A. Milner Fab Lab</a> (downtown library; free; beginner soldering training), '
+         '<a href="https://ents.ca/">ENTS</a> (community makerspace &mdash; a member-run shared workshop with an electronics lab; 12001 149 St NW; weekly tours), and '
+         '<a href="https://www.fatwiredist.ca/">Fatwire Distributors</a> (electronic-parts counter, 9325 63 Ave NW, Mon&ndash;Fri; call ahead about hobby quantities). '
+         'The former components store on Gateway Blvd (Active Electronics) has closed.</p>')
+
+P.append('<h2>3. The driver &mdash; why a static-latch shift register, and the exact parts</h2>')
 P.append('<h3>How the driver works, in plain words</h3>')
 P.append('<p>A <b>shift register</b> is a chip with a row of memory cells: you feed it bits one at a time, and each '
          'clock tick <i>shifts</i> them along the row (that is the &ldquo;shift&rdquo;; &ldquo;register&rdquo; just means the row of cells). '
@@ -374,7 +340,7 @@ P.append('<table><tr><th>Driver approach</th><th>Switching</th><th>Verdict (afte
          '<tr><td>PWM addressable LED <span class="k">(e.g. APA102 / DotStar)</span></td><td>8-bit PWM @ ~1 MHz osc</td><td>✗ ~256 µs PWM cycle smears the edge</td></tr>'
          '<tr><td>PWM constant-current LED driver <span class="k">(e.g. TLC5947)</span></td><td>12-bit PWM @ 4 MHz osc</td><td>✗ ~1 ms grayscale frame floor — far too slow</td></tr></table>')
 
-P.append('<h2>6. Parts (verified against datasheets)</h2>')
+P.append('<h3>The parts shortlist (verified against datasheets)</h3>')
 P.append('<div class="gallery">')
 P.append(card("commercial-led-panel.png", "Camera-timing reference panel", "$3,980–$57,850",
               "the calibrated device we clone, not buy · IE / Imatest LED-Panel", "https://www.imatest.com/product/camera-timing-system-led-panel/"))
@@ -421,7 +387,47 @@ P.append('<p class="k"><b>Takeaway:</b> opened parts that work but do not suit a
          '1&ndash;2 units before bulk-buying</b> (especially the red LEDs, which cannot be returned once opened), and '
          'rely on returns only for genuinely dead parts. '
          'You pay return shipping unless the item is defective. Policies change, so re-check before ordering.</p>')
-P.append('<p class="k"><b>Where to buy:</b> the order list at the top of the page carries the per-part vendors, buy links, quantities and prices.</p>')
+P.append('<p class="k"><b>Where to buy:</b> the order list in &sect;2 carries the per-part vendors, buy links, quantities and prices.</p>')
+P.append('<h2>4. Geometry &mdash; Option C: one large flat panel</h2>')
+P.append('<p>You will place the cameras to face one large flat panel, so a single planar matrix is all '
+         'that is needed (no prism, no multi-face latching). The only requirement is that the panel be '
+         'large/bright enough for every camera to resolve individual LEDs. Rule of thumb: ~1&nbsp;cm (10&nbsp;mm) LEDs '
+         'at ~3&ndash;5&nbsp;cm pitch make a 16-LED bar ~0.5&ndash;0.8&nbsp;m wide, cleanly resolved by a Pixel&nbsp;7 out to ~5&nbsp;m. '
+         'Each 10&nbsp;mm dome is ~4 breadboard holes wide, so the LEDs mount on the panel surface (foam-core / hardboard / 3D-printed grid), not the breadboard &mdash; see &sect;2.</p>')
+P.append(f'<figure>{DIAGRAMS["geometry"]}<figcaption><b>Figure 2. Panel geometry.</b> All 11 cameras are placed to face one large flat panel showing the time code &mdash; a single planar matrix, no prism or multi-face latching.</figcaption></figure>')
+
+P.append('<h2>5. Encoding &mdash; Gray-coded bar + parity + coarse row</h2>')
+P.append('<p>Do not read &ldquo;which of 100 dots&rdquo;; it is hard to resolve at distance. Use a '
+         '<b>Gray-coded binary bar</b>: a row of large LEDs showing a counter that increments every step '
+         '<code>τ</code>. On/off per LED is robust to blur and oblique viewing; Gray coding means only one '
+         'bit flips per step, so a code caught mid-transition is at most 1&nbsp;LSB off. A single <b>parity LED</b> '
+         'is switched so the number of lit LEDs is always even; a camera that reads an <b>odd</b> count knows a bit was misread (glare, an occlusion, or an LED caught mid-flip) and discards that frame.</p>')
+P.append(f'<figure>{DIAGRAMS["encoding"]}<figcaption><b>Figure 3. Readout layout.</b> A 16-bit Gray-coded bar (one bit per LED) plus a parity LED and a redundant coarse row; software thresholds each LED, converts Gray&rarr;binary, and reads <code>t = count &times; &tau;</code>.</figcaption></figure>')
+P.append('<table><tr><th>Bits / step τ</th><th>Unambiguous range</th><th>Resolution</th><th>LEDs</th></tr>'
+         '<tr><td>16-bit @ τ = 20 µs</td><td>~1.3 s</td><td>20 µs</td><td>16</td></tr>'
+         '<tr style="background:#fffbeb"><td>16-bit @ τ = 200 µs &nbsp;<b>← operating point</b></td><td>~13 s</td><td>200 µs</td><td>16</td></tr></table>')
+P.append('<p class="k">Sizing: <code>#codes = range / τ</code>; binary needs <code>ceil(log2(#codes))</code> '
+         'LEDs, base-W spatial needs <code>ceil(logW(#codes))</code> digits of W. For a 1&nbsp;s safety range: '
+         '<b>16 binary LEDs vs ~50 spatial LEDs</b>. You can interpolate below τ (down to the sensor line '
+         'time ~10 µs) using the row where the code increments within a rolling-shutter frame.</p>')
+
+P.append('<h2>6. The coarse scale is mandatory (your disambiguation point)</h2>')
+P.append('<p>Without a coarse scale, two cameras can show the <b>identical</b> fine reading while sitting '
+         'one fine-wrap period apart. The fix is the <b>vernier / positional-counter</b> principle, the same '
+         'trick as Google&rsquo;s slow bottom row (&times;10), the commercial &times;100 row, and a clock&rsquo;s '
+         'hour/minute/second hands. In a binary bar you get it for free: the high-order bits <i>are</i> the '
+         'slow row, so a 16-bit Gray bar already covers &gt;1&nbsp;s of offset.</p>')
+P.append(f'<figure>{DIAGRAMS["vernier"]}<figcaption><b>Figure 4. The vernier.</b> Two cameras can show the identical fine reading yet sit a full fine-wrap apart; the coarse scale (in binary, the high-order bits) resolves the ambiguity.</figcaption></figure>')
+
+P.append("""<h3>Step-time: τ = 200 µs (decided 2026-06-03)</h3>
+<p>Match τ to the camera's rolling-shutter line time so each code value spans several rows. The Pixel 7 line time is ≈ 10–20 µs, so <b>200 µs</b> (~10–20 rows per code) is the operating point, not 20 µs.</p>
+<ul>
+<li><b>The line time is the resolution floor.</b> One frame localises an event to ≈ one row (~10–20 µs); 20 µs already sits on that floor, so a finer step buys nothing the camera can resolve.</li>
+<li><b>Fine resolution comes from the rolling shutter, not a tiny step.</b> Fitting code-vs-row over thousands of rows reaches sub-µs precision at any τ. At 200 µs each code spans ~10–20 rows (clean, fittable, blur-tolerant); at 20 µs each spans ~1 row (a 2-row blur is a 2-LSB error).</li>
+<li><b>Exposure smear.</b> Fine bits stay crisp only if exposure ≲ τ. 200 µs allows ≤ 1/5000 s (easy against a bright panel); 20 µs would need ≤ 1/50000 s (impractical).</li>
+<li><b>Hardware.</b> A <b>static-latch</b> driver (74HC595 shift register) switches cleanly at any τ; PWM drivers (TLC5947, APA102) cannot — their brightness PWM smears the edge.</li>
+</ul>
+<p><b>Build choice:</b> drive the LEDs with <b>74HC595 shift registers</b> (static latch, no PWM), which switch cleanly at <b>both 200 µs and 20 µs</b>. Operate at 200 µs and cross-validate at 20 µs: two step sizes agreeing on the same offset is a strong validation result. First measure the actual Pixel 7 line time (readout ÷ rows); the sweet spot is τ ≈ 5–15× that.</p>""")
 P.append('<h2>7. Timing integrity</h2>')
 P.append('<p>The clock itself is already trustworthy: the microcontroller crystal (±30 ppm) drifts &lt;0.1 ms over a '
          'multi-second sweep, ample for sub-ms. The formal timing <b>audit and cross-validation</b> — recording the exact '
@@ -436,7 +442,7 @@ P.append('<p>Per camera: locate the panel, threshold each LED on/off, decode Gra
 
 P.append('<h2>9. Decisions (resolved)</h2>')
 P.append('<ul>'
-         '<li><b>Step-time τ = 200 µs</b> operating point; fine timing from the rolling-shutter row fit; cross-validated at 20 µs (see §3).</li>'
+         '<li><b>Step-time τ = 200 µs</b> operating point; fine timing from the rolling-shutter row fit; cross-validated at 20 µs (see §5).</li>'
          '<li><b>Driver = static-latch shift register</b> (no PWM, ~13 ns latch; the SN74HC595 is one part); the datasheet audit ruled out the PWM options — a PWM constant-current driver (TLC5947, ~1 ms floor) and a PWM addressable LED (APA102, ~256 µs smear).</li>'
          '<li><b>Unambiguous range ≥ 1 s</b> — a 16-bit Gray bar gives ~1.3 s at 20 µs (≈ 13 s at 200 µs), far beyond any plausible inter-camera offset.</li>'
          '<li><b>Coarse spatial row: included</b> — a redundant, human-readable cross-check beside the Gray bar (mirrors the Google / ISO design).</li>'
