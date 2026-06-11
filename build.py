@@ -494,6 +494,7 @@ P.append('<ul>'
          '</ul>')
 
 html = ("<!doctype html><html lang='en'><head><meta charset='utf-8'>"
+        "<base target='_blank'>"
         "<meta name='viewport' content='width=device-width,initial-scale=1'>"
         "<title>LED sync panel — design plan</title>"
         f"<style>{CSS}</style></head><body>{''.join(P)}</body></html>")
