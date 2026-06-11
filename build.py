@@ -270,6 +270,13 @@ P.append('<p class="k"><b>Ordering notes:</b> buying within Canada avoids USD ex
          'handled, fast to Alberta), plus ABRA Electronics (Montreal) or RobotShop.ca for the Teensy; confirm prices on each '
          'page. Order the LEDs in two passes: <b>3&ndash;5 first</b> to eyeball brightness and colour on a Pixel&nbsp;7 '
          '(opened LEDs are non-returnable), then the rest. Returns &amp; de-risking: &sect;6.</p>')
+P.append('<p class="k"><b>Hands-on help (Edmonton):</b> to handle real parts and get advice in person &mdash; '
+         '<a href="https://www.ualberta.ca/en/engineering/student-services/experiential-learning/elko-engineering-garage.html">Elko Engineering Garage</a> '
+         '(U of A, ETLC; free for university members; soldering benches, scopes, staff), '
+         '<a href="https://www.epl.ca/makerspace/">EPL Stanley A. Milner Fab Lab</a> (downtown library; free; beginner soldering training), '
+         '<a href="https://ents.ca/">ENTS</a> (community makerspace &mdash; a member-run shared workshop with an electronics lab; 12001 149 St NW; weekly tours), and '
+         '<a href="https://www.fatwiredist.ca/">Fatwire Distributors</a> (electronic-parts counter, 9325 63 Ave NW, Mon&ndash;Fri; call ahead about hobby quantities). '
+         'The former components store on Gateway Blvd (Active Electronics) has closed.</p>')
 
 P.append('<h2>1. Why not just buy the commercial panel</h2>')
 P.append('<p>The Image&nbsp;Engineering / Imatest <b>LED-Panel</b> (ISO&nbsp;15781) is the calibrated '
