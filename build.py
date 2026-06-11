@@ -214,8 +214,11 @@ ul{margin:6px 0 6px 0}
 .slide-bom{width:100%;max-width:660px}
 .slide-bom table{width:100%;border-collapse:collapse;font-size:12px;margin:0}
 .slide-bom th,.slide-bom td{border:none;border-bottom:1px solid var(--line);padding:4px 5px;text-align:left}
-.slide-bom th:nth-child(2),.slide-bom td:nth-child(2){text-align:center}
+.slide-bom td{vertical-align:middle}
+.slide-bom th:nth-child(3),.slide-bom td:nth-child(3){text-align:center}
 .slide-bom th:last-child,.slide-bom td:last-child{text-align:right;white-space:nowrap}
+.slide-bom td.th{width:54px;padding:3px 4px}
+.slide-bom td.th img{height:30px;width:46px;object-fit:contain;display:block;margin:0 auto}
 .slide-bom .tot td{border-top:2px solid var(--ink);border-bottom:none;font-weight:700}
 """
 
@@ -258,23 +261,29 @@ P.append('<div class="slide">'
          '<div class="slide-body">'
          f'<div class="slide-fig">{DIAGRAMS["layout"]}</div>'
          '<div class="slide-bom"><table>'
-         '<tr><th>Part</th><th>Qty</th><th>Buy</th><th>~CAD</th></tr>'
-         '<tr><td><b style="color:#0d9488">Microcontroller</b> <span class="k">(Teensy 4.0)</span></td><td>1</td>'
+         '<tr><th></th><th>Part</th><th>Qty</th><th>Buy</th><th>~CAD</th></tr>'
+         '<tr><td class="th"><img src="assets/teensy40.jpg" alt="Teensy 4.0"></td>'
+         '<td><b style="color:#0d9488">Microcontroller</b> <span class="k">(Teensy 4.0)</span></td><td>1</td>'
          '<td><a href="https://ca.robotshop.com/products/teensy-40-usb-microcontroller-development-board">RobotShop.ca</a> / ABRA</td><td>$34</td></tr>'
-         '<tr><td><b style="color:#2563eb">Static-latch shift register</b> <span class="k">(SN74HC595N)</span></td><td>4</td>'
+         '<tr><td class="th"><img src="assets/sn74hc595.jpg" alt="SN74HC595"></td>'
+         '<td><b style="color:#2563eb">Static-latch shift register</b> <span class="k">(SN74HC595N)</span></td><td>4</td>'
          '<td><a href="https://www.digikey.ca/en/products/detail/texas-instruments/SN74HC595N/277246">DigiKey.ca</a> / ABRA</td><td>$10</td></tr>'
-         '<tr><td><b style="color:#dc2626">Direct-emission LEDs, 10&nbsp;mm</b> <span class="k">(red AlInGaP)</span></td><td>~40</td>'
+         '<tr><td class="th"><img src="assets/led-red-10mm.jpg" alt="10 mm red LED"></td>'
+         '<td><b style="color:#dc2626">Direct-emission LEDs, 10&nbsp;mm</b> <span class="k">(red AlInGaP)</span></td><td>~40</td>'
          '<td><a href="https://www.sparkfun.com/super-bright-led-red-10mm.html">SparkFun</a> / DigiKey.ca</td><td>$20</td></tr>'
-         '<tr><td><b style="color:#b45309">Current-limit resistors</b> <span class="k">(+ ULN2803)</span></td><td>&mdash;</td>'
+         '<tr><td class="th"></td>'
+         '<td><b style="color:#b45309">Current-limit resistors</b> <span class="k">(+ ULN2803)</span></td><td>&mdash;</td>'
          '<td>DigiKey.ca / Mouser.ca</td><td>$10</td></tr>'
-         '<tr><td><b style="color:#16a34a">Regulated 5&nbsp;V supply</b> <span class="k">(Mean Well RS-25-5)</span></td><td>1</td>'
+         '<tr><td class="th"><img src="assets/psu-5v4a.jpg" alt="5 V supply"></td>'
+         '<td><b style="color:#16a34a">Regulated 5&nbsp;V supply</b> <span class="k">(Mean Well RS-25-5)</span></td><td>1</td>'
          '<td><a href="https://www.digikey.ca/en/products/detail/mean-well-usa-inc/RS-25-5/7706180">DigiKey.ca</a> / Amazon.ca</td><td>$20</td></tr>'
-         '<tr><td><b style="color:#475569">Breadboard + jumper wires</b></td><td>&mdash;</td><td>Amazon.ca / local</td><td>$18</td></tr>'
-         '<tr><td><b style="color:#7c3aed">Panel board</b> <span class="k">(black foam-core 20&times;30&Prime;; later &#8539;&Prime; hardboard)</span></td><td>&mdash;</td>'
+         '<tr><td class="th"></td><td><b style="color:#475569">Breadboard + jumper wires</b></td><td>&mdash;</td><td>Amazon.ca / local</td><td>$18</td></tr>'
+         '<tr><td class="th"></td>'
+         '<td><b style="color:#7c3aed">Panel board</b> <span class="k">(black foam-core 20&times;30&Prime;; later &#8539;&Prime; hardboard)</span></td><td>&mdash;</td>'
          '<td>Dollarama / Home&nbsp;Depot</td><td>$5&ndash;15</td></tr>'
-         '<tr><td><span style="color:#9ca3af">Micro-USB cable</span> <span class="k">&#42;</span></td><td>1</td><td>Amazon.ca / on hand</td><td>$8</td></tr>'
-         '<tr><td><span style="color:#9ca3af">Soldering iron + solder</span> <span class="k">(if needed) &#42;</span></td><td>&mdash;</td><td>Amazon.ca / local</td><td>$25</td></tr>'
-         '<tr class="tot"><td>Total</td><td></td><td></td><td>~$130 (+$25)</td></tr>'
+         '<tr><td class="th"></td><td><span style="color:#9ca3af">Micro-USB cable</span> <span class="k">&#42;</span></td><td>1</td><td>Amazon.ca / on hand</td><td>$8</td></tr>'
+         '<tr><td class="th"></td><td><span style="color:#9ca3af">Soldering iron + solder</span> <span class="k">(if needed) &#42;</span></td><td>&mdash;</td><td>Amazon.ca / local</td><td>$25</td></tr>'
+         '<tr class="tot"><td></td><td>Total</td><td></td><td></td><td>~$130 (+$25)</td></tr>'
          '</table>'
          '<p class="k" style="margin:8px 0 0;font-size:10.5px;line-height:1.45">Each <b>coloured</b> name marks the '
          'same-coloured part in the diagram. <b style="color:#9ca3af">&#42;</b> = not shown in the diagram (a tool / accessory). '
