@@ -230,7 +230,7 @@ def card(img, name, price, role, href):
 
 P = []  # page body parts
 P.append('<h1>Multi-camera sync evaluation: a large flat LED time-code panel</h1>')
-P.append('<div class="meta">DIY design plan &middot; updated 2026-06-10 &middot; working draft &middot; '
+P.append('<div class="meta">DIY design plan &middot; updated 2026-06-11 &middot; working draft &middot; '
          'step-time 200&nbsp;µs, driver 74HC595, range &ge;1&nbsp;s, coarse row included (datasheet-audited) &middot; 11&times;Pixel&nbsp;7 / Argus rig</div>')
 P.append('<p class="k"><b>Reader&rsquo;s map:</b> &sect;1 what this tool is for &middot; '
          '&sect;2 the wiring diagram + order list &middot; &sect;3 the driver choice + exact parts &middot; '
@@ -365,7 +365,13 @@ P.append('<p>The driver must switch the LEDs <b>statically</b> (no PWM) for a cl
 P.append('<table><tr><th>Driver approach</th><th>Switching</th><th>Verdict (after datasheet review)</th></tr>'
          '<tr style="background:#fffbeb"><td><b>Static-latch shift register + discrete direct LEDs &nbsp;← chosen</b><br><span class="k">e.g. SN74HC595</span></td><td>static latch ~13 ns; no PWM</td><td>clean edges at 200 µs <i>and</i> 20 µs; ±6 mA/pin (add a current-buffer array, e.g. ULN2803, for full brightness)</td></tr>'
          '<tr><td>PWM addressable LED <span class="k">(e.g. APA102 / DotStar)</span></td><td>8-bit PWM @ ~1 MHz osc</td><td>✗ ~256 µs PWM cycle smears the edge</td></tr>'
-         '<tr><td>PWM constant-current LED driver <span class="k">(e.g. TLC5947)</span></td><td>12-bit PWM @ 4 MHz osc</td><td>✗ ~1 ms grayscale frame floor — far too slow</td></tr></table>')
+         '<tr><td>PWM constant-current LED driver <span class="k">(e.g. TLC5947)</span></td><td>12-bit PWM @ 4 MHz osc</td><td>✗ ~1 ms grayscale frame floor — far too slow</td></tr>'
+         '<tr><td>Scan-multiplexed LED matrix + single-board computer <span class="k">(e.g. HUB75 RGB panel + Raspberry Pi)</span></td>'
+         '<td>1-of-8&hellip;32 row strobe + PWM; OS-timed</td>'
+         '<td>✗ never holds a frame statically — a rolling shutter sees scan bands and duty-cycle flicker, not the code; '
+         '2&nbsp;mm pixels at 4&ndash;5&nbsp;mm pitch are far too small for the camera ring (&sect;4); and Linux (not a real-time OS) '
+         'jitters the 200&nbsp;µs step. (The Raspberry Pi <b>Pico</b>, a bare-metal microcontroller, <i>would</i> work as the clock '
+         '&mdash; it is the matrix panel that fails.)</td></tr></table>')
 
 P.append('<h3>The parts shortlist (verified against datasheets)</h3>')
 P.append('<div class="gallery">')
