@@ -13,6 +13,10 @@ at once so per-frame decode gives the inter-camera offset. Built for Yubo's
   photos from `assets/`.
 - `index.html` — the generated doc. **Do not hand-edit it; edit `build.py` and rebuild.**
 - `assets/` — product photos used in the doc.
+- `sim/` — Python decode simulator (test-driven) that proves the encode → film →
+  decode → inter-camera-offset chain works before any parts are bought. Has its
+  own venv + README; run `cd sim && .venv/bin/python -m pytest`. Independent of the
+  doc build.
 
 ## Build & verify
 ```
