@@ -230,8 +230,8 @@ def card(img, name, price, role, href):
 
 P = []  # page body parts
 P.append('<h1>Multi-camera sync evaluation: a large flat LED time-code panel</h1>')
-P.append('<div class="meta">DIY design plan &middot; updated 2026-06-11 &middot; working draft &middot; '
-         'step-time 200&nbsp;µs, driver 74HC595, range &ge;1&nbsp;s, coarse row included (datasheet-audited) &middot; 11&times;Pixel&nbsp;7 / Argus rig</div>')
+P.append('<div class="meta">DIY design plan &middot; updated 2026-06-15 &middot; working draft &middot; '
+         'step-time 200&nbsp;µs, driver 74HC595, sweep encoding (Gray-bar upgrade), 2-camera same-row bring-up (sim-validated) &middot; 11&times;Pixel&nbsp;7 / Argus rig</div>')
 P.append('<p class="k"><b>Reader&rsquo;s map:</b> &sect;1 what this tool is for &middot; '
          '&sect;2 the wiring diagram + order list &middot; &sect;3 the driver choice + exact parts &middot; '
          '&sect;4&ndash;&sect;9 the design rationale.</p>')
@@ -425,6 +425,12 @@ P.append('<p>You will place the cameras to face one large flat panel, so a singl
          'at ~3&ndash;5&nbsp;cm pitch make a 16-LED bar ~0.5&ndash;0.8&nbsp;m wide, cleanly resolved by a Pixel&nbsp;7 out to ~5&nbsp;m. '
          'Each 10&nbsp;mm dome is ~4 breadboard holes wide, so the LEDs mount on the panel surface (foam-core / hardboard / 3D-printed grid), not the breadboard &mdash; see &sect;2.</p>')
 P.append(f'<figure>{DIAGRAMS["geometry"]}<figcaption><b>Figure 2. Panel geometry.</b> All 11 cameras are placed to face one large flat panel showing the time code &mdash; a single planar matrix, no prism or multi-face latching.</figcaption></figure>')
+P.append('<p><b>Bring-up scope (current): two cameras.</b> The full rig faces 11 cameras (Figure&nbsp;2); the first '
+         'measurement uses just <b>two</b> Pixel&nbsp;7s. Place them so the panel falls on <b>approximately the same sensor '
+         'row</b> in each frame. Because both are the same model (same rolling-shutter line time), equal panel rows make the '
+         'readout delay cancel in the subtraction &mdash; this removes the rolling-shutter row bias (&sect;8) by construction, '
+         'with no per-camera correction. The placement is forgiving: at &tau;&nbsp;=&nbsp;200&nbsp;µs you have ~13 rows of slack '
+         'before the residual even shows. Scaling to all 11 cameras later restores the bias and is handled in software (&sect;8).</p>')
 
 P.append('<h2>5. Encoding &mdash; Gray-coded bar + parity + coarse row</h2>')
 P.append('<p>Do not read &ldquo;which of 100 dots&rdquo;; it is hard to resolve at distance. Use a '
@@ -440,6 +446,19 @@ P.append('<p class="k">Sizing: <code>#codes = range / τ</code>; binary needs <c
          'LEDs, base-W spatial needs <code>ceil(logW(#codes))</code> digits of W. For a 1&nbsp;s safety range: '
          '<b>16 binary LEDs vs ~50 spatial LEDs</b>. You can interpolate below τ (down to the sensor line '
          'time ~10 µs) using the row where the code increments within a rolling-shutter frame.</p>')
+P.append('<h3>Bring-up encoding: a single-blob sweep</h3>')
+P.append('<p>The bar above packs the counter densely (16 on/off bits &rarr; 65&nbsp;536 codes). For bring-up we use a '
+         'simpler, eye-readable <b>sweep</b> instead: one lit LED steps along the <b>fine</b> row, one position per '
+         '<code>τ</code>, and a slower <b>coarse</b> row advances one position each time the fine row wraps &mdash; the same '
+         'scheme as the commercial and Google panels. You can watch it run and a misread is obvious, which is exactly what you '
+         'want while first bringing the rig up.</p>')
+P.append('<p>The trade-off is <b>range</b>: a sweep gives only <code>fine_n &times; coarse_n</code> codes &mdash; far fewer '
+         'than binary for the same LEDs. Size the coarse row so the range exceeds the largest offset you expect: '
+         '<b>unambiguous offset = &plusmn;(fine_n &times; coarse_n &times; &tau;) / 2</b>. A 16&times;16 sweep at 200&nbsp;µs gives '
+         '<b>&plusmn;25.6&nbsp;ms</b> (enough for two cameras started close together); 16&times;24 gives &plusmn;38&nbsp;ms '
+         '(covers a full 30&nbsp;fps frame). The dense Gray bar stays available as the long-range upgrade &mdash; it is a '
+         'firmware change, same LEDs. The simulator in <code>sim/</code> implements this sweep and recovers the offset, '
+         'including the coarse-row disambiguation.</p>')
 
 P.append('<h2>6. The coarse scale is mandatory (your disambiguation point)</h2>')
 P.append('<p>Without a coarse scale, two cameras can show the <b>identical</b> fine reading while sitting '
@@ -465,17 +484,30 @@ P.append('<p>The clock itself is already trustworthy: the microcontroller crysta
          'rig decodes correctly, so the audit gear is left off this build and its purchase list.</p>')
 
 P.append('<h2>8. Decoding pipeline</h2>')
-P.append('<p>Per camera: locate the panel, threshold each LED on/off, decode Gray&rarr;binary&rarr;timestamp; '
-         'subtract across cameras for offsets; read the code at the panel&rsquo;s sensor row, optionally '
-         'interpolating with the within-frame increment row for ~10 µs resolution. ~100 lines on top of the '
-         'existing rig&rsquo;s analysis code.</p>')
+P.append('<p>Per camera: locate the panel, threshold each LED on/off, decode the pattern to a timestamp '
+         '(Gray&rarr;binary, or sweep positions&rarr;count, then <code>t = count &times; &tau;</code>); subtract across '
+         'cameras for offsets; read the code at the panel&rsquo;s sensor row, optionally interpolating with the within-frame '
+         'increment row for ~10 µs resolution. ~100 lines on top of the existing rig&rsquo;s analysis code.</p>')
+P.append('<p><b>Rolling-shutter row bias (important).</b> A camera exposes sensor row <code>r</code> at '
+         '<code>frame_start + r &times; line_time</code>, so it reads the panel at the instant of <b>the row the panel '
+         'occupies</b>. If the panel lands on a different row in two cameras, their decoded times differ by '
+         '<code>(row<sub>A</sub> &minus; row<sub>B</sub>) &times; line_time</code> &mdash; a systematic offset of '
+         '<b>milliseconds</b> (e.g. 400&nbsp;rows &times; 15&nbsp;µs = 6&nbsp;ms) that is nothing to do with sync and would '
+         'swamp the sub-µs goal. Two ways to remove it: <b>(a)</b> place the cameras so the panel sits at the same row &mdash; '
+         'the two-camera bring-up (&sect;4); <b>(b)</b> subtract each camera&rsquo;s <code>panel_row &times; line_time</code> '
+         'to refer every timestamp to frame-start &mdash; the general N-camera fix. Both are quantified in <code>sim/</code> '
+         '(the 6&nbsp;ms artifact above is a simulator measurement).</p>')
 
 P.append('<h2>9. Decisions (resolved)</h2>')
 P.append('<ul>'
          '<li><b>Step-time τ = 200 µs</b> operating point; fine timing from the rolling-shutter row fit; cross-validated at 20 µs (see §5).</li>'
          '<li><b>Driver = static-latch shift register</b> (no PWM, ~13 ns latch; the SN74HC595 is one part); the datasheet audit ruled out the PWM options — a PWM constant-current driver (TLC5947, ~1 ms floor) and a PWM addressable LED (APA102, ~256 µs smear).</li>'
-         '<li><b>Unambiguous range ≥ 1 s</b> — a 16-bit Gray bar gives ~1.3 s at 20 µs (≈ 13 s at 200 µs), far beyond any plausible inter-camera offset.</li>'
-         '<li><b>Coarse spatial row: included</b> — a redundant, human-readable cross-check beside the Gray bar (mirrors the Google / ISO design).</li>'
+         '<li><b>Bring-up scope = two cameras</b> placed to frame the panel at the same sensor row, which cancels the rolling-shutter bias by construction (§4, §8). Scale to 11 cameras later with the software row-correction.</li>'
+         '<li><b>Bring-up encoding = single-blob sweep</b> (one-hot fine + coarse rows), chosen for eye-readable debugging over the dense Gray bar; the Gray bar stays the long-range upgrade (firmware-only).</li>'
+         '<li><b>Unambiguous range</b> — sweep gives ±(fine·coarse·τ)/2 (16×16 → ±25.6 ms, enough for two cameras started close; widen the coarse row for more); the Gray-bar upgrade gives ≈13 s at 200 µs.</li>'
+         '<li><b>Rolling-shutter row bias identified &amp; handled</b> — decoded time shifts by (Δrow × line time), ms-scale; removed now by same-row placement, at scale by per-camera subtraction. Quantified in <code>sim/</code>.</li>'
+         '<li><b>Coarse row: included</b> — extends range and gives a redundant, human-readable cross-check (mirrors the Google / ISO design).</li>'
+         '<li><b>Validated in simulation</b> — the <code>sim/</code> decode model (test-driven) confirms encode→film→decode→offset recovery, including the coarse-row disambiguation, before any parts are bought.</li>'
          '</ul>')
 
 P.append('<h2>References</h2>')
