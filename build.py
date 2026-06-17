@@ -268,7 +268,7 @@ P.append('<div class="slide">'
          '<td><a href="https://ca.robotshop.com/products/raspberry-pi-pico">RobotShop.ca</a></td><td>$8</td></tr>'
          '<tr style="background:#fffbeb"><td class="th"><img src="assets/sn74hc595.jpg" alt="SN74HC595"></td>'
          '<td>&#9744; <b style="color:#2563eb">Static-latch shift register</b> <span class="k">(SN74HC595N)</span></td><td>4</td>'
-         '<td><a href="https://ca.robotshop.com/products/shift-register-8-bit-74hc595">RobotShop.ca</a> / DigiKey.ca</td><td>$10</td></tr>'
+         '<td><a href="https://ca.robotshop.com/products/shift-register-8-bit-74hc595">RobotShop.ca</a> / <a href="https://www.digikey.ca/en/products/detail/texas-instruments/SN74HC595N/277246">DigiKey.ca</a></td><td>$10</td></tr>'
          '<tr><td class="th"></td>'
          '<td>&#9745; <b style="color:#dc2626">Direct-emission LEDs</b> <span class="k">(green SS-555-0, &times;20 &mdash; verify 10&nbsp;mm)</span></td><td>20</td>'
          '<td>Electronic Connections</td><td>$7</td></tr>'
@@ -322,6 +322,13 @@ P.append('<p class="k"><b>Ordering notes:</b> buying within Canada avoids USD ex
          'handled, fast to Alberta), plus ABRA Electronics (Montreal) or RobotShop.ca for the Teensy; confirm prices on each '
          'page. Order the LEDs in two passes: <b>3&ndash;5 first</b> to eyeball brightness and colour on a Pixel&nbsp;7 '
          '(opened LEDs are non-returnable), then the rest. Returns &amp; de-risking: &sect;3.</p>')
+P.append('<p class="k"><b>Restock &amp; bright-panel parts (DigiKey.ca):</b> more '
+         '<a href="https://www.digikey.ca/en/products/detail/texas-instruments/SN74HC595N/277246">SN74HC595N</a> '
+         '(4 needed; RobotShop stocked only one), and &mdash; for the bright 5&nbsp;V panel later &mdash; the '
+         '<a href="https://www.digikey.ca/en/products/detail/stmicroelectronics/ULN2803A/599591">ULN2803A</a> current-buffer '
+         '(DIP-18; TI&rsquo;s through-hole part is obsolete, so confirm the package on the page) and 0.1&nbsp;µF '
+         '<a href="https://www.digikey.ca/en/products/detail/kemet/C320C104J5R5TA7301/3726081">ceramic decoupling capacitors</a> '
+         '(one across each chip&rsquo;s power pins). Batch into one order to amortize shipping.</p>')
 P.append('<h3>Walk-in plan (Edmonton)</h3>')
 P.append('<p class="k">Where to handle real parts and get advice in person &mdash; shopping stops first, then places to build and learn:</p>')
 P.append('<table>'
