@@ -106,7 +106,7 @@ def svg_layout():
     s = [txt(20, 24, "Physical build: the driver sits on the breadboard, the 10 mm LEDs live on the panel", 13.5, INK, "start", "bold")]
     # 5 V supply
     s.append(f'<rect x="40" y="92" width="78" height="26" rx="4" fill="#fff" stroke="{C_PSU}"/>')
-    s.append(txt(79, 109, "5 V supply", 9.5, C_PSU, "middle"))
+    s.append(txt(79, 109, "5 V (USB)", 9.5, C_PSU, "middle"))
     # breadboard body
     bx, by, bw, bh = 40, 150, 300, 150
     s.append(f'<rect x="{bx}" y="{by}" width="{bw}" height="{bh}" rx="9" fill="#f5f5f3" stroke="{C_BB}"/>')
@@ -274,10 +274,9 @@ P.append('<div class="slide">'
          '<tr><td class="th"></td>'
          '<td>&#9745; <b style="color:#b45309">Current-limit resistors</b> <span class="k">(240&nbsp;&Omega; &times;100; ULN2803 buffer optional)</span></td><td>&mdash;</td>'
          '<td>Electronic Connections</td><td>$6</td></tr>'
-         '<tr><td class="th"><img src="assets/psu-5v4a.jpg" alt="5 V supply"></td>'
-         '<td>&#9745; <b style="color:#16a34a">Regulated 5&nbsp;V supply</b> <span class="k">(Circuit-Test '
-         '<a href="https://www.rpelectronics.com/psf25-5-ac-dc-power-supply-25w-5vdc-5a.html">PSF25-5</a>, 5&nbsp;V/5&nbsp;A)</span></td><td>1</td>'
-         '<td>Electronic Connections</td><td>$43</td></tr>'
+         '<tr><td class="th"></td>'
+         '<td>&#9745; <b style="color:#16a34a">5&nbsp;V power</b> <span class="k">(USB &mdash; the microcontroller&rsquo;s 5&nbsp;V pin, or a phone charger; no mains)</span></td><td>&mdash;</td>'
+         '<td>on hand</td><td>$0</td></tr>'
          '<tr><td class="th"></td><td>&#9745; <b style="color:#475569">Breadboard + jumper wires</b> <span class="k">(MB-104 + 120-pc kit)</span></td><td>&mdash;</td><td>Electronic Connections</td><td>$55</td></tr>'
          '<tr><td class="th"></td>'
          '<td>&#9744; <b style="color:#7c3aed">Panel board</b> <span class="k">(black foam-core 20&times;30&Prime;; later &#8539;&Prime; hardboard)</span></td><td>&mdash;</td>'
@@ -288,7 +287,8 @@ P.append('<div class="slide">'
          '</table>'
          '<p class="k" style="margin:8px 0 0;font-size:10.5px;line-height:1.45">'
          '&#9745; bought &middot; &#9744; still to buy. <b>Bought 2026-06-15, Electronic Connections ($116.52):</b> '
-         'breadboard, 120-pc jumpers, 20 green LEDs, 240&nbsp;&Omega; resistors, 5&nbsp;V/5&nbsp;A supply. '
+         'breadboard, 120-pc jumpers, 20 green LEDs, 240&nbsp;&Omega; resistors, and a 5&nbsp;V/5&nbsp;A mains supply '
+         '(now <b>set aside for safety</b> &mdash; see &sect;3; the rig runs on USB 5&nbsp;V). '
          '<b>Still needed:</b> the microcontroller and 4&times; shift registers (the driver, highlighted), plus a panel board. '
          'Each <b>coloured</b> name marks the same-coloured part in the diagram; '
          '<b style="color:#9ca3af">&#42;</b> = tool / accessory not in the diagram.</p>'
@@ -388,7 +388,7 @@ P.append(card("led-red-10mm.jpg", "Direct-emission LED (10 mm)", "~$1",
 P.append(card("psu-5v4a.jpg", "Regulated 5 V supply", "$14.95",
               "powers the LED rail · e.g. Mean Well RS-25-5", "https://www.adafruit.com/product/1466"))
 P.append('</div>')
-P.append('<h3>Rejected after reading the datasheet</h3>')
+P.append('<h3>Rejected / set aside</h3>')
 P.append('<div class="gallery">')
 P.append(card("tlc5947.jpg", "PWM constant-current LED driver ✗", "$14.95",
               "~1 ms grayscale floor, too slow · e.g. TLC5947", "https://www.adafruit.com/product/1429"))
@@ -396,6 +396,8 @@ P.append(card("dotstar.jpg", "PWM addressable LED ✗", "$49.95",
               "8-bit PWM @ ~1 MHz → ~256 µs edge smear · e.g. APA102 / DotStar", "https://www.adafruit.com/product/2241"))
 P.append(card("cree-xpe2-amber.jpg", "Phosphor-converted amber LED ✗", "$5.14",
               "PC amber = phosphor, Vf 3.05 V → decay tail smears the edge · e.g. Cree XP-E2", "https://www.ledsupply.com/leds/cree-xlamp-xp-e2-color-high-power-led-star"))
+P.append(card("psu-5v4a.jpg", "Mains 5 V supply ✗ (set aside)", "$43 · bought",
+              "Circuit-Test PSF25-5 · 120 V screw-terminal wiring is the one shock/fire hazard in a bench rig — power from USB 5 V instead; keep for a future enclosed build", "https://www.rpelectronics.com/psf25-5-ac-dc-power-supply-25w-5vdc-5a.html"))
 P.append('</div>')
 P.append('<p class="k">Full running evaluation log (every part considered + its verdict, kept across sessions): <code>wiki/analyses/sync-eval-equipment-log.md</code> in memex.</p>')
 P.append('<p class="k">Not pictured (generic): current-limit resistors (one per LED), a <b>current-buffer array</b> (e.g. ULN2803) '
