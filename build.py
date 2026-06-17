@@ -230,7 +230,7 @@ def card(img, name, price, role, href):
 
 P = []  # page body parts
 P.append('<h1>Multi-camera sync evaluation: a large flat LED time-code panel</h1>')
-P.append('<div class="meta">DIY design plan &middot; updated 2026-06-16 &middot; working draft &middot; '
+P.append('<div class="meta">DIY design plan &middot; updated 2026-06-17 &middot; working draft &middot; '
          'step-time 200&nbsp;µs, driver 74HC595, sweep encoding (Gray-bar upgrade), 2-camera same-row bring-up (sim-validated) &middot; 11&times;Pixel&nbsp;7 / Argus rig</div>')
 P.append('<p class="k"><b>Reader&rsquo;s map:</b> &sect;1 what this tool is for &middot; '
          '&sect;2 the wiring diagram + order list &middot; &sect;3 the driver choice + exact parts &middot; '
@@ -262,9 +262,9 @@ P.append('<div class="slide">'
          f'<div class="slide-fig">{DIAGRAMS["layout"]}</div>'
          '<div class="slide-bom"><table>'
          '<tr><th></th><th>Part</th><th>Qty</th><th>Buy</th><th>~CAD</th></tr>'
-         '<tr style="background:#fffbeb"><td class="th"><img src="assets/teensy40.jpg" alt="Teensy 4.0"></td>'
-         '<td>&#9744; <b style="color:#0d9488">Microcontroller</b> <span class="k">(Teensy 4.0 / Pi Pico)</span></td><td>1</td>'
-         '<td><a href="https://ca.robotshop.com/products/teensy-40-usb-microcontroller-development-board">RobotShop.ca</a> / ABRA</td><td>$34</td></tr>'
+         '<tr style="background:#fffbeb"><td class="th"><img src="assets/teensy40.jpg" alt="microcontroller board"></td>'
+         '<td>&#9744; <b style="color:#0d9488">Microcontroller</b> <span class="k">(Raspberry Pi Pico &mdash; Teensy 4.0 is the overkill alt)</span></td><td>1</td>'
+         '<td><a href="https://ca.robotshop.com/products/raspberry-pi-pico">RobotShop.ca</a></td><td>$6</td></tr>'
          '<tr style="background:#fffbeb"><td class="th"><img src="assets/sn74hc595.jpg" alt="SN74HC595"></td>'
          '<td>&#9744; <b style="color:#2563eb">Static-latch shift register</b> <span class="k">(SN74HC595N)</span></td><td>4</td>'
          '<td><a href="https://www.digikey.ca/en/products/detail/texas-instruments/SN74HC595N/277246">DigiKey.ca</a> / ABRA</td><td>$10</td></tr>'
@@ -301,7 +301,7 @@ P.append('<p class="k"><b>Reading the diagram:</b> the breadboard carries only t
          'and store link: &sect;3.</p>')
 P.append('<h3>What each part does</h3>')
 P.append('<table><tr><th>Part</th><th>Its job in the rig</th></tr>'
-         '<tr><td><b>Microcontroller</b> <span class="k">(Teensy 4.0)</span></td><td>The clock. A hardware timer advances the time code every τ and shifts the new on/off pattern out over 3 SPI wires.</td></tr>'
+         '<tr><td><b>Microcontroller</b> <span class="k">(Raspberry Pi Pico)</span></td><td>The clock. Its PIO (or a hardware timer) advances the time code every τ and shifts the new on/off pattern out over 3 SPI wires.</td></tr>'
          '<tr><td><b>Static-latch shift register</b> <span class="k">(SN74HC595)</span></td><td>The fan-out. Turns those 3 wires into many parallel outputs that all switch at the same instant (no PWM) — one output per LED.</td></tr>'
          '<tr><td><b>Direct-emission LEDs</b> <span class="k">(10 mm red)</span></td><td>The display. The time code the cameras film; on/off per LED, with no phosphor tail to smear the edge.</td></tr>'
          '<tr><td><b>Current-limit resistors</b> <span class="k">(one per LED)</span></td><td>Protection. Set each LED&rsquo;s current so it stays bright but does not burn out.</td></tr>'
@@ -364,6 +364,11 @@ P.append('<p>The driver must switch the LEDs <b>statically</b> (no PWM) for a cl
          'parts (PWM drivers and addressable strips like the TLC5947 and APA102/WS2812) and points to a <b>static-latch shift register</b> (outputs latch in ~13 ns on RCLK; the SN74HC595 is one part). '
          'LEDs are <b>direct-emission</b> (red/amber/green), <b>never white or PC-amber</b> (phosphor smears the edge). '
          'This static chain handles both 200 µs and 20 µs.</p>')
+P.append('<p><b>Logic levels &mdash; a 3.3 V / 5 V note.</b> The recommended Raspberry Pi Pico (like the Teensy) drives '
+         '<b>3.3 V</b> logic, while a 74HC595 powered at 5 V wants ~3.5 V for a guaranteed logic-high &mdash; so 3.3 V is '
+         'marginal. Two clean fixes: power the 595 at <b>3.3 V</b> for bring-up (logic matches exactly; the LEDs just run a '
+         'little dimmer), or for the bright panel run the 595 at 5 V with the TTL-input <b>SN74HCT595</b> (accepts 3.3 V) or '
+         'a level shifter.</p>')
 P.append('<table><tr><th>Driver approach</th><th>Switching</th><th>Verdict (after datasheet review)</th></tr>'
          '<tr style="background:#fffbeb"><td><b>Static-latch shift register + discrete direct LEDs &nbsp;← chosen</b><br><span class="k">e.g. SN74HC595</span></td><td>static latch ~13 ns; no PWM</td><td>clean edges at 200 µs <i>and</i> 20 µs; ±6 mA/pin (add a current-buffer array, e.g. ULN2803, for full brightness)</td></tr>'
          '<tr><td>PWM addressable LED <span class="k">(e.g. APA102 / DotStar)</span></td><td>8-bit PWM @ ~1 MHz osc</td><td>✗ ~256 µs PWM cycle smears the edge</td></tr>'
@@ -509,6 +514,7 @@ P.append('<h2>9. Decisions (resolved)</h2>')
 P.append('<ul>'
          '<li><b>Step-time τ = 200 µs</b> operating point; fine timing from the rolling-shutter row fit; cross-validated at 20 µs (see §5).</li>'
          '<li><b>Driver = static-latch shift register</b> (no PWM, ~13 ns latch; the SN74HC595 is one part); the datasheet audit ruled out the PWM options — a PWM constant-current driver (TLC5947, ~1 ms floor) and a PWM addressable LED (APA102, ~256 µs smear).</li>'
+         '<li><b>Microcontroller = Raspberry Pi Pico</b> (~$6) — its PIO clocks the shift-register chain with cycle-exact timing; the Teensy 4.0 works but is overkill. 3.3 V logic, so power the 595 at 3.3 V for bring-up (or use the HCT variant / a level shifter at 5 V).</li>'
          '<li><b>Bring-up scope = two cameras</b> placed to frame the panel at the same sensor row, which cancels the rolling-shutter bias by construction (§4, §8). Scale to 11 cameras later with the software row-correction.</li>'
          '<li><b>Bring-up encoding = single-blob sweep</b> (one-hot fine + coarse rows), chosen for eye-readable debugging over the dense Gray bar; the Gray bar stays the long-range upgrade (firmware-only).</li>'
          '<li><b>Unambiguous range</b> — sweep gives ±(fine·coarse·τ)/2 (16×16 → ±25.6 ms, enough for two cameras started close; widen the coarse row for more); the Gray-bar upgrade gives ≈13 s at 200 µs.</li>'
