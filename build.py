@@ -217,8 +217,10 @@ ul{margin:6px 0 6px 0}
 .slide-bom td{vertical-align:middle}
 .slide-bom th:nth-child(3),.slide-bom td:nth-child(3){text-align:center}
 .slide-bom th:last-child,.slide-bom td:last-child{text-align:right;white-space:nowrap}
-.slide-bom td.th{width:54px;padding:3px 4px}
-.slide-bom td.th img{height:30px;width:46px;object-fit:contain;display:block;margin:0 auto}
+.slide-bom td.th{width:72px;padding:5px 4px}
+.slide-bom td.th img{height:56px;width:64px;object-fit:contain;display:block;margin:0 auto;border:1px solid var(--line);border-radius:4px}
+.slide-bom td.th2{width:84px}
+.slide-bom td.th2 img{height:34px;width:38px;object-fit:cover;display:inline-block;margin:1px;border:1px solid var(--line);border-radius:3px}
 .slide-bom .tot td{border-top:2px solid var(--ink);border-bottom:none;font-weight:700}
 .slide-bom .shot{color:var(--accent);text-decoration:none;font-size:11px;white-space:nowrap}
 .slide-bom .shot:hover{text-decoration:underline}
@@ -273,29 +275,29 @@ P.append('<div class="slide">'
          f'<div class="slide-fig">{DIAGRAMS["layout"]}</div>'
          '<div class="slide-bom"><table>'
          '<tr><th></th><th>Part</th><th>Qty</th><th>Buy</th><th>~CAD</th></tr>'
-         '<tr><td class="th"><img src="assets/teensy40.jpg" alt="microcontroller board"></td>'
+         '<tr><td class="th"><a href="assets/bought/pico-h.jpg" target="_blank"><img src="assets/bought/pico-h.jpg" alt="our Pico H"></a></td>'
          '<td>&#9745; <b style="color:#0d9488">Microcontroller</b> <span class="k">('
-         '<a href="https://www.digikey.ca/en/products/detail/raspberry-pi/SC0917/16608257">Pico&nbsp;H</a> from DigiKey, ready to use; RobotShop Pico+headers #1482457 = spare, backordered ~Jun&nbsp;25)</span> <a class="shot" href="assets/bought/pico-h.jpg" target="_blank">&#128247;&nbsp;our Pico</a></td><td>1</td>'
+         '<a href="https://www.digikey.ca/en/products/detail/raspberry-pi/SC0917/16608257">Pico&nbsp;H</a> from DigiKey, ready to use; RobotShop Pico+headers #1482457 = spare, backordered ~Jun&nbsp;25)</span></td><td>1</td>'
          '<td>DigiKey.ca / RobotShop.ca</td><td>$8</td></tr>'
-         '<tr><td class="th"><img src="assets/sn74hc595.jpg" alt="SN74HC595"></td>'
-         '<td>&#9745; <b style="color:#2563eb">Static-latch shift register</b> <span class="k">(SN74HC595N &mdash; 5 total: 1 (#1482457) + 4 from <a href="https://www.digikey.ca/en/products/detail/texas-instruments/SN74HC595N/277246">DigiKey</a>)</span> <a class="shot" href="assets/bought/sn74hc595.jpg" target="_blank">&#128247;&nbsp;our 595s</a></td><td>4</td>'
+         '<tr><td class="th"><a href="assets/bought/sn74hc595.jpg" target="_blank"><img src="assets/bought/sn74hc595.jpg" alt="our SN74HC595 ×4"></a></td>'
+         '<td>&#9745; <b style="color:#2563eb">Static-latch shift register</b> <span class="k">(SN74HC595N &mdash; 5 total: 1 (#1482457) + 4 from <a href="https://www.digikey.ca/en/products/detail/texas-instruments/SN74HC595N/277246">DigiKey</a>)</span></td><td>4</td>'
          '<td>RobotShop + DigiKey.ca</td><td>$10</td></tr>'
-         '<tr><td class="th"></td>'
-         '<td>&#9745; <b style="color:#dc2626">Direct-emission LEDs</b> <span class="k">(green SS-555-0, &times;20 &mdash; verify 10&nbsp;mm)</span> <a class="shot" href="assets/bought/leds-green-ss555.jpg" target="_blank">&#128247;&nbsp;our LEDs</a></td><td>20</td>'
+         '<tr><td class="th"><a href="assets/bought/leds-green-ss555.jpg" target="_blank"><img src="assets/bought/leds-green-ss555.jpg" alt="our green LEDs"></a></td>'
+         '<td>&#9745; <b style="color:#dc2626">Direct-emission LEDs</b> <span class="k">(green SS-555-0, &times;20 &mdash; verify 10&nbsp;mm)</span></td><td>20</td>'
          '<td><a href="https://www.ecl.ca" target="_blank">Electronic Connections</a></td><td>$7</td></tr>'
-         '<tr><td class="th"></td>'
-         '<td>&#9745; <b style="color:#b45309">Current-limit resistors</b> <span class="k">(240&nbsp;&Omega; &times;100)</span> <a class="shot" href="assets/bought/resistors-240ohm.jpg" target="_blank">&#128247;&nbsp;our resistors</a></td><td>&mdash;</td>'
+         '<tr><td class="th"><a href="assets/bought/resistors-240ohm.jpg" target="_blank"><img src="assets/bought/resistors-240ohm.jpg" alt="our 240Ω resistors"></a></td>'
+         '<td>&#9745; <b style="color:#b45309">Current-limit resistors</b> <span class="k">(240&nbsp;&Omega; &times;100)</span></td><td>&mdash;</td>'
          '<td><a href="https://www.ecl.ca" target="_blank">Electronic Connections</a></td><td>$6</td></tr>'
-         '<tr><td class="th"></td>'
-         '<td>&#9745; <b>Current-buffer array</b> <span class="k">(<a href="https://www.digikey.ca/en/products/detail/stmicroelectronics/ULN2803A/599591">ULN2803A</a> &times;4 &mdash; bright panel)</span> <a class="shot" href="assets/bought/uln2803.jpg" target="_blank">&#128247;&nbsp;our ULN2803</a></td><td>4</td>'
+         '<tr><td class="th"><a href="assets/bought/uln2803.jpg" target="_blank"><img src="assets/bought/uln2803.jpg" alt="our ULN2803 ×4"></a></td>'
+         '<td>&#9745; <b>Current-buffer array</b> <span class="k">(<a href="https://www.digikey.ca/en/products/detail/stmicroelectronics/ULN2803A/599591">ULN2803A</a> &times;4 &mdash; bright panel)</span></td><td>4</td>'
          '<td>DigiKey.ca</td><td>$15</td></tr>'
-         '<tr><td class="th"></td>'
-         '<td>&#9745; <b>Decoupling caps</b> <span class="k">(0.1&nbsp;µF <a href="https://www.digikey.ca/en/products/detail/kemet/C320C104J5R5TA7301/3726081">ceramic</a> &times;10)</span> <a class="shot" href="assets/bought/decoupling-caps.jpg" target="_blank">&#128247;&nbsp;our caps</a></td><td>10</td>'
+         '<tr><td class="th"><a href="assets/bought/decoupling-caps.jpg" target="_blank"><img src="assets/bought/decoupling-caps.jpg" alt="our decoupling caps"></a></td>'
+         '<td>&#9745; <b>Decoupling caps</b> <span class="k">(0.1&nbsp;µF <a href="https://www.digikey.ca/en/products/detail/kemet/C320C104J5R5TA7301/3726081">ceramic</a> &times;10)</span></td><td>10</td>'
          '<td>DigiKey.ca</td><td>$4</td></tr>'
          '<tr><td class="th"></td>'
          '<td>&#9745; <b style="color:#16a34a">5&nbsp;V power</b> <span class="k">(USB &mdash; the microcontroller&rsquo;s 5&nbsp;V pin, or a phone charger; no mains)</span></td><td>&mdash;</td>'
          '<td>on hand</td><td>$0</td></tr>'
-         '<tr><td class="th"></td><td>&#9745; <b style="color:#475569">Breadboard + jumper wires</b> <span class="k">(MB-104 + 120-pc flexible kit)</span> <a class="shot" href="assets/bought/breadboard-mb104.jpg" target="_blank">&#128247;&nbsp;board</a> <a class="shot" href="assets/bought/jumpers-zipwire.jpg" target="_blank">&#128247;&nbsp;jumpers</a></td><td>&mdash;</td><td><a href="https://www.ecl.ca" target="_blank">Electronic Connections</a></td><td>$55</td></tr>'
+         '<tr><td class="th th2"><a href="assets/bought/breadboard-mb104.jpg" target="_blank"><img src="assets/bought/breadboard-mb104.jpg" alt="our breadboard"></a><a href="assets/bought/jumpers-zipwire.jpg" target="_blank"><img src="assets/bought/jumpers-zipwire.jpg" alt="our jumper wires"></a></td><td>&#9745; <b style="color:#475569">Breadboard + jumper wires</b> <span class="k">(MB-104 + 120-pc flexible kit)</span></td><td>&mdash;</td><td><a href="https://www.ecl.ca" target="_blank">Electronic Connections</a></td><td>$55</td></tr>'
          '<tr><td class="th"></td><td>&#9745; <b>Rigid jumper kit</b> <span class="k">(Elenco JW-140 &mdash; ordered #1482457)</span></td><td>1</td><td><a href="https://ca.robotshop.com/products/elenco-jw-140-jumper-wire-kit">RobotShop.ca</a></td><td>$10</td></tr>'
          '<tr><td class="th"></td>'
          '<td>&#9744; <b style="color:#7c3aed">Panel board</b> <span class="k">(black foam-core 20&times;30&Prime;; later &#8539;&Prime; hardboard)</span></td><td>&mdash;</td>'
