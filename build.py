@@ -220,13 +220,24 @@ ul{margin:6px 0 6px 0}
 .slide-bom td.th{width:54px;padding:3px 4px}
 .slide-bom td.th img{height:30px;width:46px;object-fit:contain;display:block;margin:0 auto}
 .slide-bom .tot td{border-top:2px solid var(--ink);border-bottom:none;font-weight:700}
+.slide-bom .shot{color:var(--accent);text-decoration:none;font-size:11px;white-space:nowrap}
+.slide-bom .shot:hover{text-decoration:underline}
+.card .ours{margin-top:7px;font-size:11.5px;line-height:1.7}
+.card .ours a{color:var(--accent);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:2px 9px;white-space:nowrap;display:inline-block}
+.card .ours a:hover{background:#f1f5f9}
 """
 
-def card(img, name, price, role, href):
+def card(img, name, price, role, href, ours=None):
+    """ours: optional (url, label) for a second link to a photo we took ourselves."""
+    ours_html = ''
+    if ours:
+        ours_url, ours_label = ours
+        ours_html = (f'<div class="ours"><a href="{ours_url}" target="_blank">'
+                     f'&#128247;&nbsp;{ours_label}</a></div>')
     return (f'<div class="card"><a href="{href}" target="_blank">'
             f'<img src="assets/{img}" alt="{name}"></a>'
             f'<div class="name">{name}</div><div class="price">{price}</div>'
-            f'<div class="role">{role}</div></div>')
+            f'<div class="role">{role}</div>{ours_html}</div>')
 
 P = []  # page body parts
 P.append('<h1>Multi-camera sync evaluation: a large flat LED time-code panel</h1>')
@@ -270,11 +281,11 @@ P.append('<div class="slide">'
          '<td>&#9745; <b style="color:#2563eb">Static-latch shift register</b> <span class="k">(SN74HC595N &mdash; 5 total: 1 (#1482457) + 4 from <a href="https://www.digikey.ca/en/products/detail/texas-instruments/SN74HC595N/277246">DigiKey</a>)</span></td><td>4</td>'
          '<td>RobotShop + DigiKey.ca</td><td>$10</td></tr>'
          '<tr><td class="th"></td>'
-         '<td>&#9745; <b style="color:#dc2626">Direct-emission LEDs</b> <span class="k">(green SS-555-0, &times;20 &mdash; verify 10&nbsp;mm)</span></td><td>20</td>'
-         '<td>Electronic Connections</td><td>$7</td></tr>'
+         '<td>&#9745; <b style="color:#dc2626">Direct-emission LEDs</b> <span class="k">(green SS-555-0, &times;20 &mdash; verify 10&nbsp;mm)</span> <a class="shot" href="assets/bought/all-items-group.jpg" target="_blank">&#128247;&nbsp;our LEDs</a></td><td>20</td>'
+         '<td><a href="https://www.ecl.ca" target="_blank">Electronic Connections</a></td><td>$7</td></tr>'
          '<tr><td class="th"></td>'
-         '<td>&#9745; <b style="color:#b45309">Current-limit resistors</b> <span class="k">(240&nbsp;&Omega; &times;100)</span></td><td>&mdash;</td>'
-         '<td>Electronic Connections</td><td>$6</td></tr>'
+         '<td>&#9745; <b style="color:#b45309">Current-limit resistors</b> <span class="k">(240&nbsp;&Omega; &times;100)</span> <a class="shot" href="assets/bought/resistors-240ohm.jpg" target="_blank">&#128247;&nbsp;our resistors</a></td><td>&mdash;</td>'
+         '<td><a href="https://www.ecl.ca" target="_blank">Electronic Connections</a></td><td>$6</td></tr>'
          '<tr><td class="th"></td>'
          '<td>&#9745; <b>Current-buffer array</b> <span class="k">(<a href="https://www.digikey.ca/en/products/detail/stmicroelectronics/ULN2803A/599591">ULN2803A</a> &times;4 &mdash; bright panel)</span></td><td>4</td>'
          '<td>DigiKey.ca</td><td>$15</td></tr>'
@@ -284,7 +295,7 @@ P.append('<div class="slide">'
          '<tr><td class="th"></td>'
          '<td>&#9745; <b style="color:#16a34a">5&nbsp;V power</b> <span class="k">(USB &mdash; the microcontroller&rsquo;s 5&nbsp;V pin, or a phone charger; no mains)</span></td><td>&mdash;</td>'
          '<td>on hand</td><td>$0</td></tr>'
-         '<tr><td class="th"></td><td>&#9745; <b style="color:#475569">Breadboard + jumper wires</b> <span class="k">(MB-104 + 120-pc flexible kit)</span></td><td>&mdash;</td><td>Electronic Connections</td><td>$55</td></tr>'
+         '<tr><td class="th"></td><td>&#9745; <b style="color:#475569">Breadboard + jumper wires</b> <span class="k">(MB-104 + 120-pc flexible kit)</span> <a class="shot" href="assets/bought/breadboard-mb104.jpg" target="_blank">&#128247;&nbsp;board</a> <a class="shot" href="assets/bought/jumpers-zipwire.jpg" target="_blank">&#128247;&nbsp;jumpers</a></td><td>&mdash;</td><td><a href="https://www.ecl.ca" target="_blank">Electronic Connections</a></td><td>$55</td></tr>'
          '<tr><td class="th"></td><td>&#9745; <b>Rigid jumper kit</b> <span class="k">(Elenco JW-140 &mdash; ordered #1482457)</span></td><td>1</td><td><a href="https://ca.robotshop.com/products/elenco-jw-140-jumper-wire-kit">RobotShop.ca</a></td><td>$10</td></tr>'
          '<tr><td class="th"></td>'
          '<td>&#9744; <b style="color:#7c3aed">Panel board</b> <span class="k">(black foam-core 20&times;30&Prime;; later &#8539;&Prime; hardboard)</span></td><td>&mdash;</td>'
@@ -399,7 +410,8 @@ P.append(card("teensy40.jpg", "Microcontroller board", "~$25–$30",
 P.append(card("sn74hc595.jpg", "Static-latch shift register", "$1.05",
               "drives the LEDs · static latch ~13 ns, no PWM · ×4 · e.g. SN74HC595", "https://www.sparkfun.com/products/13699"))
 P.append(card("led-red-10mm.jpg", "Direct-emission LED (10 mm)", "~$1",
-              "the measurement target · red AlInGaP, no phosphor, Vf 2.1–2.3 V · e.g. SparkFun COM-08862", "https://www.sparkfun.com/super-bright-led-red-10mm.html"))
+              "the measurement target · red AlInGaP, no phosphor, Vf 2.1–2.3 V · e.g. SparkFun COM-08862", "https://www.sparkfun.com/super-bright-led-red-10mm.html",
+              ours=("assets/bought/all-items-group.jpg", "our green LEDs (in group photo)")))
 P.append(card("psu-5v4a.jpg", "Regulated 5 V supply", "$14.95",
               "powers the LED rail · e.g. Mean Well RS-25-5", "https://www.adafruit.com/product/1466"))
 P.append('</div>')
@@ -412,11 +424,13 @@ P.append(card("dotstar.jpg", "PWM addressable LED ✗", "$49.95",
 P.append(card("cree-xpe2-amber.jpg", "Phosphor-converted amber LED ✗", "$5.14",
               "PC amber = phosphor, Vf 3.05 V → decay tail smears the edge · e.g. Cree XP-E2", "https://www.ledsupply.com/leds/cree-xlamp-xp-e2-color-high-power-led-star"))
 P.append(card("psu-5v4a.jpg", "Mains 5 V supply ✗ (set aside)", "$43 · bought",
-              "Circuit-Test PSF25-5 · 120 V screw-terminal wiring is the one shock/fire hazard in a bench rig — power from USB 5 V instead; keep for a future enclosed build", "https://www.rpelectronics.com/psf25-5-ac-dc-power-supply-25w-5vdc-5a.html"))
+              "Circuit-Test PSF25-5 · 120 V screw-terminal wiring is the one shock/fire hazard in a bench rig — power from USB 5 V instead; keep for a future enclosed build", "https://www.rpelectronics.com/psf25-5-ac-dc-power-supply-25w-5vdc-5a.html",
+              ours=("assets/bought/psu-psf25-5.jpg", "our unit")))
 P.append('</div>')
 P.append('<p class="k">Full running evaluation log (every part considered + its verdict, kept across sessions): <code>wiki/analyses/sync-eval-equipment-log.md</code> in memex.</p>')
-P.append('<p class="k">Not pictured (generic): current-limit resistors (one per LED), a <b>current-buffer array</b> (e.g. ULN2803) '
-         'for full 20 mA brightness on the big panel, a <b>breadboard + jumper wires</b> (perfboard for the permanent build), '
+P.append('<p class="k"><b>Now shown via our purchase photos in &sect;2:</b> the 240&nbsp;&Omega; resistors, the breadboard + jumper wires, and (in the group shot) the green LEDs. '
+         'Not pictured (generic): a <b>current-buffer array</b> (e.g. ULN2803) '
+         'for full 20 mA brightness on the big panel, '
          'a <b>micro-USB cable</b> for the microcontroller, a <b>soldering iron + solder</b> (to fit the board&rsquo;s header pins and wire the LEDs to the panel), and the panel board + diffuser. '
          'Ballpark for the basic rig: <b>~$120–$150 CAD</b>.</p>')
 
