@@ -1,0 +1,16 @@
+# Deploy the static design doc to GitLab Pages.
+# index.html is generated locally by build.py and committed; this job only
+# *publishes* it. We copy just index.html + assets/ into public/ so the rest of
+# the repo (build.py, sim/, purchases/) is never exposed on the public site.
+pages:
+  stage: deploy
+  image: alpine:latest
+  script:
+    - mkdir -p public
+    - cp index.html public/
+    - cp -r assets public/
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
