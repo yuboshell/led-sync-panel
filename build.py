@@ -281,7 +281,7 @@ P.append('<div class="slide">'
          '<td>&#9745; <b style="color:#2563eb">Static-latch shift register</b> <span class="k">(SN74HC595N &mdash; 5 total: 1 (#1482457) + 4 from <a href="https://www.digikey.ca/en/products/detail/texas-instruments/SN74HC595N/277246">DigiKey</a>)</span></td><td>4</td>'
          '<td>RobotShop + DigiKey.ca</td><td>$10</td></tr>'
          '<tr><td class="th"></td>'
-         '<td>&#9745; <b style="color:#dc2626">Direct-emission LEDs</b> <span class="k">(green SS-555-0, &times;20 &mdash; verify 10&nbsp;mm)</span> <a class="shot" href="assets/bought/all-items-group.jpg" target="_blank">&#128247;&nbsp;our LEDs</a></td><td>20</td>'
+         '<td>&#9745; <b style="color:#dc2626">Direct-emission LEDs</b> <span class="k">(green SS-555-0, &times;20 &mdash; verify 10&nbsp;mm)</span> <a class="shot" href="assets/bought/leds-green-ss555.jpg" target="_blank">&#128247;&nbsp;our LEDs</a></td><td>20</td>'
          '<td><a href="https://www.ecl.ca" target="_blank">Electronic Connections</a></td><td>$7</td></tr>'
          '<tr><td class="th"></td>'
          '<td>&#9745; <b style="color:#b45309">Current-limit resistors</b> <span class="k">(240&nbsp;&Omega; &times;100)</span> <a class="shot" href="assets/bought/resistors-240ohm.jpg" target="_blank">&#128247;&nbsp;our resistors</a></td><td>&mdash;</td>'
@@ -307,7 +307,7 @@ P.append('<div class="slide">'
          '<p class="k" style="margin:8px 0 0;font-size:10.5px;line-height:1.45">'
          '&#9745; bought / ordered &middot; &#9744; still to buy. <b>Bought (Electronic Connections, 2026-06-15, $116.52):</b> '
          'breadboard, jumpers, 20 green LEDs, 240&nbsp;&Omega; resistors, and a 5&nbsp;V/5&nbsp;A mains supply '
-         '(<b>set aside for safety</b> &mdash; see &sect;3; the rig runs on USB 5&nbsp;V). '
+         '(<b>set aside for safety</b> &mdash; see &sect;3; the rig runs on USB 5&nbsp;V) <a class="shot" href="assets/bought/all-items-group.jpg" target="_blank">&#128247;&nbsp;all items</a>. '
          '<b>Ordered &mdash; RobotShop #1482457 ($36.16):</b> bare Pico + headers (spare; backordered ~Jun&nbsp;25), rigid jumper kit, 1 shift register. '
          '<b>DigiKey #99883073 ($47.87, all in stock):</b> Pico&nbsp;H (start-now), 4 more shift registers, 4 ULN2803 buffers, 10 decoupling caps. '
          '<b>Still needed:</b> just the panel board (craft / hardware store). '
@@ -411,7 +411,7 @@ P.append(card("sn74hc595.jpg", "Static-latch shift register", "$1.05",
               "drives the LEDs · static latch ~13 ns, no PWM · ×4 · e.g. SN74HC595", "https://www.sparkfun.com/products/13699"))
 P.append(card("led-red-10mm.jpg", "Direct-emission LED (10 mm)", "~$1",
               "the measurement target · red AlInGaP, no phosphor, Vf 2.1–2.3 V · e.g. SparkFun COM-08862", "https://www.sparkfun.com/super-bright-led-red-10mm.html",
-              ours=("assets/bought/all-items-group.jpg", "our green LEDs (in group photo)")))
+              ours=("assets/bought/leds-green-ss555.jpg", "our green LEDs")))
 P.append(card("psu-5v4a.jpg", "Regulated 5 V supply", "$14.95",
               "powers the LED rail · e.g. Mean Well RS-25-5", "https://www.adafruit.com/product/1466"))
 P.append('</div>')
