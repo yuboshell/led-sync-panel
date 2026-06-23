@@ -275,10 +275,10 @@ P.append('<div class="slide">'
          '<tr><th></th><th>Part</th><th>Qty</th><th>Buy</th><th>~CAD</th></tr>'
          '<tr><td class="th"><img src="assets/teensy40.jpg" alt="microcontroller board"></td>'
          '<td>&#9745; <b style="color:#0d9488">Microcontroller</b> <span class="k">('
-         '<a href="https://www.digikey.ca/en/products/detail/raspberry-pi/SC0917/16608257">Pico&nbsp;H</a> from DigiKey, ready to use; RobotShop Pico+headers #1482457 = spare, backordered ~Jun&nbsp;25)</span></td><td>1</td>'
+         '<a href="https://www.digikey.ca/en/products/detail/raspberry-pi/SC0917/16608257">Pico&nbsp;H</a> from DigiKey, ready to use; RobotShop Pico+headers #1482457 = spare, backordered ~Jun&nbsp;25)</span> <a class="shot" href="assets/bought/pico-h.jpg" target="_blank">&#128247;&nbsp;our Pico</a></td><td>1</td>'
          '<td>DigiKey.ca / RobotShop.ca</td><td>$8</td></tr>'
          '<tr><td class="th"><img src="assets/sn74hc595.jpg" alt="SN74HC595"></td>'
-         '<td>&#9745; <b style="color:#2563eb">Static-latch shift register</b> <span class="k">(SN74HC595N &mdash; 5 total: 1 (#1482457) + 4 from <a href="https://www.digikey.ca/en/products/detail/texas-instruments/SN74HC595N/277246">DigiKey</a>)</span></td><td>4</td>'
+         '<td>&#9745; <b style="color:#2563eb">Static-latch shift register</b> <span class="k">(SN74HC595N &mdash; 5 total: 1 (#1482457) + 4 from <a href="https://www.digikey.ca/en/products/detail/texas-instruments/SN74HC595N/277246">DigiKey</a>)</span> <a class="shot" href="assets/bought/sn74hc595.jpg" target="_blank">&#128247;&nbsp;our 595s</a></td><td>4</td>'
          '<td>RobotShop + DigiKey.ca</td><td>$10</td></tr>'
          '<tr><td class="th"></td>'
          '<td>&#9745; <b style="color:#dc2626">Direct-emission LEDs</b> <span class="k">(green SS-555-0, &times;20 &mdash; verify 10&nbsp;mm)</span> <a class="shot" href="assets/bought/leds-green-ss555.jpg" target="_blank">&#128247;&nbsp;our LEDs</a></td><td>20</td>'
@@ -287,10 +287,10 @@ P.append('<div class="slide">'
          '<td>&#9745; <b style="color:#b45309">Current-limit resistors</b> <span class="k">(240&nbsp;&Omega; &times;100)</span> <a class="shot" href="assets/bought/resistors-240ohm.jpg" target="_blank">&#128247;&nbsp;our resistors</a></td><td>&mdash;</td>'
          '<td><a href="https://www.ecl.ca" target="_blank">Electronic Connections</a></td><td>$6</td></tr>'
          '<tr><td class="th"></td>'
-         '<td>&#9745; <b>Current-buffer array</b> <span class="k">(<a href="https://www.digikey.ca/en/products/detail/stmicroelectronics/ULN2803A/599591">ULN2803A</a> &times;4 &mdash; bright panel)</span></td><td>4</td>'
+         '<td>&#9745; <b>Current-buffer array</b> <span class="k">(<a href="https://www.digikey.ca/en/products/detail/stmicroelectronics/ULN2803A/599591">ULN2803A</a> &times;4 &mdash; bright panel)</span> <a class="shot" href="assets/bought/uln2803.jpg" target="_blank">&#128247;&nbsp;our ULN2803</a></td><td>4</td>'
          '<td>DigiKey.ca</td><td>$15</td></tr>'
          '<tr><td class="th"></td>'
-         '<td>&#9745; <b>Decoupling caps</b> <span class="k">(0.1&nbsp;µF <a href="https://www.digikey.ca/en/products/detail/kemet/C320C104J5R5TA7301/3726081">ceramic</a> &times;10)</span></td><td>10</td>'
+         '<td>&#9745; <b>Decoupling caps</b> <span class="k">(0.1&nbsp;µF <a href="https://www.digikey.ca/en/products/detail/kemet/C320C104J5R5TA7301/3726081">ceramic</a> &times;10)</span> <a class="shot" href="assets/bought/decoupling-caps.jpg" target="_blank">&#128247;&nbsp;our caps</a></td><td>10</td>'
          '<td>DigiKey.ca</td><td>$4</td></tr>'
          '<tr><td class="th"></td>'
          '<td>&#9745; <b style="color:#16a34a">5&nbsp;V power</b> <span class="k">(USB &mdash; the microcontroller&rsquo;s 5&nbsp;V pin, or a phone charger; no mains)</span></td><td>&mdash;</td>'
@@ -406,9 +406,11 @@ P.append('<div class="gallery">')
 P.append(card("commercial-led-panel.png", "Camera-timing reference panel", "$3,980–$57,850",
               "the calibrated device we clone, not buy · IE / Imatest LED-Panel", "https://www.imatest.com/product/camera-timing-system-led-panel/"))
 P.append(card("teensy40.jpg", "Microcontroller board", "~$25–$30",
-              "the clock · Cortex-M7 @ 600 MHz · e.g. Teensy 4.0", "https://www.pjrc.com/store/teensy40.html"))
+              "the clock · Cortex-M7 @ 600 MHz · e.g. Teensy 4.0", "https://www.pjrc.com/store/teensy40.html",
+              ours=("assets/bought/pico-h.jpg", "our Pico H")))
 P.append(card("sn74hc595.jpg", "Static-latch shift register", "$1.05",
-              "drives the LEDs · static latch ~13 ns, no PWM · ×4 · e.g. SN74HC595", "https://www.sparkfun.com/products/13699"))
+              "drives the LEDs · static latch ~13 ns, no PWM · ×4 · e.g. SN74HC595", "https://www.sparkfun.com/products/13699",
+              ours=("assets/bought/sn74hc595.jpg", "our 595s (×4)")))
 P.append(card("led-red-10mm.jpg", "Direct-emission LED (10 mm)", "~$1",
               "the measurement target · red AlInGaP, no phosphor, Vf 2.1–2.3 V · e.g. SparkFun COM-08862", "https://www.sparkfun.com/super-bright-led-red-10mm.html",
               ours=("assets/bought/leds-green-ss555.jpg", "our green LEDs")))
@@ -428,9 +430,8 @@ P.append(card("psu-5v4a.jpg", "Mains 5 V supply ✗ (set aside)", "$43 · bought
               ours=("assets/bought/psu-psf25-5.jpg", "our unit")))
 P.append('</div>')
 P.append('<p class="k">Full running evaluation log (every part considered + its verdict, kept across sessions): <code>wiki/analyses/sync-eval-equipment-log.md</code> in memex.</p>')
-P.append('<p class="k"><b>Now shown via our purchase photos in &sect;2:</b> the 240&nbsp;&Omega; resistors, the breadboard + jumper wires, and (in the group shot) the green LEDs. '
-         'Not pictured (generic): a <b>current-buffer array</b> (e.g. ULN2803) '
-         'for full 20 mA brightness on the big panel, '
+P.append('<p class="k"><b>Now shown via our own photos in &sect;2:</b> the green LEDs, 240&nbsp;&Omega; resistors, breadboard + jumper wires, microcontroller (Pico&nbsp;H), shift registers (SN74HC595), current-buffer array (ULN2803), and decoupling caps. '
+         'Not pictured (generic): '
          'a <b>micro-USB cable</b> for the microcontroller, a <b>soldering iron + solder</b> (to fit the board&rsquo;s header pins and wire the LEDs to the panel), and the panel board + diffuser. '
          'Ballpark for the basic rig: <b>~$120–$150 CAD</b>.</p>')
 
