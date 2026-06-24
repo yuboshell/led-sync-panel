@@ -170,7 +170,7 @@ def svg_layout():
 
 # ---------- Diagram: bring-up wiring (breadboard, hole-level control wiring) ----------
 def svg_wiring():
-    W, H = 980, 568
+    W, H = 840, 548
     RED="#dc2626"; BLK="#111827"; PUR="#7c3aed"; CYN="#0891b2"; ORA="#ea580c"; GRN="#16a34a"
     s = [txt(W/2, 22, "Bring-up wiring: Pico + one 74HC595 + eight LEDs", 14.5, INK, "middle", "bold")]
     s.append(txt(W/2, 39, "powered at 3.3 V from the Pico (no ULN2803) — the smallest circuit that lights up", 10.5, MUTE, "middle"))
@@ -217,8 +217,8 @@ def svg_wiring():
     for c in range(NC):                          # column numbers every 5 (like the real board)
         if (c+1)%5==0:
             s.append(txt(cx(c), (y_tn+rowsA[0])/2+2, str(c+1), 6.5, "#9aa0a6", "middle"))
-    s.append(txt(BX, BY-12, "Circuit-Test MB-104 (large double board) — red + / blue – rails, rows a–j, columns numbered", 8.5, "#cbd5e1", "start"))
-    s.append(txt(BX, y_bp+30, "the MB-104 has a second identical terminal block below this one — room to chain more 595s + LEDs", 7.5, "#cbd5e1", "start"))
+    s.append(txt(BX, BY-12, "Circuit-Test MB-104 (large board) — red + / blue – power rails, rows a–j, columns numbered", 8.5, "#cbd5e1", "start"))
+    s.append(txt(BX, y_bp+30, "the MB-104 has more terminal strips below this one — room to chain the other 595s + LEDs", 7.5, "#cbd5e1", "start"))
 
     # ----- 74HC595 straddling the channel, columns c0..c0+7 -----
     c0=4
@@ -256,27 +256,21 @@ def svg_wiring():
     yy,_ = piny["GND"];  s.append(C(px+pw, yy, cx(0), y_tn, BLK))          # GND -> - rail
     s.append(vwire(0, y_tn, y_bn, "#2563eb", 1.6))  # tie top - rail to bottom - rail
 
-    # ----- outputs -> ribbon -> LED row (below) -----
-    panx, pany, panw, panh = BX+bw+24, BY+30, 132, 200
-    # gather outputs: QA top(col5), QB..QH bottom(col4..col10)
-    outcols = [(c0+1, rowE)] + [(c0+i, rowF) for i in range(0,7)]   # QA..QH
-    lx0 = panx+22
-    for i,(c,yr) in enumerate(outcols):
-        ly = pany+24+i*22
-        s.append(f'<path d="M{cx(c)},{yr} C{cx(c)+40},{yr} {lx0-46},{ly} {lx0-12},{ly}" fill="none" stroke="{C_RES}" stroke-width="1.1" opacity="0.6"/>')
-    s.append(f'<rect x="{panx}" y="{pany}" width="{panw}" height="{panh}" rx="8" fill="{PANEL}" stroke="{C_BOARD}" stroke-width="1.5"/>')
-    s.append(txt(panx+panw/2, pany-8, "LED row (one per output)", 8.5, C_BOARD, "middle"))
-    names=["QA","QB","QC","QD","QE","QF","QG","QH"]
+    # ----- outputs -> 240 ohm (straddles the channel) -> green LED -> GND rail, ALL plugged into the board -----
+    GLED="#22c55e"
+    outpins = [("QA",c0+1,rowE)] + [(f"Q{ch}",c0+j,rowF) for j,ch in enumerate("BCDEFGH")]  # QA..QH at their pin columns
+    ledcols = list(range(13,21))            # 8 spare columns to the right of the chip
     for i in range(8):
-        ly=pany+24+i*22
-        s.append(f'<rect x="{lx0}" y="{ly-3.5}" width="16" height="7" rx="1.5" fill="#d6b06a" stroke="#a07d3a" stroke-width="0.5"/>')  # resistor
-        s.append(f'<circle cx="{lx0+34}" cy="{ly}" r="6" fill="{C_LED}"/>')
-        s.append(f'<circle cx="{lx0+32}" cy="{ly-2}" r="1.6" fill="#fff" opacity="0.5"/>')
-        s.append(f'<line x1="{lx0+40}" y1="{ly}" x2="{lx0+62}" y2="{ly}" stroke="#2563eb" stroke-width="1.4"/>')
-        s.append(txt(lx0-6, ly+3, names[i], 7, "#cbd5e1", "end", "bold"))
-    s.append(f'<line x1="{lx0+62}" y1="{pany+24}" x2="{lx0+62}" y2="{pany+24+7*22}" stroke="#2563eb" stroke-width="2"/>')
-    s.append(txt(lx0+66, pany+24+7*22+2, "GND", 7.5, "#93c5fd", "start"))
-    s.append(txt(panx+panw/2, pany+panh+16, "240 Ω → LED → GND, ×8", 8.5, MUTE, "middle"))
+        lc = ledcols[i]; nm,oc,oy = outpins[i]
+        # jumper: output pin -> LED column, top half
+        s.append(f'<path d="M{cx(oc)},{oy} C{cx(oc)+24},{oy} {cx(lc)-24},{rowsA[0]} {cx(lc)},{rowsA[0]}" fill="none" stroke="{C_RES}" stroke-width="1.1" opacity="0.6"/>')
+        # 240 ohm resistor straddling the centre channel (top node -> bottom node, like the chip)
+        s.append(f'<rect x="{cx(lc)-3}" y="{rowsA[4]-2}" width="6" height="{rowsF[0]+2-(rowsA[4]-2)}" rx="2" fill="#d6b06a" stroke="#a07d3a" stroke-width="0.6"/>')
+        # green LED in the bottom half, cathode jumper down to the GND rail
+        s.append(f'<line x1="{cx(lc)}" y1="{rowsF[2]+4}" x2="{cx(lc)}" y2="{y_bn}" stroke="#2563eb" stroke-width="1.3"/>')
+        s.append(f'<circle cx="{cx(lc)}" cy="{rowsF[2]}" r="5.5" fill="{GLED}" stroke="#15803d" stroke-width="0.6"/>')
+        s.append(f'<circle cx="{cx(lc)-2}" cy="{rowsF[2]-2}" r="1.6" fill="#fff" opacity="0.55"/>')
+    s.append(f'<text x="{cx(ledcols[0])}" y="{rowsF[2]+3}" font-size="7" fill="{GRN}" text-anchor="end" font-weight="bold">8 LEDs&#8594;</text>')
 
     # ----- legend -----
     ly0=H-46
@@ -367,9 +361,43 @@ P = []  # page body parts
 P.append('<h1>Multi-camera sync evaluation: a large flat LED time-code panel</h1>')
 P.append('<div class="meta">DIY design plan &middot; updated 2026-06-17 &middot; working draft &middot; '
          'step-time 200&nbsp;µs, driver 74HC595, sweep encoding (Gray-bar upgrade), 2-camera same-row bring-up (sim-validated) &middot; 11&times;Pixel&nbsp;7 / Argus rig</div>')
-P.append('<p class="k"><b>Reader&rsquo;s map:</b> &sect;1 what this tool is for &middot; '
-         '&sect;2 the wiring diagram + order list &middot; &sect;3 the driver choice + exact parts &middot; '
+P.append('<p class="k"><b>Reader&rsquo;s map:</b> <b>build guide first</b> (wire the first light-up, just below) &middot; '
+         'then &sect;1 what this tool is for &middot; &sect;2 the order list &middot; &sect;3 the driver choice + exact parts &middot; '
          '&sect;4&ndash;&sect;9 the design rationale.</p>')
+P.append('<h2>Build the bring-up first &mdash; wiring the first light-up</h2>')
+P.append('<p class="k"><b>Got the parts? Start here.</b> This is the hands-on build; the numbered sections below '
+         '(&sect;1 onward) explain what the panel is for and why each part was chosen.</p>')
+P.append('<p class="k"><b>Bring-up</b> = power on the smallest version of the circuit and get it working in verified steps, '
+         'before scaling to the full panel. Here that is just <b>the Pico + one 74HC595 + eight LEDs</b>, powered at '
+         '<b>3.3&nbsp;V from the Pico</b> (no ULN2803, no external supply): the Pico&rsquo;s 3.3&nbsp;V logic drives a '
+         '3.3&nbsp;V-powered 595 directly, so <b>no level shifter is needed</b>. Green LEDs through 240&nbsp;&Omega; at '
+         '3.3&nbsp;V draw ~5&nbsp;mA &mdash; a little dim, but plenty to confirm the chain works.</p>')
+P.append('<p class="k"><b>No display panel needed yet.</b> For this first light-up the LEDs <b>plug straight into the '
+         'breadboard</b> (as drawn). You only need the separate display panel <i>later</i>, for the actual multi-camera '
+         'filming &mdash; there the LEDs must spread out at 3&ndash;5&nbsp;cm pitch so every camera can resolve them, and '
+         '10&nbsp;mm domes are too wide to pack on a breadboard. The panel board is in &sect;2.</p>')
+P.append(f'<figure>{DIAGRAMS["wiring"]}<figcaption><b>Figure 1. Bring-up wiring.</b> The Pico clocks a pattern into one '
+         '74HC595 over three wires (data&nbsp;SER, clock&nbsp;SRCLK, latch&nbsp;RCLK); its eight parallel outputs '
+         'QA&ndash;QH each drive one green LED through a 240&nbsp;&Omega; resistor to ground. Power and ground come from the '
+         'Pico&rsquo;s 3V3 and GND pins via the breadboard rails. Everything &mdash; chip, resistors and LEDs &mdash; plugs '
+         'directly into the MB-104 breadboard, drawn to match our actual board (rows a&ndash;j, numbered columns).</figcaption></figure>')
+P.append('<p class="k"><b>Connect it in this order</b> (USB unplugged while wiring):</p>')
+P.append('<table>'
+         '<tr><th>#</th><th>From</th><th>To</th><th>Why</th></tr>'
+         '<tr><td>1</td><td>Pico <b>3V3</b></td><td>breadboard <b>+ rail</b></td><td>3.3&nbsp;V power for the whole board</td></tr>'
+         '<tr><td>2</td><td>Pico <b>GND</b></td><td>breadboard <b>&ndash; rail</b></td><td>common ground (jumper the top and bottom &ndash; rails together too)</td></tr>'
+         '<tr><td>3</td><td>595 <b>VCC&nbsp;(16)</b> and <b>MR&nbsp;(10)</b></td><td>+ rail</td><td>power the chip; MR high = never reset</td></tr>'
+         '<tr><td>4</td><td>595 <b>GND&nbsp;(8)</b> and <b>OE&nbsp;(13)</b></td><td>&ndash; rail</td><td>ground the chip; OE low = outputs always on</td></tr>'
+         '<tr><td>5</td><td>Pico <b>GP19</b></td><td>595 <b>SER&nbsp;(14)</b></td><td>serial <b>data</b> in</td></tr>'
+         '<tr><td>6</td><td>Pico <b>GP18</b></td><td>595 <b>SRCLK&nbsp;(11)</b></td><td>shift <b>clock</b></td></tr>'
+         '<tr><td>7</td><td>Pico <b>GP17</b></td><td>595 <b>RCLK&nbsp;(12)</b></td><td><b>latch</b> &mdash; copies the shifted byte to all outputs at once</td></tr>'
+         '<tr><td>8</td><td>each output <b>QA&ndash;QH</b> (15, 1&ndash;7)</td><td>240&nbsp;&Omega; &rarr; LED&nbsp;+ &rarr; LED&nbsp;&minus; &rarr; &ndash; rail</td><td>one resistor + LED per output, into the board&rsquo;s spare columns; mind polarity (long leg = +)</td></tr>'
+         '</table>')
+P.append('<p class="k"><b>First test:</b> plug in USB and run firmware that shifts out <code>0b10101010</code> then pulses '
+         'RCLK &mdash; four alternating LEDs should light. If they do, the data&rarr;shift&rarr;latch&rarr;LED chain works, and '
+         'you can scale up: chain more 595s off <b>QH&rsquo;&nbsp;(9)</b>, and add the ULN2803 buffer for full brightness. '
+         'GP18/GP19 are the Pico&rsquo;s hardware <b>SPI0</b> pins (SCK/TX), so the firmware can drive them with the SPI '
+         'peripheral; GP17 is a spare GPIO toggled by hand as the latch.</p>')
 P.append('<h2>1. Purpose &mdash; what this is for, and why DIY</h2>')
 P.append('<p class="lead">Build a large, flat LED panel that shows a fast-advancing, '
          'visually-decodable <b>time code</b>. All 11 cameras film it at once; each frame decodes '
@@ -381,7 +409,7 @@ P.append('<p>The Image&nbsp;Engineering / Imatest <b>LED-Panel</b> (ISO&nbsp;157
          '<b>$3,980&ndash;$57,850</b>. It cannot face an 11-camera ring. We keep its principle and rebuild '
          'it large, flat, and multi-camera-friendly.</p>')
 P.append('<figure><img src="assets/commercial-led-panel.png" style="max-width:420px;width:100%;border:1px solid #e5e7eb;border-radius:8px">'
-         '<figcaption><b>Figure 1. The commercial reference panel.</b> Image Engineering / Imatest LED-Panel V5: '
+         '<figcaption><b>Figure 2. The commercial reference panel.</b> Image Engineering / Imatest LED-Panel V5: '
          '110 LEDs (10&times;10 grid + a &times;100 row), step 20&nbsp;µs–10&nbsp;s, accuracy &lt;0.06%.</figcaption></figure>')
 P.append('<p class="k">How it encodes time: in the timing modes a single lit LED sweeps across the grid '
          'one position per step, and the &times;100 bottom row counts each wrap, giving a spatial '
@@ -489,34 +517,6 @@ P.append('<p class="k">The former components store on Gateway Blvd (Active Elect
          'Distributors stocks finished products, not loose components. Bring this page along: &sect;2 is the shopping '
          'list, &sect;3 the part-by-part rationale.</p>')
 
-P.append('<h3>Wiring the bring-up &mdash; first light-up on the breadboard</h3>')
-P.append('<p class="k"><b>Bring-up</b> = power on the smallest version of the circuit and get it working in verified steps, '
-         'before scaling to the full panel. Here that is just <b>the Pico + one 74HC595 + eight LEDs</b>, powered at '
-         '<b>3.3&nbsp;V from the Pico</b> (no ULN2803, no external supply): the Pico&rsquo;s 3.3&nbsp;V logic drives a '
-         '3.3&nbsp;V-powered 595 directly, so <b>no level shifter is needed</b>. Green LEDs through 240&nbsp;&Omega; at '
-         '3.3&nbsp;V draw ~5&nbsp;mA &mdash; a little dim, but plenty to confirm the chain works.</p>')
-P.append(f'<figure>{DIAGRAMS["wiring"]}<figcaption><b>Figure 2. Bring-up wiring.</b> The Pico clocks a pattern into one '
-         '74HC595 over three wires (data&nbsp;SER, clock&nbsp;SRCLK, latch&nbsp;RCLK); the eight parallel outputs '
-         'QA&ndash;QH each drive one LED through a 240&nbsp;&Omega; resistor to ground. Power and ground come from the '
-         'Pico&rsquo;s 3V3 and GND pins via the breadboard rails. The control wiring is drawn hole-to-hole; the eight '
-         'identical output&rarr;LED chains are shown as a ribbon.</figcaption></figure>')
-P.append('<p class="k"><b>Connect it in this order</b> (USB unplugged while wiring):</p>')
-P.append('<table>'
-         '<tr><th>#</th><th>From</th><th>To</th><th>Why</th></tr>'
-         '<tr><td>1</td><td>Pico <b>3V3</b></td><td>breadboard <b>+ rail</b></td><td>3.3&nbsp;V power for the whole board</td></tr>'
-         '<tr><td>2</td><td>Pico <b>GND</b></td><td>breadboard <b>&ndash; rail</b></td><td>common ground (jumper the top and bottom &ndash; rails together too)</td></tr>'
-         '<tr><td>3</td><td>595 <b>VCC&nbsp;(16)</b> and <b>MR&nbsp;(10)</b></td><td>+ rail</td><td>power the chip; MR high = never reset</td></tr>'
-         '<tr><td>4</td><td>595 <b>GND&nbsp;(8)</b> and <b>OE&nbsp;(13)</b></td><td>&ndash; rail</td><td>ground the chip; OE low = outputs always on</td></tr>'
-         '<tr><td>5</td><td>Pico <b>GP19</b></td><td>595 <b>SER&nbsp;(14)</b></td><td>serial <b>data</b> in</td></tr>'
-         '<tr><td>6</td><td>Pico <b>GP18</b></td><td>595 <b>SRCLK&nbsp;(11)</b></td><td>shift <b>clock</b></td></tr>'
-         '<tr><td>7</td><td>Pico <b>GP17</b></td><td>595 <b>RCLK&nbsp;(12)</b></td><td><b>latch</b> &mdash; copies the shifted byte to all outputs at once</td></tr>'
-         '<tr><td>8</td><td>each output <b>QA&ndash;QH</b> (15, 1&ndash;7)</td><td>240&nbsp;&Omega; &rarr; LED&nbsp;+ &rarr; LED&nbsp;&minus; &rarr; &ndash; rail</td><td>one resistor + LED per output; mind polarity (long leg = +)</td></tr>'
-         '</table>')
-P.append('<p class="k"><b>First test:</b> plug in USB and run firmware that shifts out <code>0b10101010</code> then pulses '
-         'RCLK &mdash; four alternating LEDs should light. If they do, the data&rarr;shift&rarr;latch&rarr;LED chain works, and '
-         'you can scale up: chain more 595s off <b>QH&rsquo;&nbsp;(9)</b>, and add the ULN2803 buffer for full brightness. '
-         'GP18/GP19 are the Pico&rsquo;s hardware <b>SPI0</b> pins (SCK/TX), so the firmware can drive them with the SPI '
-         'peripheral; GP17 is a spare GPIO toggled by hand as the latch.</p>')
 P.append('<h2>3. The driver &mdash; why a static-latch shift register, and the exact parts</h2>')
 P.append('<h3>How the driver works, in plain words</h3>')
 P.append('<p>A <b>shift register</b> is a chip with a row of memory cells: you feed it bits one at a time, and each '
