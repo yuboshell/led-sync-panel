@@ -168,11 +168,123 @@ def svg_layout():
     # callout
     return wrap("".join(s), 900, 350)
 
+# ---------- Diagram: bring-up wiring (breadboard, hole-level control wiring) ----------
+def svg_wiring():
+    W, H = 940, 540
+    RED="#dc2626"; BLK="#111827"; PUR="#7c3aed"; CYN="#0891b2"; ORA="#ea580c"; GRN="#16a34a"
+    s = [txt(W/2, 22, "Bring-up wiring: Pico + one 74HC595 + eight LEDs", 14.5, INK, "middle", "bold")]
+    s.append(txt(W/2, 39, "powered at 3.3 V from the Pico (no ULN2803) — the smallest circuit that lights up", 10.5, MUTE, "middle"))
+
+    # ----- Pico block (left) -----
+    px, py, pw, ph = 24, 96, 94, 322
+    s.append(f'<rect x="{px}" y="{py}" width="{pw}" height="{ph}" rx="8" fill="{C_MCU}"/>')
+    s.append(f'<rect x="{px+pw/2-12}" y="{py+7}" width="24" height="11" rx="3" fill="#0a322e"/>')
+    s.append(txt(px+pw/2, py+33, "USB", 6.5, "#bfe9e3", "middle"))
+    s.append(txt(px+pw/2, py+52, "Raspberry", 9, "#e6fffb", "middle", "bold"))
+    s.append(txt(px+pw/2, py+64, "Pi Pico", 9, "#e6fffb", "middle", "bold"))
+    picopins = [("3V3",RED),("GND",BLK),("GP19",PUR),("GP18",CYN),("GP17",ORA)]
+    piny = {}
+    for i,(nm,col) in enumerate(picopins):
+        yy = py+112+i*42; piny[nm]=(yy,col)
+        s.append(f'<circle cx="{px+pw}" cy="{yy}" r="4" fill="#fff" stroke="{col}" stroke-width="2"/>')
+        s.append(txt(px+pw-9, yy+3, nm, 8.5, "#e6fffb", "end", "bold"))
+
+    # ----- breadboard -----
+    BX, BY, NC, PITCH = 246, 80, 18, 24
+    def cx(c): return BX+28 + c*PITCH
+    bw = 56 + (NC-1)*PITCH
+    y_tp=BY+20; y_tn=BY+36
+    rowsA=[BY+64+r*15 for r in range(5)]
+    y_ch=rowsA[-1]+20
+    rowsF=[y_ch+14+r*15 for r in range(5)]
+    y_bn=rowsF[-1]+26; y_bp=y_bn+16
+    bh=(y_bp+14)-BY
+    s.append(f'<rect x="{BX}" y="{BY}" width="{bw}" height="{bh}" rx="8" fill="#f6f6f4" stroke="{C_BB}"/>')
+    s.append(f'<rect x="{BX}" y="{y_ch-6}" width="{bw}" height="12" fill="#ececea"/>')
+    def holes(y):
+        return "".join(f'<circle cx="{cx(c)}" cy="{y}" r="1.8" fill="#cdcdcd"/>' for c in range(NC))
+    for (yr,clr,lab) in [(y_tp,RED,"+"),(y_tn,"#2563eb","–"),(y_bn,"#2563eb","–"),(y_bp,RED,"+")]:
+        s.append(f'<line x1="{cx(0)}" y1="{yr}" x2="{cx(NC-1)}" y2="{yr}" stroke="{clr}" stroke-width="1.1" opacity="0.5"/>')
+        s.append(holes(yr))
+        s.append(txt(cx(0)-13, yr+3.5, lab, 12, clr, "middle", "bold"))
+    s.append(txt(cx(NC-1)+12, y_tp+3.5, "3.3 V rail", 8, RED, "start"))
+    s.append(txt(cx(NC-1)+12, y_tn+3.5, "GND rail", 8, "#2563eb", "start"))
+    for y in rowsA+rowsF: s.append(holes(y))
+
+    # ----- 74HC595 straddling the channel, columns c0..c0+7 -----
+    c0=4
+    rowE=rowsA[-1]; rowF=rowsF[0]; rowA=rowsA[0]; rowJ=rowsF[-1]
+    chx1=cx(c0)-9; chx2=cx(c0+7)+9
+    s.append(f'<rect x="{chx1}" y="{rowE-7}" width="{chx2-chx1}" height="{rowF+7-(rowE-7)}" rx="3" fill="{C_SHIFT}"/>')
+    s.append(f'<circle cx="{cx(c0)}" cy="{(rowE+rowF)/2}" r="3" fill="none" stroke="#cbd5e1"/>')
+    s.append(txt((chx1+chx2)/2, (rowE+rowF)/2+3, "74HC595", 8.5, "#dbeafe", "middle", "bold"))
+    topnames=["VCC","QA","SER","OE","RCLK","SRCLK","MR","QH'"]
+    botnames=["QB","QC","QD","QE","QF","QG","QH","GND"]
+    for i in range(8):
+        s.append(f'<circle cx="{cx(c0+i)}" cy="{rowE}" r="2.4" fill="#cfe0ff"/>')
+        s.append(f'<circle cx="{cx(c0+i)}" cy="{rowF}" r="2.4" fill="#cfe0ff"/>')
+        s.append(txt(cx(c0+i), rowE-10, topnames[i], 7, "#1e3a8a", "middle", "bold"))
+        s.append(txt(cx(c0+i), rowF+15, botnames[i], 7, "#1e3a8a", "middle", "bold"))
+
+    # ----- control jumpers (hole to hole) -----
+    def vwire(c, y1, y2, col, w=2.2):
+        return f'<line x1="{cx(c)}" y1="{y1}" x2="{cx(c)}" y2="{y2}" stroke="{col}" stroke-width="{w}" stroke-linecap="round"/>'
+    # power taps: VCC(col4)->+, MR(col10)->+, OE(col7)->- (top rail)
+    s.append(vwire(c0+0, y_tp, rowA, RED))      # VCC -> + rail
+    s.append(vwire(c0+6, y_tp, rowA, RED))      # MR  -> + rail
+    s.append(vwire(c0+3, y_tn, rowA, "#2563eb"))# OE  -> - rail (top)
+    # chip GND (col11 bottom) -> bottom - rail
+    s.append(vwire(c0+7, rowJ, y_bn, "#2563eb"))
+    # signal wires from Pico to the chip's top-half columns (SER col6, SRCLK col9, RCLK col8)
+    def C(x1,y1,x2,y2,col,w=2.2):
+        mx=(x1+x2)/2
+        return f'<path d="M{x1},{y1} C{mx},{y1} {mx},{y2} {x2},{y2}" fill="none" stroke="{col}" stroke-width="{w}" stroke-linecap="round"/>'
+    yy,_ = piny["GP19"]; s.append(C(px+pw, yy, cx(c0+2), rowsA[3], PUR))   # GP19 -> SER (col6)
+    yy,_ = piny["GP18"]; s.append(C(px+pw, yy, cx(c0+5), rowsA[3], CYN))   # GP18 -> SRCLK (col9)
+    yy,_ = piny["GP17"]; s.append(C(px+pw, yy, cx(c0+4), rowsA[3], ORA))   # GP17 -> RCLK (col8)
+    yy,_ = piny["3V3"];  s.append(C(px+pw, yy, cx(0), y_tp, RED))          # 3V3 -> + rail
+    yy,_ = piny["GND"];  s.append(C(px+pw, yy, cx(0), y_tn, BLK))          # GND -> - rail
+    s.append(vwire(0, y_tn, y_bn, "#2563eb", 1.6))  # tie top - rail to bottom - rail
+
+    # ----- outputs -> ribbon -> LED row (below) -----
+    panx, pany, panw, panh = BX+bw+24, BY+30, 132, 200
+    # gather outputs: QA top(col5), QB..QH bottom(col4..col10)
+    outcols = [(c0+1, rowE)] + [(c0+i, rowF) for i in range(0,7)]   # QA..QH
+    lx0 = panx+22
+    for i,(c,yr) in enumerate(outcols):
+        ly = pany+24+i*22
+        s.append(f'<path d="M{cx(c)},{yr} C{cx(c)+40},{yr} {lx0-46},{ly} {lx0-12},{ly}" fill="none" stroke="{C_RES}" stroke-width="1.1" opacity="0.6"/>')
+    s.append(f'<rect x="{panx}" y="{pany}" width="{panw}" height="{panh}" rx="8" fill="{PANEL}" stroke="{C_BOARD}" stroke-width="1.5"/>')
+    s.append(txt(panx+panw/2, pany-8, "LED row (one per output)", 8.5, C_BOARD, "middle"))
+    names=["QA","QB","QC","QD","QE","QF","QG","QH"]
+    for i in range(8):
+        ly=pany+24+i*22
+        s.append(f'<rect x="{lx0}" y="{ly-3.5}" width="16" height="7" rx="1.5" fill="#d6b06a" stroke="#a07d3a" stroke-width="0.5"/>')  # resistor
+        s.append(f'<circle cx="{lx0+34}" cy="{ly}" r="6" fill="{C_LED}"/>')
+        s.append(f'<circle cx="{lx0+32}" cy="{ly-2}" r="1.6" fill="#fff" opacity="0.5"/>')
+        s.append(f'<line x1="{lx0+40}" y1="{ly}" x2="{lx0+62}" y2="{ly}" stroke="#2563eb" stroke-width="1.4"/>')
+        s.append(txt(lx0-6, ly+3, names[i], 7, "#cbd5e1", "end", "bold"))
+    s.append(f'<line x1="{lx0+62}" y1="{pany+24}" x2="{lx0+62}" y2="{pany+24+7*22}" stroke="#2563eb" stroke-width="2"/>')
+    s.append(txt(lx0+66, pany+24+7*22+2, "GND", 7.5, "#93c5fd", "start"))
+    s.append(txt(panx+panw/2, pany+panh+16, "240 Ω → LED → GND, ×8", 8.5, MUTE, "middle"))
+
+    # ----- legend -----
+    ly0=H-46
+    leg=[("3.3 V",RED),("GND",BLK),("SER data",PUR),("SRCLK clock",CYN),("RCLK latch",ORA),("output → LED",C_RES)]
+    lx=40
+    for lab,col in leg:
+        s.append(f'<line x1="{lx}" y1="{ly0}" x2="{lx+22}" y2="{ly0}" stroke="{col}" stroke-width="3" stroke-linecap="round"/>')
+        s.append(txt(lx+28, ly0+3.5, lab, 9.5, INK, "start"))
+        lx += 36 + 7.2*len(lab)
+    s.append(txt(40, ly0+24, "OE→GND keeps outputs on; MR→+3.3 V means never reset; QH' (serial-out) chains to a 2nd 595 later.", 9, MUTE, "start"))
+    return wrap("".join(s), W, H)
+
 DIAGRAMS = {
     "geometry": svg_geometry(),
     "encoding": svg_encoding(),
     "vernier":  svg_vernier(),
     "layout":   svg_layout(),
+    "wiring":   svg_wiring(),
 }
 
 # validate every SVG before writing the page
@@ -367,6 +479,34 @@ P.append('<p class="k">The former components store on Gateway Blvd (Active Elect
          'Distributors stocks finished products, not loose components. Bring this page along: &sect;2 is the shopping '
          'list, &sect;3 the part-by-part rationale.</p>')
 
+P.append('<h3>Wiring the bring-up &mdash; first light-up on the breadboard</h3>')
+P.append('<p class="k"><b>Bring-up</b> = power on the smallest version of the circuit and get it working in verified steps, '
+         'before scaling to the full panel. Here that is just <b>the Pico + one 74HC595 + eight LEDs</b>, powered at '
+         '<b>3.3&nbsp;V from the Pico</b> (no ULN2803, no external supply): the Pico&rsquo;s 3.3&nbsp;V logic drives a '
+         '3.3&nbsp;V-powered 595 directly, so <b>no level shifter is needed</b>. Green LEDs through 240&nbsp;&Omega; at '
+         '3.3&nbsp;V draw ~5&nbsp;mA &mdash; a little dim, but plenty to confirm the chain works.</p>')
+P.append(f'<figure>{DIAGRAMS["wiring"]}<figcaption><b>Figure 2. Bring-up wiring.</b> The Pico clocks a pattern into one '
+         '74HC595 over three wires (data&nbsp;SER, clock&nbsp;SRCLK, latch&nbsp;RCLK); the eight parallel outputs '
+         'QA&ndash;QH each drive one LED through a 240&nbsp;&Omega; resistor to ground. Power and ground come from the '
+         'Pico&rsquo;s 3V3 and GND pins via the breadboard rails. The control wiring is drawn hole-to-hole; the eight '
+         'identical output&rarr;LED chains are shown as a ribbon.</figcaption></figure>')
+P.append('<p class="k"><b>Connect it in this order</b> (USB unplugged while wiring):</p>')
+P.append('<table>'
+         '<tr><th>#</th><th>From</th><th>To</th><th>Why</th></tr>'
+         '<tr><td>1</td><td>Pico <b>3V3</b></td><td>breadboard <b>+ rail</b></td><td>3.3&nbsp;V power for the whole board</td></tr>'
+         '<tr><td>2</td><td>Pico <b>GND</b></td><td>breadboard <b>&ndash; rail</b></td><td>common ground (jumper the top and bottom &ndash; rails together too)</td></tr>'
+         '<tr><td>3</td><td>595 <b>VCC&nbsp;(16)</b> and <b>MR&nbsp;(10)</b></td><td>+ rail</td><td>power the chip; MR high = never reset</td></tr>'
+         '<tr><td>4</td><td>595 <b>GND&nbsp;(8)</b> and <b>OE&nbsp;(13)</b></td><td>&ndash; rail</td><td>ground the chip; OE low = outputs always on</td></tr>'
+         '<tr><td>5</td><td>Pico <b>GP19</b></td><td>595 <b>SER&nbsp;(14)</b></td><td>serial <b>data</b> in</td></tr>'
+         '<tr><td>6</td><td>Pico <b>GP18</b></td><td>595 <b>SRCLK&nbsp;(11)</b></td><td>shift <b>clock</b></td></tr>'
+         '<tr><td>7</td><td>Pico <b>GP17</b></td><td>595 <b>RCLK&nbsp;(12)</b></td><td><b>latch</b> &mdash; copies the shifted byte to all outputs at once</td></tr>'
+         '<tr><td>8</td><td>each output <b>QA&ndash;QH</b> (15, 1&ndash;7)</td><td>240&nbsp;&Omega; &rarr; LED&nbsp;+ &rarr; LED&nbsp;&minus; &rarr; &ndash; rail</td><td>one resistor + LED per output; mind polarity (long leg = +)</td></tr>'
+         '</table>')
+P.append('<p class="k"><b>First test:</b> plug in USB and run firmware that shifts out <code>0b10101010</code> then pulses '
+         'RCLK &mdash; four alternating LEDs should light. If they do, the data&rarr;shift&rarr;latch&rarr;LED chain works, and '
+         'you can scale up: chain more 595s off <b>QH&rsquo;&nbsp;(9)</b>, and add the ULN2803 buffer for full brightness. '
+         'GP18/GP19 are the Pico&rsquo;s hardware <b>SPI0</b> pins (SCK/TX), so the firmware can drive them with the SPI '
+         'peripheral; GP17 is a spare GPIO toggled by hand as the latch.</p>')
 P.append('<h2>3. The driver &mdash; why a static-latch shift register, and the exact parts</h2>')
 P.append('<h3>How the driver works, in plain words</h3>')
 P.append('<p>A <b>shift register</b> is a chip with a row of memory cells: you feed it bits one at a time, and each '
@@ -463,8 +603,8 @@ P.append('<p>You will place the cameras to face one large flat panel, so a singl
          'large/bright enough for every camera to resolve individual LEDs. Rule of thumb: ~1&nbsp;cm (10&nbsp;mm) LEDs '
          'at ~3&ndash;5&nbsp;cm pitch make a 16-LED bar ~0.5&ndash;0.8&nbsp;m wide, cleanly resolved by a Pixel&nbsp;7 out to ~5&nbsp;m. '
          'Each 10&nbsp;mm dome is ~4 breadboard holes wide, so the LEDs mount on the panel surface (foam-core / hardboard / 3D-printed grid), not the breadboard &mdash; see &sect;2.</p>')
-P.append(f'<figure>{DIAGRAMS["geometry"]}<figcaption><b>Figure 2. Panel geometry.</b> All 11 cameras are placed to face one large flat panel showing the time code &mdash; a single planar matrix, no prism or multi-face latching.</figcaption></figure>')
-P.append('<p><b>Bring-up scope (current): two cameras.</b> The full rig faces 11 cameras (Figure&nbsp;2); the first '
+P.append(f'<figure>{DIAGRAMS["geometry"]}<figcaption><b>Figure 3. Panel geometry.</b> All 11 cameras are placed to face one large flat panel showing the time code &mdash; a single planar matrix, no prism or multi-face latching.</figcaption></figure>')
+P.append('<p><b>Bring-up scope (current): two cameras.</b> The full rig faces 11 cameras (Figure&nbsp;3); the first '
          'measurement uses just <b>two</b> Pixel&nbsp;7s. Place them so the panel falls on <b>approximately the same sensor '
          'row</b> in each frame. Because both are the same model (same rolling-shutter line time), equal panel rows make the '
          'readout delay cancel in the subtraction &mdash; this removes the rolling-shutter row bias (&sect;8) by construction, '
@@ -477,7 +617,7 @@ P.append('<p>Do not read &ldquo;which of 100 dots&rdquo;; it is hard to resolve 
          '<code>τ</code>. On/off per LED is robust to blur and oblique viewing; Gray coding means only one '
          'bit flips per step, so a code caught mid-transition is at most 1&nbsp;LSB off. A single <b>parity LED</b> '
          'is switched so the number of lit LEDs is always even; a camera that reads an <b>odd</b> count knows a bit was misread (glare, an occlusion, or an LED caught mid-flip) and discards that frame.</p>')
-P.append(f'<figure>{DIAGRAMS["encoding"]}<figcaption><b>Figure 3. Readout layout.</b> A 16-bit Gray-coded bar (one bit per LED) plus a parity LED and a redundant coarse row; software thresholds each LED, converts Gray&rarr;binary, and reads <code>t = count &times; &tau;</code>.</figcaption></figure>')
+P.append(f'<figure>{DIAGRAMS["encoding"]}<figcaption><b>Figure 4. Readout layout.</b> A 16-bit Gray-coded bar (one bit per LED) plus a parity LED and a redundant coarse row; software thresholds each LED, converts Gray&rarr;binary, and reads <code>t = count &times; &tau;</code>.</figcaption></figure>')
 P.append('<table><tr><th>Bits / step τ</th><th>Unambiguous range</th><th>Resolution</th><th>LEDs</th></tr>'
          '<tr><td>16-bit @ τ = 20 µs</td><td>~1.3 s</td><td>20 µs</td><td>16</td></tr>'
          '<tr style="background:#fffbeb"><td>16-bit @ τ = 200 µs &nbsp;<b>← operating point</b></td><td>~13 s</td><td>200 µs</td><td>16</td></tr></table>')
@@ -505,7 +645,7 @@ P.append('<p>Without a coarse scale, two cameras can show the <b>identical</b> f
          'trick as Google&rsquo;s slow bottom row (&times;10), the commercial &times;100 row, and a clock&rsquo;s '
          'hour/minute/second hands. In a binary bar you get it for free: the high-order bits <i>are</i> the '
          'slow row, so a 16-bit Gray bar already covers &gt;1&nbsp;s of offset.</p>')
-P.append(f'<figure>{DIAGRAMS["vernier"]}<figcaption><b>Figure 4. The vernier.</b> Two cameras can show the identical fine reading yet sit a full fine-wrap apart; the coarse scale (in binary, the high-order bits) resolves the ambiguity.</figcaption></figure>')
+P.append(f'<figure>{DIAGRAMS["vernier"]}<figcaption><b>Figure 5. The vernier.</b> Two cameras can show the identical fine reading yet sit a full fine-wrap apart; the coarse scale (in binary, the high-order bits) resolves the ambiguity.</figcaption></figure>')
 
 P.append("""<h3>Step-time: τ = 200 µs (decided 2026-06-03)</h3>
 <p>Match τ to the camera's rolling-shutter line time so each code value spans several rows. The Pixel 7 line time is ≈ 10–20 µs, so <b>200 µs</b> (~10–20 rows per code) is the operating point, not 20 µs.</p>
