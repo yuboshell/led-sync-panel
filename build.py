@@ -197,43 +197,45 @@ def svg_wiring():
     s.append(txt(px+pw/2, py+ph+13, "Pico H drops in straddling the", 6.8, MUTE, "middle"))
     s.append(txt(px+pw/2, py+ph+22, "channel; USB hangs off the end", 6.8, MUTE, "middle"))
 
-    # ----- breadboard: Circuit-Test MB-104 (large double board; its top terminal block shown) -----
-    BX, BY, NC, PITCH = 254, 78, 22, 21
+    # ----- breadboard: Circuit-Test MB-104 in FULL — 28 rows: top pair, block-1 (a–j), four middle rails, block-2 (a–j), bottom pair -----
+    BX, BY, NC, PITCH = 254, 60, 22, 21
     def cx(c): return BX+30 + c*PITCH
     bw = 60 + (NC-1)*PITCH
-    y_tp=BY+16; y_tn=BY+30                       # TOP pair: + (red, y_tp) then – (blue, y_tn)
-    rowsA=[BY+56+r*14 for r in range(5)]         # block-1 top half (rows a..e)
-    y_ch=rowsA[-1]+18                            # block-1 centre channel
-    rowsF=[y_ch+12+r*14 for r in range(5)]       # block-1 bottom half (rows f..j)
-    y_bn=rowsF[-1]+20; y_bp=y_bn+13              # block-1 bottom pair: + (red, y_bn) then – (blue, y_bp)
-    y_bn2=y_bp+15; y_bp2=y_bn2+13               # block-2 top pair: + (red) then – (blue)  — these TWO pairs = the MIDDLE rails
-    y_b2=y_bp2+20                                 # faded 2nd terminal block starts here
-    bh=(y_b2+62)-BY
-    s.append(f'<rect x="{BX-12}" y="{BY-22}" width="{bw+24}" height="{bh+42}" rx="7" fill="#1c1c1c"/>')  # black tray
+    RP=10                                            # vertical pitch between rows / rails
+    y_tp=BY+11; y_tn=BY+22                            # TOP pair: + (red) over – (blue)
+    rowsA=[BY+38+r*RP for r in range(5)]             # block-1 rows a..e
+    y_ch=rowsA[-1]+12                               # block-1 channel (between e and f)
+    rowsF=[y_ch+10+r*RP for r in range(5)]           # block-1 rows f..j
+    y_m0=rowsF[-1]+15; y_m1=y_m0+11                 # MIDDLE upper pair (block-1 bottom): + over –
+    y_m2=y_m1+12; y_m3=y_m2+11                      # MIDDLE lower pair (block-2 top):  + over –
+    rows2A=[y_m3+16+r*RP for r in range(5)]          # block-2 rows a..e
+    y_ch2=rows2A[-1]+12                             # block-2 channel
+    rows2F=[y_ch2+10+r*RP for r in range(5)]         # block-2 rows f..j
+    y_b0=rows2F[-1]+15; y_b1=y_b0+11               # BOTTOM pair: + over –
+    bh=(y_b1+13)-BY
+    s.append(f'<rect x="{BX-12}" y="{BY-18}" width="{bw+24}" height="{bh+30}" rx="7" fill="#1c1c1c"/>')  # black tray
     s.append(f'<rect x="{BX}" y="{BY}" width="{bw}" height="{bh}" rx="3" fill="#fcfcfb" stroke="#d6d6d2"/>')
-    s.append(f'<rect x="{BX}" y="{y_ch-6}" width="{bw}" height="12" fill="#e7e7e3"/>')
+    s.append(f'<rect x="{BX}" y="{y_ch-5}" width="{bw}" height="10" fill="#e7e7e3"/>')     # block-1 channel
+    s.append(f'<rect x="{BX}" y="{y_ch2-5}" width="{bw}" height="10" fill="#e7e7e3"/>')    # block-2 channel
     def holes(y, fill="#c9c9c5"):
-        return "".join(f'<circle cx="{cx(c)}" cy="{y}" r="1.7" fill="{fill}"/>' for c in range(NC))
-    # rails: each pair is + (red) then – (blue), top to bottom. MIDDLE = block-1 bottom pair + block-2 top pair, back-to-back (4 lines: + – + –)
-    for (yr,clr,lab) in [(y_tp,RED,"+"),(y_tn,"#2563eb","–"),(y_bn,RED,"+"),(y_bp,"#2563eb","–"),(y_bn2,RED,"+"),(y_bp2,"#2563eb","–")]:
+        return "".join(f'<circle cx="{cx(c)}" cy="{y}" r="1.5" fill="{fill}"/>' for c in range(NC))
+    # all FOUR rail pairs, each + (red) over – (blue): top, two back-to-back in the middle, bottom
+    for (yr,clr,lab) in [(y_tp,RED,"+"),(y_tn,"#2563eb","–"),(y_m0,RED,"+"),(y_m1,"#2563eb","–"),(y_m2,RED,"+"),(y_m3,"#2563eb","–"),(y_b0,RED,"+"),(y_b1,"#2563eb","–")]:
         s.append(f'<line x1="{cx(0)}" y1="{yr}" x2="{cx(NC-1)}" y2="{yr}" stroke="{clr}" stroke-width="1.2" opacity="0.6"/>')
         s.append(holes(yr))
-        s.append(txt(cx(0)-10, yr+3.4, lab, 10, clr, "middle", "bold"))
-        s.append(txt(cx(NC-1)+9, yr+3.4, lab, 10, clr, "start", "bold"))
+        s.append(txt(cx(0)-9, yr+3, lab, 9, clr, "middle", "bold"))
+        s.append(txt(cx(NC-1)+8, yr+3, lab, 9, clr, "start", "bold"))
     rl=list("abcde")+list("fghij")
-    for i,y in enumerate(rowsA+rowsF):
-        s.append(holes(y))
-        s.append(txt(cx(NC-1)+9, y+2.5, rl[i], 6.5, MUTE, "start"))
-        s.append(txt(cx(0)-9, y+2.5, rl[i], 6.5, MUTE, "end"))
-    for c in range(NC):                          # column numbers every 5 (like the real board)
+    for blockrows in (rowsA+rowsF, rows2A+rows2F):
+        for i,y in enumerate(blockrows):
+            s.append(holes(y))
+            s.append(txt(cx(NC-1)+8, y+2.2, rl[i], 5.5, MUTE, "start"))
+            s.append(txt(cx(0)-8, y+2.2, rl[i], 5.5, MUTE, "end"))
+    for c in range(NC):                              # column numbers every 5 (like the real board)
         if (c+1)%5==0:
-            s.append(txt(cx(c), (y_tn+rowsA[0])/2+2, str(c+1), 6.5, "#9aa0a6", "middle"))
-    for r in range(4):                            # faded 2nd block + its own bottom rail pair
-        s.append(holes(y_b2+r*10, "#e1e1dd"))
-    s.append(f'<line x1="{cx(0)}" y1="{y_b2+48}" x2="{cx(NC-1)}" y2="{y_b2+48}" stroke="{RED}" stroke-width="1.1" opacity="0.28"/>')
-    s.append(f'<line x1="{cx(0)}" y1="{y_b2+56}" x2="{cx(NC-1)}" y2="{y_b2+56}" stroke="#2563eb" stroke-width="1.1" opacity="0.28"/>')
-    s.append(txt(BX, BY-12, "Circuit-Test MB-104 (two blocks). Rails come in + / – pairs; the MIDDLE has TWO pairs — block-1 bottom + block-2 top, back-to-back", 7.5, "#cbd5e1", "start"))
-    s.append(txt(BX, y_b2+66, "second block + its bottom rail pair (faded) — room to chain the other 595s + LEDs", 7, "#9aa0a6", "start"))
+            s.append(txt(cx(c), (y_tn+rowsA[0])/2+1, str(c+1), 5.5, "#9aa0a6", "middle"))
+    s.append(txt(BX, BY-7, "Circuit-Test MB-104 — TWO blocks (rows a–j each) + FOUR + / – rail pairs (red + over blue –): top, two back-to-back in the middle, bottom = 28 rows", 6.6, "#cbd5e1", "start"))
+    s.append(txt(BX, y_b1+12, "block 2 is spare here — room to chain the other 595s + LEDs", 6.2, "#9aa0a6", "start"))
 
     # ----- 74HC595 straddling the channel, columns c0..c0+7 -----
     c0=4
@@ -260,13 +262,13 @@ def svg_wiring():
         return f'<path d="M{x1},{y1} C{mx},{y1} {mx},{y2} {x2},{y2}" fill="none" stroke="{col}" stroke-width="{w}" stroke-linecap="round"/>'
     s.append(vwire(c0+0, y_tp, rowA, RED))       # VCC -> the top + rail
     s.append(vwire(c0+6, y_tp, rowA, RED))       # MR  -> + rail
-    s.append(vwire(c0+7, rowJ, y_bp, "#2563eb")) # chip GND -> the – line in the middle (just below the block)
-    s.append(C(cx(c0+3), rowsA[0], cx(c0-1), y_bp, "#2563eb"))            # OE -> – rail (one jumper round the chip)
+    s.append(vwire(c0+7, rowJ, y_m1, "#2563eb")) # chip GND -> the – line in the middle (just below the block)
+    s.append(C(cx(c0+3), rowsA[0], cx(c0-1), y_m1, "#2563eb"))            # OE -> – rail (one jumper round the chip)
     yy,_ = piny["GP19"]; s.append(C(px+pw, yy, cx(c0+2), rowsA[3], PUR))  # GP19 -> SER (col6)
     yy,_ = piny["GP18"]; s.append(C(px+pw, yy, cx(c0+5), rowsA[3], CYN))  # GP18 -> SRCLK (col9)
     yy,_ = piny["GP17"]; s.append(C(px+pw, yy, cx(c0+4), rowsA[3], ORA))  # GP17 -> RCLK (col8)
     yy,_ = piny["3V3"];  s.append(C(px+pw, yy, cx(0), y_tp, RED))         # 3V3 -> + rail (top)
-    yy,_ = piny["GND"];  s.append(C(px+pw, yy, cx(0), y_bp, BLK))         # GND -> – rail (middle)
+    yy,_ = piny["GND"];  s.append(C(px+pw, yy, cx(0), y_m1, BLK))         # GND -> – rail (middle)
 
     # ----- outputs -> 240 ohm (straddles the channel) -> green LED -> GND rail, ALL plugged into the board -----
     GLED="#22c55e"
@@ -279,7 +281,7 @@ def svg_wiring():
         # 240 ohm resistor straddling the centre channel (top node -> bottom node, like the chip)
         s.append(f'<rect x="{cx(lc)-3}" y="{rowsA[4]-2}" width="6" height="{rowsF[0]+2-(rowsA[4]-2)}" rx="2" fill="#d6b06a" stroke="#a07d3a" stroke-width="0.6"/>')
         # green LED in the bottom half, cathode jumper down to the GND rail
-        s.append(f'<line x1="{cx(lc)}" y1="{rowsF[2]+4}" x2="{cx(lc)}" y2="{y_bp}" stroke="#2563eb" stroke-width="1.3"/>')
+        s.append(f'<line x1="{cx(lc)}" y1="{rowsF[2]+4}" x2="{cx(lc)}" y2="{y_m1}" stroke="#2563eb" stroke-width="1.3"/>')
         s.append(f'<circle cx="{cx(lc)}" cy="{rowsF[2]}" r="5.5" fill="{GLED}" stroke="#15803d" stroke-width="0.6"/>')
         s.append(f'<circle cx="{cx(lc)-2}" cy="{rowsF[2]-2}" r="1.6" fill="#fff" opacity="0.55"/>')
     s.append(f'<text x="{cx(ledcols[0])}" y="{rowsF[2]+3}" font-size="7" fill="{GRN}" text-anchor="end" font-weight="bold">8 LEDs&#8594;</text>')
