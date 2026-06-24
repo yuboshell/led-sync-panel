@@ -188,7 +188,7 @@ def svg_wiring():
     for pos in range(20):                  # 40 header pins (gold); unused ones plain
         s.append(f'<rect x="{px+1}" y="{ppy(pos)-2}" width="6" height="4.5" rx="1" fill="#caa63c"/>')
         s.append(f'<rect x="{px+pw-7}" y="{ppy(pos)-2}" width="6" height="4.5" rx="1" fill="#caa63c"/>')
-    used=[("GND","38",2,BLK),("3V3","36",4,RED),("GP19","25",15,PUR),("GP18","24",16,CYN),("GP17","22",18,ORA)]
+    used=[("3V3","36",4,RED),("GP19","25",15,PUR),("GP18","24",16,CYN),("GND","23",17,BLK),("GP17","22",18,ORA)]
     piny={}
     for nm,pn,pos,col in used:
         yy=ppy(pos); piny[nm]=(yy,col)
@@ -201,19 +201,21 @@ def svg_wiring():
     BX, BY, NC, PITCH = 254, 78, 22, 21
     def cx(c): return BX+30 + c*PITCH
     bw = 60 + (NC-1)*PITCH
-    y_tp=BY+16; y_tn=BY+30                      # top rails: red(+), blue(-)
-    rowsA=[BY+56+r*14 for r in range(5)]        # rows a..e (top half)
-    y_ch=rowsA[-1]+18                           # center channel
-    rowsF=[y_ch+12+r*14 for r in range(5)]      # rows f..j (bottom half)
-    y_bn=rowsF[-1]+22; y_bp=y_bn+14             # bottom rails: blue(-), red(+)
-    bh=(y_bp+16)-BY
-    s.append(f'<rect x="{BX-12}" y="{BY-22}" width="{bw+24}" height="{bh+54}" rx="7" fill="#1c1c1c"/>')  # black tray
+    y_tp=BY+16; y_tn=BY+30                       # TOP pair: – (blue, y_tp) then + (red, y_tn)
+    rowsA=[BY+56+r*14 for r in range(5)]         # block-1 top half (rows a..e)
+    y_ch=rowsA[-1]+18                            # block-1 centre channel
+    rowsF=[y_ch+12+r*14 for r in range(5)]       # block-1 bottom half (rows f..j)
+    y_bn=rowsF[-1]+22; y_bp=y_bn+14              # MIDDLE pair: – (blue, y_bn) then + (red, y_bp)
+    y_b2=y_bp+22                                  # faded 2nd terminal block starts here
+    bh=(y_b2+64)-BY
+    s.append(f'<rect x="{BX-12}" y="{BY-22}" width="{bw+24}" height="{bh+42}" rx="7" fill="#1c1c1c"/>')  # black tray
     s.append(f'<rect x="{BX}" y="{BY}" width="{bw}" height="{bh}" rx="3" fill="#fcfcfb" stroke="#d6d6d2"/>')
     s.append(f'<rect x="{BX}" y="{y_ch-6}" width="{bw}" height="12" fill="#e7e7e3"/>')
-    def holes(y):
-        return "".join(f'<circle cx="{cx(c)}" cy="{y}" r="1.7" fill="#c9c9c5"/>' for c in range(NC))
-    for (yr,clr,lab) in [(y_tp,RED,"+"),(y_tn,"#2563eb","–"),(y_bn,"#2563eb","–"),(y_bp,RED,"+")]:
-        s.append(f'<line x1="{cx(0)}" y1="{yr}" x2="{cx(NC-1)}" y2="{yr}" stroke="{clr}" stroke-width="1.2" opacity="0.55"/>')
+    def holes(y, fill="#c9c9c5"):
+        return "".join(f'<circle cx="{cx(c)}" cy="{y}" r="1.7" fill="{fill}"/>' for c in range(NC))
+    # rail pairs: TOP (– / +) and MIDDLE (– / +). Each pair = blue – then red +, like the real board.
+    for (yr,clr,lab) in [(y_tp,"#2563eb","–"),(y_tn,RED,"+"),(y_bn,"#2563eb","–"),(y_bp,RED,"+")]:
+        s.append(f'<line x1="{cx(0)}" y1="{yr}" x2="{cx(NC-1)}" y2="{yr}" stroke="{clr}" stroke-width="1.2" opacity="0.6"/>')
         s.append(holes(yr))
         s.append(txt(cx(0)-10, yr+3.5, lab, 11, clr, "middle", "bold"))
         s.append(txt(cx(NC-1)+9, yr+3.5, lab, 11, clr, "start", "bold"))
@@ -225,8 +227,13 @@ def svg_wiring():
     for c in range(NC):                          # column numbers every 5 (like the real board)
         if (c+1)%5==0:
             s.append(txt(cx(c), (y_tn+rowsA[0])/2+2, str(c+1), 6.5, "#9aa0a6", "middle"))
-    s.append(txt(BX, BY-12, "Circuit-Test MB-104 (large board) — red + / blue – power rails, rows a–j, columns numbered", 8.5, "#cbd5e1", "start"))
-    s.append(txt(BX, y_bp+30, "the MB-104 has more terminal strips below this one — room to chain the other 595s + LEDs", 7.5, "#cbd5e1", "start"))
+    # faded hint of the SECOND block + bottom rail pair — so the middle pair clearly reads as a MIDDLE rail
+    for r in range(4):
+        s.append(holes(y_b2+r*11, "#e1e1dd"))
+    s.append(f'<line x1="{cx(0)}" y1="{y_b2+50}" x2="{cx(NC-1)}" y2="{y_b2+50}" stroke="#2563eb" stroke-width="1.1" opacity="0.3"/>')
+    s.append(f'<line x1="{cx(0)}" y1="{y_b2+58}" x2="{cx(NC-1)}" y2="{y_b2+58}" stroke="{RED}" stroke-width="1.1" opacity="0.3"/>')
+    s.append(txt(BX, BY-12, "Circuit-Test MB-104 — red + / blue – rails run in THREE places: top, MIDDLE, bottom (two terminal blocks)", 8, "#cbd5e1", "start"))
+    s.append(txt(BX, y_b2+70, "second block + bottom rail (faded) — room to chain the other 595s + LEDs", 7, "#9aa0a6", "start"))
 
     # ----- 74HC595 straddling the channel, columns c0..c0+7 -----
     c0=4
@@ -247,22 +254,19 @@ def svg_wiring():
     # ----- control jumpers (hole to hole) -----
     def vwire(c, y1, y2, col, w=2.2):
         return f'<line x1="{cx(c)}" y1="{y1}" x2="{cx(c)}" y2="{y2}" stroke="{col}" stroke-width="{w}" stroke-linecap="round"/>'
-    # power taps: VCC(col4)->+, MR(col10)->+, OE(col7)->- (top rail)
-    s.append(vwire(c0+0, y_tp, rowA, RED))      # VCC -> + rail
-    s.append(vwire(c0+6, y_tp, rowA, RED))      # MR  -> + rail
-    s.append(vwire(c0+3, y_tn, rowA, "#2563eb"))# OE  -> - rail (top)
-    # chip GND (col11 bottom) -> bottom - rail
-    s.append(vwire(c0+7, rowJ, y_bn, "#2563eb"))
-    # signal wires from Pico to the chip's top-half columns (SER col6, SRCLK col9, RCLK col8)
+    # power & ground taps — each is a SHORT hop to the nearest bracketing rail (no cross-board jumpers)
     def C(x1,y1,x2,y2,col,w=2.2):
         mx=(x1+x2)/2
         return f'<path d="M{x1},{y1} C{mx},{y1} {mx},{y2} {x2},{y2}" fill="none" stroke="{col}" stroke-width="{w}" stroke-linecap="round"/>'
-    yy,_ = piny["GP19"]; s.append(C(px+pw, yy, cx(c0+2), rowsA[3], PUR))   # GP19 -> SER (col6)
-    yy,_ = piny["GP18"]; s.append(C(px+pw, yy, cx(c0+5), rowsA[3], CYN))   # GP18 -> SRCLK (col9)
-    yy,_ = piny["GP17"]; s.append(C(px+pw, yy, cx(c0+4), rowsA[3], ORA))   # GP17 -> RCLK (col8)
-    yy,_ = piny["3V3"];  s.append(C(px+pw, yy, cx(0), y_tp, RED))          # 3V3 -> + rail
-    yy,_ = piny["GND"];  s.append(C(px+pw, yy, cx(0), y_tn, BLK))          # GND -> - rail
-    s.append(vwire(0, y_tn, y_bn, "#2563eb", 1.6))  # tie top - rail to bottom - rail
+    s.append(vwire(c0+0, y_tn, rowA, RED))       # VCC -> + rail (just above the block)
+    s.append(vwire(c0+6, y_tn, rowA, RED))       # MR  -> + rail
+    s.append(vwire(c0+7, rowJ, y_bn, "#2563eb")) # chip GND -> – rail (the MIDDLE rail, just below)
+    s.append(C(cx(c0+3), rowsA[0], cx(c0-1), y_bn, "#2563eb"))            # OE -> – rail (one jumper round the chip)
+    yy,_ = piny["GP19"]; s.append(C(px+pw, yy, cx(c0+2), rowsA[3], PUR))  # GP19 -> SER (col6)
+    yy,_ = piny["GP18"]; s.append(C(px+pw, yy, cx(c0+5), rowsA[3], CYN))  # GP18 -> SRCLK (col9)
+    yy,_ = piny["GP17"]; s.append(C(px+pw, yy, cx(c0+4), rowsA[3], ORA))  # GP17 -> RCLK (col8)
+    yy,_ = piny["3V3"];  s.append(C(px+pw, yy, cx(0), y_tn, RED))         # 3V3 -> + rail (above)
+    yy,_ = piny["GND"];  s.append(C(px+pw, yy, cx(0), y_bn, BLK))         # GND -> – rail (middle)
 
     # ----- outputs -> 240 ohm (straddles the channel) -> green LED -> GND rail, ALL plugged into the board -----
     GLED="#22c55e"
@@ -288,7 +292,7 @@ def svg_wiring():
         s.append(f'<line x1="{lx}" y1="{ly0}" x2="{lx+22}" y2="{ly0}" stroke="{col}" stroke-width="3" stroke-linecap="round"/>')
         s.append(txt(lx+28, ly0+3.5, lab, 9.5, INK, "start"))
         lx += 36 + 7.2*len(lab)
-    s.append(txt(40, ly0+24, "OE→GND keeps outputs on; MR→+3.3 V means never reset; QH' (serial-out) chains to a 2nd 595 later.", 9, MUTE, "start"))
+    s.append(txt(40, ly0+24, "Every power/ground pin taps the NEAREST rail (+ just above, – the middle rail just below) — short hops, no cross-board jumpers. OE→GND = outputs on; MR→+3.3 V = never reset.", 8.2, MUTE, "start"))
     return wrap("".join(s), W, H)
 
 DIAGRAMS = {
@@ -389,13 +393,16 @@ P.append(f'<figure>{DIAGRAMS["wiring"]}<figcaption><b>Figure 1. Bring-up wiring.
          'QA&ndash;QH each drive one green LED through a 240&nbsp;&Omega; resistor to ground. Power and ground come from the '
          'Pico&rsquo;s 3V3 and GND pins via the breadboard rails. Everything &mdash; chip, resistors and LEDs &mdash; plugs '
          'directly into the MB-104 breadboard, drawn to match our actual board (rows a&ndash;j, numbered columns).</figcaption></figure>')
-P.append('<p class="k"><b>Connect it in this order</b> (USB unplugged while wiring):</p>')
+P.append('<p class="k"><b>Connect it in this order</b> (USB unplugged while wiring). The MB-104&rsquo;s power rails run in '
+         '<b>three</b> places &mdash; top, middle, bottom. We build in the top block and tap the <b>+ rail just above it</b> '
+         'and the <b>&ndash; (middle) rail just below it</b>, so every power/ground jumper is one short hop &mdash; no '
+         'cross-board ties.</p>')
 P.append('<table>'
          '<tr><th>#</th><th>From</th><th>To</th><th>Why</th></tr>'
-         '<tr><td>1</td><td>Pico <b>3V3</b>&nbsp;(pin&nbsp;36)</td><td>breadboard <b>+ rail</b></td><td>3.3&nbsp;V power for the whole board</td></tr>'
-         '<tr><td>2</td><td>Pico <b>GND</b>&nbsp;(pin&nbsp;38)</td><td>breadboard <b>&ndash; rail</b></td><td>common ground (jumper the top and bottom &ndash; rails together too)</td></tr>'
-         '<tr><td>3</td><td>595 <b>VCC&nbsp;(16)</b> and <b>MR&nbsp;(10)</b></td><td>+ rail</td><td>power the chip; MR high = never reset</td></tr>'
-         '<tr><td>4</td><td>595 <b>GND&nbsp;(8)</b> and <b>OE&nbsp;(13)</b></td><td>&ndash; rail</td><td>ground the chip; OE low = outputs always on</td></tr>'
+         '<tr><td>1</td><td>Pico <b>3V3</b>&nbsp;(pin&nbsp;36)</td><td><b>+ rail</b> (just above the block)</td><td>3.3&nbsp;V power for the whole board</td></tr>'
+         '<tr><td>2</td><td>Pico <b>GND</b>&nbsp;(pin&nbsp;23)</td><td><b>&ndash; rail</b> (the middle rail, just below)</td><td>common ground &mdash; one short hop, no cross-board tie</td></tr>'
+         '<tr><td>3</td><td>595 <b>VCC&nbsp;(16)</b> and <b>MR&nbsp;(10)</b></td><td>+ rail (above)</td><td>power the chip; MR high = never reset</td></tr>'
+         '<tr><td>4</td><td>595 <b>GND&nbsp;(8)</b> and <b>OE&nbsp;(13)</b></td><td>&ndash; rail (middle, below)</td><td>ground the chip; OE low = outputs always on</td></tr>'
          '<tr><td>5</td><td>Pico <b>GP19</b>&nbsp;(pin&nbsp;25)</td><td>595 <b>SER&nbsp;(14)</b></td><td>serial <b>data</b> in</td></tr>'
          '<tr><td>6</td><td>Pico <b>GP18</b>&nbsp;(pin&nbsp;24)</td><td>595 <b>SRCLK&nbsp;(11)</b></td><td>shift <b>clock</b></td></tr>'
          '<tr><td>7</td><td>Pico <b>GP17</b>&nbsp;(pin&nbsp;22)</td><td>595 <b>RCLK&nbsp;(12)</b></td><td><b>latch</b> &mdash; copies the shifted byte to all outputs at once</td></tr>'
@@ -403,8 +410,8 @@ P.append('<table>'
          '</table>')
 P.append('<p class="k"><b>Finding the Pico&rsquo;s pins.</b> The <b>Pico&nbsp;H</b> has its headers pre-soldered, so it drops '
          'straight into the breadboard <b>straddling the centre channel</b> (USB hanging off one end). All five pins we use '
-         'are along <b>one long edge</b>: <b>3V3</b> (pin&nbsp;36) and a <b>GND</b> (pin&nbsp;38) up near the USB, and '
-         '<b>GP17 / GP18 / GP19</b> (pins&nbsp;22 / 24 / 25) grouped toward the far end. Count pins from the USB end, or read '
+         'are along <b>one long edge</b>: <b>3V3</b> (pin&nbsp;36) up near the USB, then a <b>GND</b> with '
+         '<b>GP17 / GP18 / GP19</b> (pins&nbsp;22&ndash;25) grouped together toward the far end. Count pins from the USB end, or read '
          'the labels printed beside each pin, to find them.</p>')
 P.append('<p class="k"><b>First test:</b> plug in USB and run firmware that shifts out <code>0b10101010</code> then pulses '
          'RCLK &mdash; four alternating LEDs should light. If they do, the data&rarr;shift&rarr;latch&rarr;LED chain works, and '
