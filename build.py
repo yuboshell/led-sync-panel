@@ -263,12 +263,18 @@ def svg_wiring():
     s.append(vwire(c0+0, y_tp, rowA, RED))       # VCC -> the top + rail
     s.append(vwire(c0+6, y_tp, rowA, RED))       # MR  -> + rail
     s.append(vwire(c0+7, rowJ, y_m1, "#2563eb")) # chip GND -> the – line in the middle (just below the block)
-    s.append(C(cx(c0+3), rowsA[0], cx(c0-1), y_m1, "#2563eb"))            # OE -> – rail (one jumper round the chip)
+    s.append(vwire(c0+3, y_tn, rowsA[0], "#2563eb"))                      # OE -> the – rail right above the chip (short)
     yy,_ = piny["GP19"]; s.append(C(px+pw, yy, cx(c0+2), rowsA[3], PUR))  # GP19 -> SER (col6)
     yy,_ = piny["GP18"]; s.append(C(px+pw, yy, cx(c0+5), rowsA[3], CYN))  # GP18 -> SRCLK (col9)
     yy,_ = piny["GP17"]; s.append(C(px+pw, yy, cx(c0+4), rowsA[3], ORA))  # GP17 -> RCLK (col8)
     yy,_ = piny["3V3"];  s.append(C(px+pw, yy, cx(0), y_tp, RED))         # 3V3 -> + rail (top)
     yy,_ = piny["GND"];  s.append(C(px+pw, yy, cx(0), y_m1, BLK))         # GND -> – rail (middle)
+    s.append(C(px+pw, yy, cx(1), y_tn, BLK))                              # 2nd GND tap -> top – rail (grounds it for OE + the cap)
+    # 0.1 µF decoupling cap across the top + / – rails, right beside the 595 — short leads, clean supply when 8 outputs switch
+    capx=cx(2)
+    s.append(f'<line x1="{capx}" y1="{y_tp}" x2="{capx}" y2="{y_tn}" stroke="#9a7b3a" stroke-width="1.3"/>')
+    s.append(f'<rect x="{capx-5}" y="{(y_tp+y_tn)/2-3.5}" width="10" height="7" rx="3" fill="#e8c17a" stroke="#b8893a" stroke-width="0.7"/>')
+    s.append(txt(capx, y_tp-2.5, "0.1µF", 5.5, "#8a6d2a", "middle", "bold"))
 
     # ----- outputs -> 240 ohm (straddles the channel) -> green LED -> GND rail, ALL plugged into the board -----
     GLED="#22c55e"
@@ -294,7 +300,7 @@ def svg_wiring():
         s.append(f'<line x1="{lx}" y1="{ly0}" x2="{lx+22}" y2="{ly0}" stroke="{col}" stroke-width="3" stroke-linecap="round"/>')
         s.append(txt(lx+28, ly0+3.5, lab, 9.5, INK, "start"))
         lx += 36 + 7.2*len(lab)
-    s.append(txt(40, ly0+24, "+ pins (VCC, MR, 3V3) go to the top + rail; – pins (GND, OE, LED cathodes) go to the – line in the middle — one jumper each, no rail-to-rail ties. OE→GND = outputs on; MR→+3.3 V = never reset.", 8.0, MUTE, "start"))
+    s.append(txt(40, ly0+24, "VCC/MR/3V3 → top + rail; GND + LED cathodes → the – line in the middle; OE → the – rail just above the chip. The 0.1 µF cap across the supply by the 595 keeps switching edges clean. MR→+3.3 V = never reset.", 7.8, MUTE, "start"))
     return wrap("".join(s), W, H)
 
 DIAGRAMS = {
@@ -397,19 +403,21 @@ P.append(f'<figure>{DIAGRAMS["wiring"]}<figcaption><b>Figure 1. Bring-up wiring.
          'directly into the MB-104 breadboard, drawn to match our actual board (rows a&ndash;j, numbered columns).</figcaption></figure>')
 P.append('<p class="k"><b>Connect it in this order</b> (USB unplugged while wiring). The MB-104&rsquo;s rails come in '
          '<b>+ / &ndash; pairs</b> (red <b>+</b> on top, blue <b>&ndash;</b> below), and the middle of the board carries <b>two</b> '
-         'pairs back-to-back &mdash; block-1&rsquo;s bottom rails and block-2&rsquo;s top rails. We build in the top block: its '
-         '<b>+ pins go to the top + rail</b>, its <b>&ndash; pins to the &ndash; line in the middle</b> &mdash; one jumper each, '
-         'no rail-to-rail ties.</p>')
+         'pairs back-to-back &mdash; block-1&rsquo;s bottom rails and block-2&rsquo;s top rails. We build in the top block: '
+         '<b>+ pins go to the top + rail</b>; <b>GND and the LED cathodes to the &ndash; line in the middle</b>; <b>OE to the '
+         '&ndash; rail just above the chip</b>. Add a <b>0.1&nbsp;µF decoupling cap</b> across the + and &ndash; rails right by '
+         'the 595 &mdash; it keeps the supply clean when all eight outputs switch together, which is what keeps the edges sharp.</p>')
 P.append('<table>'
          '<tr><th>#</th><th>From</th><th>To</th><th>Why</th></tr>'
          '<tr><td>1</td><td>Pico <b>3V3</b>&nbsp;(pin&nbsp;36)</td><td>the <b>top + rail</b></td><td>3.3&nbsp;V power for the whole board</td></tr>'
-         '<tr><td>2</td><td>Pico <b>GND</b>&nbsp;(pin&nbsp;23)</td><td>a <b>&ndash; line in the middle</b></td><td>common ground &mdash; one jumper, no rail-to-rail tie</td></tr>'
+         '<tr><td>2</td><td>Pico <b>GND</b>&nbsp;(pin&nbsp;23)</td><td>a <b>&ndash; line in the middle</b>, plus a 2nd jumper up to the <b>top &ndash; rail</b></td><td>grounds both &ndash; rails the chip uses (no cross-board tie)</td></tr>'
          '<tr><td>3</td><td>595 <b>VCC&nbsp;(16)</b> and <b>MR&nbsp;(10)</b></td><td>top + rail</td><td>power the chip; MR high = never reset</td></tr>'
-         '<tr><td>4</td><td>595 <b>GND&nbsp;(8)</b> and <b>OE&nbsp;(13)</b></td><td>&ndash; line (middle)</td><td>ground the chip; OE low = outputs always on</td></tr>'
-         '<tr><td>5</td><td>Pico <b>GP19</b>&nbsp;(pin&nbsp;25)</td><td>595 <b>SER&nbsp;(14)</b></td><td>serial <b>data</b> in</td></tr>'
-         '<tr><td>6</td><td>Pico <b>GP18</b>&nbsp;(pin&nbsp;24)</td><td>595 <b>SRCLK&nbsp;(11)</b></td><td>shift <b>clock</b></td></tr>'
-         '<tr><td>7</td><td>Pico <b>GP17</b>&nbsp;(pin&nbsp;22)</td><td>595 <b>RCLK&nbsp;(12)</b></td><td><b>latch</b> &mdash; copies the shifted byte to all outputs at once</td></tr>'
-         '<tr><td>8</td><td>each output <b>QA&ndash;QH</b> (15, 1&ndash;7)</td><td>240&nbsp;&Omega; &rarr; LED&nbsp;+ &rarr; LED&nbsp;&minus; &rarr; &ndash; rail</td><td>one resistor + LED per output, into the board&rsquo;s spare columns; mind polarity (long leg = +)</td></tr>'
+         '<tr><td>4</td><td>595 <b>GND&nbsp;(8)</b> &rarr; middle &ndash; line; <b>OE&nbsp;(13)</b> &rarr; the &ndash; rail above the chip</td><td>&ndash; rails</td><td>ground the chip; OE low = outputs always on</td></tr>'
+         '<tr><td>5</td><td><b>0.1&nbsp;µF cap</b></td><td>across the <b>+ and &ndash; rails</b> right by the 595</td><td>decoupling &mdash; a clean supply when all 8 outputs flip at once (sharp edges)</td></tr>'
+         '<tr><td>6</td><td>Pico <b>GP19</b>&nbsp;(pin&nbsp;25)</td><td>595 <b>SER&nbsp;(14)</b></td><td>serial <b>data</b> in</td></tr>'
+         '<tr><td>7</td><td>Pico <b>GP18</b>&nbsp;(pin&nbsp;24)</td><td>595 <b>SRCLK&nbsp;(11)</b></td><td>shift <b>clock</b></td></tr>'
+         '<tr><td>8</td><td>Pico <b>GP17</b>&nbsp;(pin&nbsp;22)</td><td>595 <b>RCLK&nbsp;(12)</b></td><td><b>latch</b> &mdash; copies the shifted byte to all outputs at once</td></tr>'
+         '<tr><td>9</td><td>each output <b>QA&ndash;QH</b> (15, 1&ndash;7)</td><td>240&nbsp;&Omega; &rarr; LED&nbsp;+ &rarr; LED&nbsp;&minus; &rarr; &ndash; rail</td><td>one resistor + LED per output, into the board&rsquo;s spare columns; mind polarity (long leg = +)</td></tr>'
          '</table>')
 P.append('<p class="k"><b>Finding the Pico&rsquo;s pins.</b> The <b>Pico&nbsp;H</b> has its headers pre-soldered, so it drops '
          'straight into the breadboard <b>straddling the centre channel</b> (USB hanging off one end). All five pins we use '
