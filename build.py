@@ -205,35 +205,35 @@ def svg_wiring():
     rowsA=[BY+56+r*14 for r in range(5)]         # block-1 top half (rows a..e)
     y_ch=rowsA[-1]+18                            # block-1 centre channel
     rowsF=[y_ch+12+r*14 for r in range(5)]       # block-1 bottom half (rows f..j)
-    y_bn=rowsF[-1]+22; y_bp=y_bn+14              # MIDDLE pair: – (blue, y_bn) then + (red, y_bp)
-    y_b2=y_bp+22                                  # faded 2nd terminal block starts here
-    bh=(y_b2+64)-BY
+    y_bn=rowsF[-1]+20; y_bp=y_bn+13              # block-1 bottom pair: – (blue, y_bn) then + (red, y_bp)
+    y_bn2=y_bp+15; y_bp2=y_bn2+13               # block-2 top pair: – (blue) then + (red)  — these TWO pairs = the MIDDLE rails
+    y_b2=y_bp2+20                                 # faded 2nd terminal block starts here
+    bh=(y_b2+62)-BY
     s.append(f'<rect x="{BX-12}" y="{BY-22}" width="{bw+24}" height="{bh+42}" rx="7" fill="#1c1c1c"/>')  # black tray
     s.append(f'<rect x="{BX}" y="{BY}" width="{bw}" height="{bh}" rx="3" fill="#fcfcfb" stroke="#d6d6d2"/>')
     s.append(f'<rect x="{BX}" y="{y_ch-6}" width="{bw}" height="12" fill="#e7e7e3"/>')
     def holes(y, fill="#c9c9c5"):
         return "".join(f'<circle cx="{cx(c)}" cy="{y}" r="1.7" fill="{fill}"/>' for c in range(NC))
-    # rail pairs: TOP (– / +) and MIDDLE (– / +). Each pair = blue – then red +, like the real board.
-    for (yr,clr,lab) in [(y_tp,"#2563eb","–"),(y_tn,RED,"+"),(y_bn,"#2563eb","–"),(y_bp,RED,"+")]:
+    # rails: TOP pair (– /+), then the MIDDLE = block-1 bottom pair + block-2 top pair back-to-back (4 lines: – + – +)
+    for (yr,clr,lab) in [(y_tp,"#2563eb","–"),(y_tn,RED,"+"),(y_bn,"#2563eb","–"),(y_bp,RED,"+"),(y_bn2,"#2563eb","–"),(y_bp2,RED,"+")]:
         s.append(f'<line x1="{cx(0)}" y1="{yr}" x2="{cx(NC-1)}" y2="{yr}" stroke="{clr}" stroke-width="1.2" opacity="0.6"/>')
         s.append(holes(yr))
-        s.append(txt(cx(0)-10, yr+3.5, lab, 11, clr, "middle", "bold"))
-        s.append(txt(cx(NC-1)+9, yr+3.5, lab, 11, clr, "start", "bold"))
+        s.append(txt(cx(0)-10, yr+3.4, lab, 10, clr, "middle", "bold"))
+        s.append(txt(cx(NC-1)+9, yr+3.4, lab, 10, clr, "start", "bold"))
     rl=list("abcde")+list("fghij")
     for i,y in enumerate(rowsA+rowsF):
         s.append(holes(y))
-        s.append(txt(cx(NC-1)+9, y+2.6, rl[i], 7, MUTE, "start"))
-        s.append(txt(cx(0)-9, y+2.6, rl[i], 7, MUTE, "end"))
+        s.append(txt(cx(NC-1)+9, y+2.5, rl[i], 6.5, MUTE, "start"))
+        s.append(txt(cx(0)-9, y+2.5, rl[i], 6.5, MUTE, "end"))
     for c in range(NC):                          # column numbers every 5 (like the real board)
         if (c+1)%5==0:
             s.append(txt(cx(c), (y_tn+rowsA[0])/2+2, str(c+1), 6.5, "#9aa0a6", "middle"))
-    # faded hint of the SECOND block + bottom rail pair — so the middle pair clearly reads as a MIDDLE rail
-    for r in range(4):
-        s.append(holes(y_b2+r*11, "#e1e1dd"))
-    s.append(f'<line x1="{cx(0)}" y1="{y_b2+50}" x2="{cx(NC-1)}" y2="{y_b2+50}" stroke="#2563eb" stroke-width="1.1" opacity="0.3"/>')
-    s.append(f'<line x1="{cx(0)}" y1="{y_b2+58}" x2="{cx(NC-1)}" y2="{y_b2+58}" stroke="{RED}" stroke-width="1.1" opacity="0.3"/>')
-    s.append(txt(BX, BY-12, "Circuit-Test MB-104 — red + / blue – rails run in THREE places: top, MIDDLE, bottom (two terminal blocks)", 8, "#cbd5e1", "start"))
-    s.append(txt(BX, y_b2+70, "second block + bottom rail (faded) — room to chain the other 595s + LEDs", 7, "#9aa0a6", "start"))
+    for r in range(4):                            # faded 2nd block + its own bottom rail pair
+        s.append(holes(y_b2+r*10, "#e1e1dd"))
+    s.append(f'<line x1="{cx(0)}" y1="{y_b2+48}" x2="{cx(NC-1)}" y2="{y_b2+48}" stroke="#2563eb" stroke-width="1.1" opacity="0.28"/>')
+    s.append(f'<line x1="{cx(0)}" y1="{y_b2+56}" x2="{cx(NC-1)}" y2="{y_b2+56}" stroke="{RED}" stroke-width="1.1" opacity="0.28"/>')
+    s.append(txt(BX, BY-12, "Circuit-Test MB-104 (two blocks). Rails come in – / + pairs; the MIDDLE has TWO pairs — block-1 bottom + block-2 top, back-to-back", 7.5, "#cbd5e1", "start"))
+    s.append(txt(BX, y_b2+66, "second block + its bottom rail pair (faded) — room to chain the other 595s + LEDs", 7, "#9aa0a6", "start"))
 
     # ----- 74HC595 straddling the channel, columns c0..c0+7 -----
     c0=4
