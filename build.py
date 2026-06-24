@@ -170,24 +170,32 @@ def svg_layout():
 
 # ---------- Diagram: bring-up wiring (breadboard, hole-level control wiring) ----------
 def svg_wiring():
-    W, H = 840, 548
+    W, H = 840, 568
     RED="#dc2626"; BLK="#111827"; PUR="#7c3aed"; CYN="#0891b2"; ORA="#ea580c"; GRN="#16a34a"
     s = [txt(W/2, 22, "Bring-up wiring: Pico + one 74HC595 + eight LEDs", 14.5, INK, "middle", "bold")]
     s.append(txt(W/2, 39, "powered at 3.3 V from the Pico (no ULN2803) — the smallest circuit that lights up", 10.5, MUTE, "middle"))
 
-    # ----- Pico block (left) -----
-    px, py, pw, ph = 24, 96, 94, 322
-    s.append(f'<rect x="{px}" y="{py}" width="{pw}" height="{ph}" rx="8" fill="{C_MCU}"/>')
-    s.append(f'<rect x="{px+pw/2-12}" y="{py+7}" width="24" height="11" rx="3" fill="#0a322e"/>')
-    s.append(txt(px+pw/2, py+33, "USB", 6.5, "#bfe9e3", "middle"))
-    s.append(txt(px+pw/2, py+52, "Raspberry", 9, "#e6fffb", "middle", "bold"))
-    s.append(txt(px+pw/2, py+64, "Pi Pico", 9, "#e6fffb", "middle", "bold"))
-    picopins = [("3V3",RED),("GND",BLK),("GP19",PUR),("GP18",CYN),("GP17",ORA)]
-    piny = {}
-    for i,(nm,col) in enumerate(picopins):
-        yy = py+112+i*42; piny[nm]=(yy,col)
-        s.append(f'<circle cx="{px+pw}" cy="{yy}" r="4" fill="#fff" stroke="{col}" stroke-width="2"/>')
-        s.append(txt(px+pw-9, yy+3, nm, 8.5, "#e6fffb", "end", "bold"))
+    # ----- Pico H (left): realistic 40-pin board; the 5 pins we use sit at their true positions -----
+    px, py, pw, ph = 18, 60, 90, 396
+    s.append(f'<rect x="{px}" y="{py}" width="{pw}" height="{ph}" rx="10" fill="{C_MCU}"/>')
+    s.append(f'<rect x="{px+pw/2-11}" y="{py+5}" width="22" height="10" rx="2.5" fill="#cfd8dc" stroke="#90a4ae" stroke-width="0.6"/>')
+    s.append(txt(px+pw/2, py+28, "USB", 6, "#bfe9e3", "middle"))
+    s.append(f'<circle cx="{px+pw/2}" cy="{py+52}" r="8" fill="#7a1620"/>')
+    s.append(txt(px+pw/2, py+74, "Raspberry Pi", 7, "#e6fffb", "middle", "bold"))
+    s.append(txt(px+pw/2, py+85, "Pico H", 8.5, "#e6fffb", "middle", "bold"))
+    pin_top=py+108; pitch=(ph-122)/19
+    def ppy(pos): return pin_top+pos*pitch
+    for pos in range(20):                  # 40 header pins (gold); unused ones plain
+        s.append(f'<rect x="{px+1}" y="{ppy(pos)-2}" width="6" height="4.5" rx="1" fill="#caa63c"/>')
+        s.append(f'<rect x="{px+pw-7}" y="{ppy(pos)-2}" width="6" height="4.5" rx="1" fill="#caa63c"/>')
+    used=[("GND","38",2,BLK),("3V3","36",4,RED),("GP19","25",15,PUR),("GP18","24",16,CYN),("GP17","22",18,ORA)]
+    piny={}
+    for nm,pn,pos,col in used:
+        yy=ppy(pos); piny[nm]=(yy,col)
+        s.append(f'<rect x="{px+pw-8}" y="{yy-3}" width="9" height="6" rx="1.5" fill="{col}"/>')
+        s.append(txt(px+pw-12, yy+2.6, f"{nm} ({pn})", 6.8, "#e6fffb", "end", "bold"))
+    s.append(txt(px+pw/2, py+ph+13, "Pico H drops in straddling the", 6.8, MUTE, "middle"))
+    s.append(txt(px+pw/2, py+ph+22, "channel; USB hangs off the end", 6.8, MUTE, "middle"))
 
     # ----- breadboard: Circuit-Test MB-104 (large double board; its top terminal block shown) -----
     BX, BY, NC, PITCH = 254, 78, 22, 21
@@ -384,15 +392,20 @@ P.append(f'<figure>{DIAGRAMS["wiring"]}<figcaption><b>Figure 1. Bring-up wiring.
 P.append('<p class="k"><b>Connect it in this order</b> (USB unplugged while wiring):</p>')
 P.append('<table>'
          '<tr><th>#</th><th>From</th><th>To</th><th>Why</th></tr>'
-         '<tr><td>1</td><td>Pico <b>3V3</b></td><td>breadboard <b>+ rail</b></td><td>3.3&nbsp;V power for the whole board</td></tr>'
-         '<tr><td>2</td><td>Pico <b>GND</b></td><td>breadboard <b>&ndash; rail</b></td><td>common ground (jumper the top and bottom &ndash; rails together too)</td></tr>'
+         '<tr><td>1</td><td>Pico <b>3V3</b>&nbsp;(pin&nbsp;36)</td><td>breadboard <b>+ rail</b></td><td>3.3&nbsp;V power for the whole board</td></tr>'
+         '<tr><td>2</td><td>Pico <b>GND</b>&nbsp;(pin&nbsp;38)</td><td>breadboard <b>&ndash; rail</b></td><td>common ground (jumper the top and bottom &ndash; rails together too)</td></tr>'
          '<tr><td>3</td><td>595 <b>VCC&nbsp;(16)</b> and <b>MR&nbsp;(10)</b></td><td>+ rail</td><td>power the chip; MR high = never reset</td></tr>'
          '<tr><td>4</td><td>595 <b>GND&nbsp;(8)</b> and <b>OE&nbsp;(13)</b></td><td>&ndash; rail</td><td>ground the chip; OE low = outputs always on</td></tr>'
-         '<tr><td>5</td><td>Pico <b>GP19</b></td><td>595 <b>SER&nbsp;(14)</b></td><td>serial <b>data</b> in</td></tr>'
-         '<tr><td>6</td><td>Pico <b>GP18</b></td><td>595 <b>SRCLK&nbsp;(11)</b></td><td>shift <b>clock</b></td></tr>'
-         '<tr><td>7</td><td>Pico <b>GP17</b></td><td>595 <b>RCLK&nbsp;(12)</b></td><td><b>latch</b> &mdash; copies the shifted byte to all outputs at once</td></tr>'
+         '<tr><td>5</td><td>Pico <b>GP19</b>&nbsp;(pin&nbsp;25)</td><td>595 <b>SER&nbsp;(14)</b></td><td>serial <b>data</b> in</td></tr>'
+         '<tr><td>6</td><td>Pico <b>GP18</b>&nbsp;(pin&nbsp;24)</td><td>595 <b>SRCLK&nbsp;(11)</b></td><td>shift <b>clock</b></td></tr>'
+         '<tr><td>7</td><td>Pico <b>GP17</b>&nbsp;(pin&nbsp;22)</td><td>595 <b>RCLK&nbsp;(12)</b></td><td><b>latch</b> &mdash; copies the shifted byte to all outputs at once</td></tr>'
          '<tr><td>8</td><td>each output <b>QA&ndash;QH</b> (15, 1&ndash;7)</td><td>240&nbsp;&Omega; &rarr; LED&nbsp;+ &rarr; LED&nbsp;&minus; &rarr; &ndash; rail</td><td>one resistor + LED per output, into the board&rsquo;s spare columns; mind polarity (long leg = +)</td></tr>'
          '</table>')
+P.append('<p class="k"><b>Finding the Pico&rsquo;s pins.</b> The <b>Pico&nbsp;H</b> has its headers pre-soldered, so it drops '
+         'straight into the breadboard <b>straddling the centre channel</b> (USB hanging off one end). All five pins we use '
+         'are along <b>one long edge</b>: <b>3V3</b> (pin&nbsp;36) and a <b>GND</b> (pin&nbsp;38) up near the USB, and '
+         '<b>GP17 / GP18 / GP19</b> (pins&nbsp;22 / 24 / 25) grouped toward the far end. Count pins from the USB end, or read '
+         'the labels printed beside each pin, to find them.</p>')
 P.append('<p class="k"><b>First test:</b> plug in USB and run firmware that shifts out <code>0b10101010</code> then pulses '
          'RCLK &mdash; four alternating LEDs should light. If they do, the data&rarr;shift&rarr;latch&rarr;LED chain works, and '
          'you can scale up: chain more 595s off <b>QH&rsquo;&nbsp;(9)</b>, and add the ULN2803 buffer for full brightness. '
