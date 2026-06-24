@@ -170,7 +170,7 @@ def svg_layout():
 
 # ---------- Diagram: bring-up wiring (breadboard, hole-level control wiring) ----------
 def svg_wiring():
-    W, H = 940, 540
+    W, H = 980, 568
     RED="#dc2626"; BLK="#111827"; PUR="#7c3aed"; CYN="#0891b2"; ORA="#ea580c"; GRN="#16a34a"
     s = [txt(W/2, 22, "Bring-up wiring: Pico + one 74HC595 + eight LEDs", 14.5, INK, "middle", "bold")]
     s.append(txt(W/2, 39, "powered at 3.3 V from the Pico (no ULN2803) — the smallest circuit that lights up", 10.5, MUTE, "middle"))
@@ -189,27 +189,36 @@ def svg_wiring():
         s.append(f'<circle cx="{px+pw}" cy="{yy}" r="4" fill="#fff" stroke="{col}" stroke-width="2"/>')
         s.append(txt(px+pw-9, yy+3, nm, 8.5, "#e6fffb", "end", "bold"))
 
-    # ----- breadboard -----
-    BX, BY, NC, PITCH = 246, 80, 18, 24
-    def cx(c): return BX+28 + c*PITCH
-    bw = 56 + (NC-1)*PITCH
-    y_tp=BY+20; y_tn=BY+36
-    rowsA=[BY+64+r*15 for r in range(5)]
-    y_ch=rowsA[-1]+20
-    rowsF=[y_ch+14+r*15 for r in range(5)]
-    y_bn=rowsF[-1]+26; y_bp=y_bn+16
-    bh=(y_bp+14)-BY
-    s.append(f'<rect x="{BX}" y="{BY}" width="{bw}" height="{bh}" rx="8" fill="#f6f6f4" stroke="{C_BB}"/>')
-    s.append(f'<rect x="{BX}" y="{y_ch-6}" width="{bw}" height="12" fill="#ececea"/>')
+    # ----- breadboard: Circuit-Test MB-104 (large double board; its top terminal block shown) -----
+    BX, BY, NC, PITCH = 254, 78, 22, 21
+    def cx(c): return BX+30 + c*PITCH
+    bw = 60 + (NC-1)*PITCH
+    y_tp=BY+16; y_tn=BY+30                      # top rails: red(+), blue(-)
+    rowsA=[BY+56+r*14 for r in range(5)]        # rows a..e (top half)
+    y_ch=rowsA[-1]+18                           # center channel
+    rowsF=[y_ch+12+r*14 for r in range(5)]      # rows f..j (bottom half)
+    y_bn=rowsF[-1]+22; y_bp=y_bn+14             # bottom rails: blue(-), red(+)
+    bh=(y_bp+16)-BY
+    s.append(f'<rect x="{BX-12}" y="{BY-22}" width="{bw+24}" height="{bh+54}" rx="7" fill="#1c1c1c"/>')  # black tray
+    s.append(f'<rect x="{BX}" y="{BY}" width="{bw}" height="{bh}" rx="3" fill="#fcfcfb" stroke="#d6d6d2"/>')
+    s.append(f'<rect x="{BX}" y="{y_ch-6}" width="{bw}" height="12" fill="#e7e7e3"/>')
     def holes(y):
-        return "".join(f'<circle cx="{cx(c)}" cy="{y}" r="1.8" fill="#cdcdcd"/>' for c in range(NC))
+        return "".join(f'<circle cx="{cx(c)}" cy="{y}" r="1.7" fill="#c9c9c5"/>' for c in range(NC))
     for (yr,clr,lab) in [(y_tp,RED,"+"),(y_tn,"#2563eb","–"),(y_bn,"#2563eb","–"),(y_bp,RED,"+")]:
-        s.append(f'<line x1="{cx(0)}" y1="{yr}" x2="{cx(NC-1)}" y2="{yr}" stroke="{clr}" stroke-width="1.1" opacity="0.5"/>')
+        s.append(f'<line x1="{cx(0)}" y1="{yr}" x2="{cx(NC-1)}" y2="{yr}" stroke="{clr}" stroke-width="1.2" opacity="0.55"/>')
         s.append(holes(yr))
-        s.append(txt(cx(0)-13, yr+3.5, lab, 12, clr, "middle", "bold"))
-    s.append(txt(cx(NC-1)+12, y_tp+3.5, "3.3 V rail", 8, RED, "start"))
-    s.append(txt(cx(NC-1)+12, y_tn+3.5, "GND rail", 8, "#2563eb", "start"))
-    for y in rowsA+rowsF: s.append(holes(y))
+        s.append(txt(cx(0)-10, yr+3.5, lab, 11, clr, "middle", "bold"))
+        s.append(txt(cx(NC-1)+9, yr+3.5, lab, 11, clr, "start", "bold"))
+    rl=list("abcde")+list("fghij")
+    for i,y in enumerate(rowsA+rowsF):
+        s.append(holes(y))
+        s.append(txt(cx(NC-1)+9, y+2.6, rl[i], 7, MUTE, "start"))
+        s.append(txt(cx(0)-9, y+2.6, rl[i], 7, MUTE, "end"))
+    for c in range(NC):                          # column numbers every 5 (like the real board)
+        if (c+1)%5==0:
+            s.append(txt(cx(c), (y_tn+rowsA[0])/2+2, str(c+1), 6.5, "#9aa0a6", "middle"))
+    s.append(txt(BX, BY-12, "Circuit-Test MB-104 (large double board) — red + / blue – rails, rows a–j, columns numbered", 8.5, "#cbd5e1", "start"))
+    s.append(txt(BX, y_bp+30, "the MB-104 has a second identical terminal block below this one — room to chain more 595s + LEDs", 7.5, "#cbd5e1", "start"))
 
     # ----- 74HC595 straddling the channel, columns c0..c0+7 -----
     c0=4
@@ -223,8 +232,9 @@ def svg_wiring():
     for i in range(8):
         s.append(f'<circle cx="{cx(c0+i)}" cy="{rowE}" r="2.4" fill="#cfe0ff"/>')
         s.append(f'<circle cx="{cx(c0+i)}" cy="{rowF}" r="2.4" fill="#cfe0ff"/>')
-        s.append(txt(cx(c0+i), rowE-10, topnames[i], 7, "#1e3a8a", "middle", "bold"))
-        s.append(txt(cx(c0+i), rowF+15, botnames[i], 7, "#1e3a8a", "middle", "bold"))
+        ty = rowE-9 if i%2==0 else rowE-19
+        s.append(txt(cx(c0+i), ty, topnames[i], 6.5, "#1e3a8a", "middle", "bold"))
+        s.append(txt(cx(c0+i), rowF+15, botnames[i], 6.5, "#1e3a8a", "middle", "bold"))
 
     # ----- control jumpers (hole to hole) -----
     def vwire(c, y1, y2, col, w=2.2):
