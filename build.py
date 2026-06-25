@@ -170,137 +170,94 @@ def svg_layout():
 
 # ---------- Diagram: bring-up wiring (breadboard, hole-level control wiring) ----------
 def svg_wiring():
-    W, H = 840, 568
-    RED="#dc2626"; BLK="#111827"; PUR="#7c3aed"; CYN="#0891b2"; ORA="#ea580c"; GRN="#16a34a"
-    s = [txt(W/2, 22, "Bring-up wiring: Pico + one 74HC595 + eight LEDs", 14.5, INK, "middle", "bold")]
-    s.append(txt(W/2, 39, "powered at 3.3 V from the Pico (no ULN2803) — the smallest circuit that lights up", 10.5, MUTE, "middle"))
-
-    # ----- Pico H (left): realistic 40-pin board; the 5 pins we use sit at their true positions -----
-    px, py, pw, ph = 18, 60, 90, 396
-    s.append(f'<rect x="{px}" y="{py}" width="{pw}" height="{ph}" rx="10" fill="{C_MCU}"/>')
-    s.append(f'<rect x="{px+pw/2-11}" y="{py+5}" width="22" height="10" rx="2.5" fill="#cfd8dc" stroke="#90a4ae" stroke-width="0.6"/>')
-    s.append(txt(px+pw/2, py+28, "USB", 6, "#bfe9e3", "middle"))
-    s.append(f'<circle cx="{px+pw/2}" cy="{py+52}" r="8" fill="#7a1620"/>')
-    s.append(txt(px+pw/2, py+74, "Raspberry Pi", 7, "#e6fffb", "middle", "bold"))
-    s.append(txt(px+pw/2, py+85, "Pico H", 8.5, "#e6fffb", "middle", "bold"))
-    pin_top=py+108; pitch=(ph-122)/19
-    def ppy(pos): return pin_top+pos*pitch
-    for pos in range(20):                  # 40 header pins (gold); unused ones plain
-        s.append(f'<rect x="{px+1}" y="{ppy(pos)-2}" width="6" height="4.5" rx="1" fill="#caa63c"/>')
-        s.append(f'<rect x="{px+pw-7}" y="{ppy(pos)-2}" width="6" height="4.5" rx="1" fill="#caa63c"/>')
-    used=[("3V3","36",4,RED),("GP19","25",15,PUR),("GP18","24",16,CYN),("GND","23",17,BLK),("GP17","22",18,ORA)]
-    piny={}
-    for nm,pn,pos,col in used:
-        yy=ppy(pos); piny[nm]=(yy,col)
-        s.append(f'<rect x="{px+pw-8}" y="{yy-3}" width="9" height="6" rx="1.5" fill="{col}"/>')
-        s.append(txt(px+pw-12, yy+2.6, f"{nm} ({pn})", 6.8, "#e6fffb", "end", "bold"))
-    s.append(txt(px+pw/2, py+ph+13, "Pico H drops in straddling the", 6.8, MUTE, "middle"))
-    s.append(txt(px+pw/2, py+ph+22, "channel; USB hangs off the end", 6.8, MUTE, "middle"))
-
-    # ----- breadboard: Circuit-Test MB-104 in FULL — 28 rows: top pair, block-1 (a–j), four middle rails, block-2 (a–j), bottom pair -----
-    BX, BY, NC, PITCH = 254, 60, 22, 21
-    def cx(c): return BX+30 + c*PITCH
-    bw = 60 + (NC-1)*PITCH
-    RP=10                                            # vertical pitch between rows / rails
-    y_tp=BY+11; y_tn=BY+22                            # TOP pair: + (red) over – (blue)
-    rowsA=[BY+38+r*RP for r in range(5)]             # block-1 rows a..e
-    y_ch=rowsA[-1]+12                               # block-1 channel (between e and f)
-    rowsF=[y_ch+10+r*RP for r in range(5)]           # block-1 rows f..j
-    y_m0=rowsF[-1]+15; y_m1=y_m0+11                 # MIDDLE upper pair (block-1 bottom): + over –
-    y_m2=y_m1+12; y_m3=y_m2+11                      # MIDDLE lower pair (block-2 top):  + over –
-    rows2A=[y_m3+16+r*RP for r in range(5)]          # block-2 rows a..e
-    y_ch2=rows2A[-1]+12                             # block-2 channel
-    rows2F=[y_ch2+10+r*RP for r in range(5)]         # block-2 rows f..j
-    y_b0=rows2F[-1]+15; y_b1=y_b0+11               # BOTTOM pair: + over –
-    bh=(y_b1+13)-BY
-    s.append(f'<rect x="{BX-12}" y="{BY-18}" width="{bw+24}" height="{bh+30}" rx="7" fill="#1c1c1c"/>')  # black tray
-    s.append(f'<rect x="{BX}" y="{BY}" width="{bw}" height="{bh}" rx="3" fill="#fcfcfb" stroke="#d6d6d2"/>')
-    s.append(f'<rect x="{BX}" y="{y_ch-5}" width="{bw}" height="10" fill="#e7e7e3"/>')     # block-1 channel
-    s.append(f'<rect x="{BX}" y="{y_ch2-5}" width="{bw}" height="10" fill="#e7e7e3"/>')    # block-2 channel
-    def holes(y, fill="#c9c9c5"):
-        return "".join(f'<circle cx="{cx(c)}" cy="{y}" r="1.5" fill="{fill}"/>' for c in range(NC))
-    # all FOUR rail pairs, each + (red) over – (blue): top, two back-to-back in the middle, bottom
-    for (yr,clr,lab) in [(y_tp,RED,"+"),(y_tn,"#2563eb","–"),(y_m0,RED,"+"),(y_m1,"#2563eb","–"),(y_m2,RED,"+"),(y_m3,"#2563eb","–"),(y_b0,RED,"+"),(y_b1,"#2563eb","–")]:
-        s.append(f'<line x1="{cx(0)}" y1="{yr}" x2="{cx(NC-1)}" y2="{yr}" stroke="{clr}" stroke-width="1.2" opacity="0.6"/>')
-        s.append(holes(yr))
-        s.append(txt(cx(0)-9, yr+3, lab, 9, clr, "middle", "bold"))
-        s.append(txt(cx(NC-1)+8, yr+3, lab, 9, clr, "start", "bold"))
-    rl=list("abcde")+list("fghij")
-    for blockrows in (rowsA+rowsF, rows2A+rows2F):
-        for i,y in enumerate(blockrows):
-            s.append(holes(y))
-            s.append(txt(cx(NC-1)+8, y+2.2, rl[i], 5.5, MUTE, "start"))
-            s.append(txt(cx(0)-8, y+2.2, rl[i], 5.5, MUTE, "end"))
-    for c in range(NC):                              # column numbers every 5 (like the real board)
-        if (c+1)%5==0:
-            s.append(txt(cx(c), (y_tn+rowsA[0])/2+1, str(c+1), 5.5, "#9aa0a6", "middle"))
-    s.append(txt(BX, BY-7, "Circuit-Test MB-104 — TWO blocks (rows a–j each) + FOUR + / – rail pairs (red + over blue –): top, two back-to-back in the middle, bottom = 28 rows", 6.6, "#cbd5e1", "start"))
-    s.append(txt(BX, y_b1+12, "block 2 is spare here — room to chain the other 595s + LEDs", 6.2, "#9aa0a6", "start"))
-
-    # ----- 74HC595 straddling the channel, columns c0..c0+7 -----
-    c0=4
-    rowE=rowsA[-1]; rowF=rowsF[0]; rowA=rowsA[0]; rowJ=rowsF[-1]
-    chx1=cx(c0)-9; chx2=cx(c0+7)+9
-    s.append(f'<rect x="{chx1}" y="{rowE-7}" width="{chx2-chx1}" height="{rowF+7-(rowE-7)}" rx="3" fill="{C_SHIFT}"/>')
-    s.append(f'<circle cx="{cx(c0)}" cy="{(rowE+rowF)/2}" r="3" fill="none" stroke="#cbd5e1"/>')
-    s.append(txt((chx1+chx2)/2, (rowE+rowF)/2+3, "74HC595", 8.5, "#dbeafe", "middle", "bold"))
-    topnames=["VCC","QA","SER","OE","RCLK","SRCLK","MR","QH'"]
-    botnames=["QB","QC","QD","QE","QF","QG","QH","GND"]
-    for i in range(8):
-        s.append(f'<circle cx="{cx(c0+i)}" cy="{rowE}" r="2.4" fill="#cfe0ff"/>')
-        s.append(f'<circle cx="{cx(c0+i)}" cy="{rowF}" r="2.4" fill="#cfe0ff"/>')
-        ty = rowE-9 if i%2==0 else rowE-19
-        s.append(txt(cx(c0+i), ty, topnames[i], 6.5, "#1e3a8a", "middle", "bold"))
-        s.append(txt(cx(c0+i), rowF+15, botnames[i], 6.5, "#1e3a8a", "middle", "bold"))
-
-    # ----- control jumpers (hole to hole) -----
-    def vwire(c, y1, y2, col, w=2.2):
-        return f'<line x1="{cx(c)}" y1="{y1}" x2="{cx(c)}" y2="{y2}" stroke="{col}" stroke-width="{w}" stroke-linecap="round"/>'
-    # power & ground taps — + pins to the top + rail, – pins to the – line in the middle. One jumper each, no rail-tie.
-    def C(x1,y1,x2,y2,col,w=2.2):
-        mx=(x1+x2)/2
-        return f'<path d="M{x1},{y1} C{mx},{y1} {mx},{y2} {x2},{y2}" fill="none" stroke="{col}" stroke-width="{w}" stroke-linecap="round"/>'
-    s.append(vwire(c0+0, y_tp, rowA, RED))       # VCC -> the top + rail
-    s.append(vwire(c0+6, y_tp, rowA, RED))       # MR  -> + rail
-    s.append(vwire(c0+7, rowJ, y_m1, "#2563eb")) # chip GND -> the – line in the middle (just below the block)
-    s.append(vwire(c0+3, y_tn, rowsA[0], "#2563eb"))                      # OE -> the – rail right above the chip (short)
-    yy,_ = piny["GP19"]; s.append(C(px+pw, yy, cx(c0+2), rowsA[3], PUR))  # GP19 -> SER (col6)
-    yy,_ = piny["GP18"]; s.append(C(px+pw, yy, cx(c0+5), rowsA[3], CYN))  # GP18 -> SRCLK (col9)
-    yy,_ = piny["GP17"]; s.append(C(px+pw, yy, cx(c0+4), rowsA[3], ORA))  # GP17 -> RCLK (col8)
-    yy,_ = piny["3V3"];  s.append(C(px+pw, yy, cx(0), y_tp, RED))         # 3V3 -> + rail (top)
-    yy,_ = piny["GND"];  s.append(C(px+pw, yy, cx(0), y_m1, BLK))         # GND -> – rail (middle)
-    s.append(C(px+pw, yy, cx(1), y_tn, BLK))                              # 2nd GND tap -> top – rail (grounds it for OE + the cap)
-    # 0.1 µF decoupling cap across the top + / – rails, right beside the 595 — short leads, clean supply when 8 outputs switch
-    capx=cx(2)
-    s.append(f'<line x1="{capx}" y1="{y_tp}" x2="{capx}" y2="{y_tn}" stroke="#9a7b3a" stroke-width="1.3"/>')
-    s.append(f'<rect x="{capx-5}" y="{(y_tp+y_tn)/2-3.5}" width="10" height="7" rx="3" fill="#e8c17a" stroke="#b8893a" stroke-width="0.7"/>')
-    s.append(txt(capx, y_tp-2.5, "0.1µF", 5.5, "#8a6d2a", "middle", "bold"))
-
-    # ----- outputs -> 240 ohm (straddles the channel) -> green LED -> GND rail, ALL plugged into the board -----
-    GLED="#22c55e"
-    outpins = [("QA",c0+1,rowE)] + [(f"Q{ch}",c0+j,rowF) for j,ch in enumerate("BCDEFGH")]  # QA..QH at their pin columns
-    ledcols = list(range(13,21))            # 8 spare columns to the right of the chip
-    for i in range(8):
-        lc = ledcols[i]; nm,oc,oy = outpins[i]
-        # jumper: output pin -> LED column, top half
-        s.append(f'<path d="M{cx(oc)},{oy} C{cx(oc)+24},{oy} {cx(lc)-24},{rowsA[0]} {cx(lc)},{rowsA[0]}" fill="none" stroke="{C_RES}" stroke-width="1.1" opacity="0.6"/>')
-        # 240 ohm resistor straddling the centre channel (top node -> bottom node, like the chip)
-        s.append(f'<rect x="{cx(lc)-3}" y="{rowsA[4]-2}" width="6" height="{rowsF[0]+2-(rowsA[4]-2)}" rx="2" fill="#d6b06a" stroke="#a07d3a" stroke-width="0.6"/>')
-        # green LED in the bottom half, cathode jumper down to the GND rail
-        s.append(f'<line x1="{cx(lc)}" y1="{rowsF[2]+4}" x2="{cx(lc)}" y2="{y_m1}" stroke="#2563eb" stroke-width="1.3"/>')
-        s.append(f'<circle cx="{cx(lc)}" cy="{rowsF[2]}" r="5.5" fill="{GLED}" stroke="#15803d" stroke-width="0.6"/>')
-        s.append(f'<circle cx="{cx(lc)-2}" cy="{rowsF[2]-2}" r="1.6" fill="#fff" opacity="0.55"/>')
-    s.append(f'<text x="{cx(ledcols[0])}" y="{rowsF[2]+3}" font-size="7" fill="{GRN}" text-anchor="end" font-weight="bold">8 LEDs&#8594;</text>')
-
-    # ----- legend -----
-    ly0=H-46
-    leg=[("3.3 V",RED),("GND",BLK),("SER data",PUR),("SRCLK clock",CYN),("RCLK latch",ORA),("output → LED",C_RES)]
-    lx=40
+    # Bring-up across BOTH MB-104 strips: Pico + 595 on the LEFT strip, 8-LED comb on the RIGHT. Exact holes.
+    P=17.0; HOLE=6.0; R0=1; RN=33; LX=120; TY=92
+    RED="#dc2626"; BLUE="#2563eb"; HOLEC="#39393c"; GRN="#22c55e"; ORA="#ea580c"; PUR="#7c3aed"; CYN="#0891b2"; TAN="#d6b06a"
+    seq=[("LEFT+","rail"),("LEFT-","rail"),
+         ("La","s"),("Lb","s"),("Lc","s"),("Ld","s"),("Le","s"),("|L","gap"),("Lf","s"),("Lg","s"),("Lh","s"),("Li","s"),("Lj","s"),
+         ("MIDa+","rail"),("MIDa-","rail"),("MIDb+","rail"),("MIDb-","rail"),
+         ("Ra","s"),("Rb","s"),("Rc","s"),("Rd","s"),("Re","s"),("|R","gap"),("Rf","s"),("Rg","s"),("Rh","s"),("Ri","s"),("Rj","s"),
+         ("RIGHT+","rail"),("RIGHT-","rail")]
+    X={}; x=LX
+    for nm,k in seq:
+        if k=="gap": x+=P*0.85; continue
+        X[nm]=x; x+=P
+        if nm in ("LEFT-","Lj","MIDb-","Rj"): x+=P*0.55
+    GR=x; W=int(GR+30); H=int(TY+(RN-R0)*P+56)
+    def cx(c): return X[c]
+    def cy(r): return TY+(r-R0)*P
+    s=[]
+    def rect(x,y,w,h,r,fill,ex=""): s.append(f'<rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" height="{h:.1f}" rx="{r}" fill="{fill}" {ex}/>')
+    def txt(x,y,t,sz,fill,a="middle",w="normal"): s.append(f'<text x="{x:.1f}" y="{y:.1f}" font-size="{sz}" fill="{fill}" text-anchor="{a}" font-weight="{w}">{t}</text>')
+    def line(x1,y1,x2,y2,c,w=2.2): s.append(f'<line x1="{x1:.1f}" y1="{y1:.1f}" x2="{x2:.1f}" y2="{y2:.1f}" stroke="{c}" stroke-width="{w}" stroke-linecap="round"/>')
+    def J(c1,r1,c2,r2,clr,w=2.0):
+        x1,y1,x2,y2=cx(c1),cy(r1),cx(c2),cy(r2); mx=(x1+x2)/2
+        s.append(f'<path d="M{x1:.1f},{y1:.1f} C{mx:.1f},{y1:.1f} {mx:.1f},{y2:.1f} {x2:.1f},{y2:.1f}" fill="none" stroke="{clr}" stroke-width="{w}" stroke-linecap="round"/>')
+    def hole(c,r,fill=HOLEC): s.append(f'<rect x="{cx(c)-HOLE/2:.1f}" y="{cy(r)-HOLE/2:.1f}" width="{HOLE}" height="{HOLE}" rx="1.3" fill="{fill}"/>')
+    gtop=cy(R0)-9; gbot=cy(RN)+9
+    rect(5,5,W-10,H-10,15,"#1d1d1d")
+    for grp in [("La","Lj"),("Ra","Rj")]:
+        rect(cx(grp[0])-8,gtop,(cx(grp[1])-cx(grp[0]))+16,gbot-gtop,5,"#f3f1ea")
+    rails=[("LEFT+","#bbb"),("LEFT-","#bbb"),("MIDa+",RED),("MIDa-",BLUE),("MIDb+",RED),("MIDb-",BLUE),("RIGHT+","#bbb"),("RIGHT-",BLUE)]
+    for rl,clr in rails:
+        rect(cx(rl)-6,gtop,12,gbot-gtop,4,"#f3f1ea"); line(cx(rl),gtop+3,cx(rl),gbot-3,clr,2.0)
+    for gcx in [(cx("Le")+cx("Lf"))/2,(cx("Re")+cx("Rf"))/2]:
+        rect(gcx-6,gtop+2,12,(gbot-2)-(gtop+2),2,"#d9d6cc")
+    allcols=[c for c,k in seq if k in ("s","rail")]
+    for c in allcols:
+        for r in range(R0,RN+1): hole(c,r)
+    for c in allcols:
+        lab=c[-1] if (c[0] in "LR" and len(c)==2) else ("+" if c.endswith("+") else "–")
+        cl=RED if c.endswith("+") else (BLUE if c.endswith("-") else "#d6dde5")
+        txt(cx(c),gtop-5,lab,8.5,cl,"middle","bold")
+    txt(cx("MIDa+"),gtop-18,"3V3",7,RED,"middle","bold"); txt(cx("MIDa-"),gtop-18,"GND",7,BLUE,"middle","bold")
+    txt(cx("RIGHT-"),gtop-18,"GND",7,BLUE,"middle","bold")
+    for r in range(R0,RN+1):
+        if r==1 or r%5==0: txt(LX-26,cy(r)+3,str(r),8,"#cbd5e1","middle")
+    px1,px2=cx("Lc"),cx("Lh"); py1,py2=cy(1),cy(20)
+    rect(px1-8,py1-8,(px2-px1)+16,(py2-py1)+16,6,"#0b6b5e",'opacity="0.92"')
+    txt((px1+px2)/2,py1-8+13,"Pico (USB ↑)",8,"#dffaf4","middle","bold")
+    txt((px1+px2)/2,(py1+py2)/2,"PICO",13,"#0d4a41","middle","bold")
+    for nm,c,r,cl in [("3V3","Lh",5,RED),("GP19","Lh",16,PUR),("GP18","Lh",17,CYN),("GND","Lh",18,BLUE),("GP17","Lh",19,ORA)]:
+        hole(c,r,cl); txt(cx(c)+8,cy(r)+3,nm,6,cl,"start","bold")
+    qx1,qx2=cx("Le"),cx("Lf"); qy1,qy2=cy(24),cy(31)
+    rect(qx1-7,qy1-7,(qx2-qx1)+14,(qy2-qy1)+14,3,"#23252b")
+    txt((qx1+qx2)/2,(qy1+qy2)/2,"595",9,"#9fb0c0","middle","bold")
+    p595={"QB":("Lf",24),"QC":("Lf",25),"QD":("Lf",26),"QE":("Lf",27),"QF":("Lf",28),"QG":("Lf",29),"QH":("Lf",30),"GNDp":("Lf",31),
+          "VCC":("Le",24),"QA":("Le",25),"SER":("Le",26),"OE":("Le",27),"RCLK":("Le",28),"SRCLK":("Le",29),"MR":("Le",30),"QHp":("Le",31)}
+    for nm,(c,r) in p595.items():
+        hole(c,r,"#c9a36a")
+        if c=="Le":
+            lab={"VCC":"VCC","QA":"QA","SER":"SER","OE":"OE","RCLK":"RCK","SRCLK":"SCK","MR":"MR","QHp":"QH'"}.get(nm,nm)
+            txt(cx(c)-7,cy(r)+2.5,lab,5,"#9aa3ad","end")
+    J("Lh",5,"MIDa+",5,RED); J("Lh",18,"MIDa-",18,BLUE)
+    line(cx("MIDa+"),cy(22),cx("LEFT+"),cy(22),RED,1.8); line(cx("MIDa-"),cy(23),cx("LEFT-"),cy(23),BLUE,1.8)
+    line(cx("MIDa-"),cy(33),cx("RIGHT-"),cy(33),BLUE,1.8)
+    J("Le",24,"LEFT+",24,RED); J("Le",30,"LEFT+",30,RED)
+    J("Le",27,"LEFT-",27,BLUE)
+    J("Lf",31,"MIDa-",31,BLUE)
+    J("Lh",16,"Le",26,PUR); J("Lh",17,"Le",29,CYN); J("Lh",19,"Le",28,ORA)
+    leds=[("QB","Lf",24,24),("QC","Lf",25,25),("QD","Lf",26,26),("QE","Lf",27,27),
+          ("QF","Lf",28,28),("QG","Lf",29,29),("QH","Lf",30,30),("QA","Le",25,31)]
+    for nm,oc,orow,lr in leds:
+        ay=cy(lr)
+        J(oc,orow,"Ra",lr,TAN,1.7)
+        line(cx("Rc"),ay,cx("Rg"),ay,"#9a8050",1.1)
+        rect((cx("Rc")+cx("Rg"))/2-7,ay-2.5,14,5,2,TAN,'stroke="#a07d3a" stroke-width="0.5"')
+        ah=cx("Rh"); rk=cx("RIGHT-"); dm=ah+0.6*(rk-ah)
+        line(ah,ay,dm-4,ay,"#9aa0a6",1.5)
+        line(dm+4,ay,rk,ay,"#9aa0a6",1.5)
+        s.append(f'<circle cx="{dm:.1f}" cy="{ay:.1f}" r="4.6" fill="{GRN}" stroke="#15803d" stroke-width="0.7"/>')
+        hole("Rh",lr,"#2a2a2a"); txt(ah,ay-7,"+",6.5,"#15803d","middle","bold")
+        txt(rk,ay-7,"–",6.5,BLUE,"middle","bold")
+        txt(dm,ay+10,nm,5,"#9aa0a6","middle")
+    txt((cx("Rc")+cx("RIGHT-"))/2,cy(24)-12,"LEDs: long lead (+) → hole Rh,  short lead (–) → GND rail",6,GRN,"middle","bold")
+    txt(W/2,24,"Bring-up across both strips — Pico + 595 (left), 8-LED comb (right)",12,"#ffffff","middle","bold")
+    txt(W/2,40,"595 outputs face right, so each LED sits across from its output (rows 24–31)",8.5,"#aab2bd","middle")
+    leg=[("3V3",RED),("GND",BLUE),("SER",PUR),("SRCLK",CYN),("RCLK",ORA),("output→LED",TAN)]
+    lx=40; ly=H-14
     for lab,col in leg:
-        s.append(f'<line x1="{lx}" y1="{ly0}" x2="{lx+22}" y2="{ly0}" stroke="{col}" stroke-width="3" stroke-linecap="round"/>')
-        s.append(txt(lx+28, ly0+3.5, lab, 9.5, INK, "start"))
-        lx += 36 + 7.2*len(lab)
-    s.append(txt(40, ly0+24, "VCC/MR/3V3 → top + rail; GND + LED cathodes → the – line in the middle; OE → the – rail just above the chip. The 0.1 µF cap across the supply by the 595 keeps switching edges clean. MR→+3.3 V = never reset.", 7.8, MUTE, "start"))
+        line(lx,ly,lx+18,ly,col,3); txt(lx+22,ly+3.2,lab,8.5,"#d6dde5","start"); lx+=34+6.2*len(lab)
     return wrap("".join(s), W, H)
 
 DIAGRAMS = {
@@ -396,29 +353,31 @@ P.append('<p class="k"><b>No display panel needed yet.</b> For this first light-
          'breadboard</b> (as drawn). You only need the separate display panel <i>later</i>, for the actual multi-camera '
          'filming &mdash; there the LEDs must spread out at 3&ndash;5&nbsp;cm pitch so every camera can resolve them, and '
          '10&nbsp;mm domes are too wide to pack on a breadboard. The panel board is in &sect;2.</p>')
-P.append(f'<figure>{DIAGRAMS["wiring"]}<figcaption><b>Figure 1. Bring-up wiring.</b> The Pico clocks a pattern into one '
-         '74HC595 over three wires (data&nbsp;SER, clock&nbsp;SRCLK, latch&nbsp;RCLK); its eight parallel outputs '
-         'QA&ndash;QH each drive one green LED through a 240&nbsp;&Omega; resistor to ground. Power and ground come from the '
-         'Pico&rsquo;s 3V3 and GND pins via the breadboard rails. Everything &mdash; chip, resistors and LEDs &mdash; plugs '
-         'directly into the MB-104 breadboard, drawn to match our actual board (rows a&ndash;j, numbered columns).</figcaption></figure>')
-P.append('<p class="k"><b>Connect it in this order</b> (USB unplugged while wiring). The MB-104&rsquo;s rails come in '
-         '<b>+ / &ndash; pairs</b> (red <b>+</b> on top, blue <b>&ndash;</b> below), and the middle of the board carries <b>two</b> '
-         'pairs back-to-back &mdash; block-1&rsquo;s bottom rails and block-2&rsquo;s top rails. We build in the top block: '
-         '<b>+ pins go to the top + rail</b>; <b>GND and the LED cathodes to the &ndash; line in the middle</b>; <b>OE to the '
-         '&ndash; rail just above the chip</b>. Add a <b>0.1&nbsp;µF decoupling cap</b> across the + and &ndash; rails right by '
-         'the 595 &mdash; it keeps the supply clean when all eight outputs switch together, which is what keeps the edges sharp.</p>')
+P.append(f'<figure>{DIAGRAMS["wiring"]}<figcaption><b>Figure 1. Bring-up wiring (exact holes).</b> The Pico and 595 sit on the '
+         '<b>left strip</b>; the eight LEDs form a comb on the <b>right strip</b>. The Pico clocks a byte into the 595 over three '
+         'wires (data&nbsp;SER, clock&nbsp;SRCLK, latch&nbsp;RCLK); each output QA&ndash;QH drives one green LED through a '
+         '240&nbsp;&Omega; resistor to ground. The 595&rsquo;s outputs face right, so <b>each LED sits in the same row as its '
+         'output</b> and the eight output&rarr;LED wires run straight across as a tidy ribbon. Holes use the '
+         '<b>L&hellip;&nbsp;/&nbsp;R&hellip;</b> convention (Left or Right strip, column&nbsp;a&ndash;j, row&nbsp;1&ndash;63).</figcaption></figure>')
+P.append('<p class="k"><b>Connect it in this order</b> (USB unplugged while wiring). Power runs on the <b>central rails</b> '
+         'between the strips &mdash; Pico <b>3V3&nbsp;&rarr;&nbsp;+</b> rail and <b>GND&nbsp;&rarr;&nbsp;&ndash;</b> rail &mdash; with short '
+         'ties carrying + / &ndash; to the left rails (for the 595) and ground out to the right rail (for the LED cathodes). Every '
+         '<b>LED has two leads in two holes</b>: the <b>long lead (anode,&nbsp;+)</b> into the resistor&rsquo;s hole, the '
+         '<b>short lead (cathode,&nbsp;&ndash;)</b> into the adjacent ground rail.</p>')
 P.append('<table>'
-         '<tr><th>#</th><th>From</th><th>To</th><th>Why</th></tr>'
-         '<tr><td>1</td><td>Pico <b>3V3</b>&nbsp;(pin&nbsp;36)</td><td>the <b>top + rail</b></td><td>3.3&nbsp;V power for the whole board</td></tr>'
-         '<tr><td>2</td><td>Pico <b>GND</b>&nbsp;(pin&nbsp;23)</td><td>a <b>&ndash; line in the middle</b>, plus a 2nd jumper up to the <b>top &ndash; rail</b></td><td>grounds both &ndash; rails the chip uses (no cross-board tie)</td></tr>'
-         '<tr><td>3</td><td>595 <b>VCC&nbsp;(16)</b> and <b>MR&nbsp;(10)</b></td><td>top + rail</td><td>power the chip; MR high = never reset</td></tr>'
-         '<tr><td>4</td><td>595 <b>GND&nbsp;(8)</b> &rarr; middle &ndash; line; <b>OE&nbsp;(13)</b> &rarr; the &ndash; rail above the chip</td><td>&ndash; rails</td><td>ground the chip; OE low = outputs always on</td></tr>'
-         '<tr><td>5</td><td><b>0.1&nbsp;µF cap</b></td><td>across the <b>+ and &ndash; rails</b> right by the 595</td><td>decoupling &mdash; a clean supply when all 8 outputs flip at once (sharp edges)</td></tr>'
-         '<tr><td>6</td><td>Pico <b>GP19</b>&nbsp;(pin&nbsp;25)</td><td>595 <b>SER&nbsp;(14)</b></td><td>serial <b>data</b> in</td></tr>'
-         '<tr><td>7</td><td>Pico <b>GP18</b>&nbsp;(pin&nbsp;24)</td><td>595 <b>SRCLK&nbsp;(11)</b></td><td>shift <b>clock</b></td></tr>'
-         '<tr><td>8</td><td>Pico <b>GP17</b>&nbsp;(pin&nbsp;22)</td><td>595 <b>RCLK&nbsp;(12)</b></td><td><b>latch</b> &mdash; copies the shifted byte to all outputs at once</td></tr>'
-         '<tr><td>9</td><td>each output <b>QA&ndash;QH</b> (15, 1&ndash;7)</td><td>240&nbsp;&Omega; &rarr; LED&nbsp;+ &rarr; LED&nbsp;&minus; &rarr; &ndash; rail</td><td>one resistor + LED per output, into the board&rsquo;s spare columns; mind polarity (long leg = +)</td></tr>'
+         '<tr><th>#</th><th>From (hole)</th><th>To (hole)</th><th>Why</th></tr>'
+         '<tr><td>1</td><td>Pico <b>3V3</b> (pin&nbsp;36) at <code>Lh5</code></td><td><b>+ rail</b> &mdash; centre <code>MIDa+</code></td><td>3.3&nbsp;V for the whole board</td></tr>'
+         '<tr><td>2</td><td>Pico <b>GND</b> (pin&nbsp;23) at <code>Lh18</code></td><td><b>&ndash; rail</b> &mdash; centre <code>MIDa&ndash;</code></td><td>common ground</td></tr>'
+         '<tr><td>3</td><td><b>rail ties</b></td><td><code>MIDa+&harr;LEFT+</code>, <code>MIDa&ndash;&harr;LEFT&ndash;</code>, <code>MIDa&ndash;&harr;RIGHT&ndash;</code></td><td>brings + / &ndash; to the left rails (595) and ground to the right rail (LED cathodes)</td></tr>'
+         '<tr><td>4</td><td>595 <b>VCC</b> <code>Le24</code>, <b>MR</b> <code>Le30</code></td><td><b>LEFT+</b> rail</td><td>power the chip; MR high = never reset</td></tr>'
+         '<tr><td>5</td><td>595 <b>GND&nbsp;(8)</b> <code>Lf31</code>; <b>OE</b> <code>Le27</code></td><td><code>MIDa&ndash;</code> ; <b>LEFT&ndash;</b></td><td>ground the chip; OE low = outputs on</td></tr>'
+         '<tr><td>6</td><td>Pico <b>GP19</b> <code>Lh16</code></td><td>595 <b>SER</b> <code>Le26</code></td><td>serial <b>data</b></td></tr>'
+         '<tr><td>7</td><td>Pico <b>GP18</b> <code>Lh17</code></td><td>595 <b>SRCLK</b> <code>Le29</code></td><td>shift <b>clock</b></td></tr>'
+         '<tr><td>8</td><td>Pico <b>GP17</b> <code>Lh19</code></td><td>595 <b>RCLK</b> <code>Le28</code></td><td><b>latch</b></td></tr>'
+         '<tr><td>9</td><td>each output QB&ndash;QH <code>Lf24&ndash;Lf30</code>, QA <code>Le25</code></td><td><code>Ra</code> of that LED&rsquo;s row (ribbon straight across)</td><td>output &rarr; right strip, same row</td></tr>'
+         '<tr><td>10</td><td>per LED row: <b>240&nbsp;&Omega;</b> <code>Rc&rarr;Rg</code>, then <b>LED</b> long&nbsp;lead&nbsp;(+) <code>Rh</code>, short&nbsp;lead&nbsp;(&ndash;) &rarr; <b>RIGHT&ndash;</b></td><td>rows 24&ndash;31</td><td>resistor across the channel, LED to ground; long lead is +</td></tr>'
          '</table>')
+P.append('<p class="k"><b>LED rows:</b> QB&rarr;24, QC&rarr;25, QD&rarr;26, QE&rarr;27, QF&rarr;28, QG&rarr;29, QH&rarr;30, QA&rarr;31.</p>')
 P.append('<p class="k"><b>Finding the Pico&rsquo;s pins.</b> The <b>Pico&nbsp;H</b> has its headers pre-soldered, so it drops '
          'straight into the breadboard <b>straddling the centre channel</b> (USB hanging off one end). All five pins we use '
          'are along <b>one long edge</b>: <b>3V3</b> (pin&nbsp;36) up near the USB, then a <b>GND</b> with '
