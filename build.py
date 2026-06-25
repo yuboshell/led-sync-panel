@@ -443,77 +443,62 @@ def svg_wiring_b():
     return wrap("".join(s), W, H)
 
 def svg_schematic():
-    # Academic circuit schematic: Pico -> 74HC595 -> 8x (R + LED) -> GND. Logical, not physical.
+    # Academic schematic: Pico -> 74HC595 -> 8x(240ohm+LED). Conventions: dot = junction (connected);
+    # hop-arc = crossing (NOT connected). Laid out so wires DON'T cross; every real join carries a dot.
     W,H=820,560
-    INK="#1f2937"; RED="#c0392b"; BLU="#1f5fb4"; GRN="#1f9d55"; MUT="#6b7280"
+    INK="#1f2937"; RED="#c0392b"; GRN="#1f9d55"; MUT="#6b7280"
     s=[]
     def rect(x,y,w,h,fill="none",stroke=INK,sw=1.4,rx=2): s.append(f'<rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" height="{h:.1f}" rx="{rx}" fill="{fill}" stroke="{stroke}" stroke-width="{sw}"/>')
     def ln(x1,y1,x2,y2,c=INK,w=1.4): s.append(f'<line x1="{x1:.1f}" y1="{y1:.1f}" x2="{x2:.1f}" y2="{y2:.1f}" stroke="{c}" stroke-width="{w}" stroke-linecap="round"/>')
-    def txt(x,y,t,sz=11,fill=INK,a="middle",w="normal",fam="sans-serif"): s.append(f'<text x="{x:.1f}" y="{y:.1f}" font-size="{sz}" fill="{fill}" text-anchor="{a}" font-weight="{w}" font-family="{fam}">{t}</text>')
-    def dot(x,y,c=INK,r=2.6): s.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{r}" fill="{c}"/>')
-    def res(x,y,w=26,lab=""):   # horizontal resistor (IEC box) centred at (x,y)
-        rect(x-w/2,y-5,w,10,"#fff",INK,1.3,1);
-        if lab: txt(x,y-9,lab,8.5,MUT)
-    def led(x,y,sz=9):          # LED pointing DOWN (anode top -> cathode bar bottom)
-        s.append(f'<path d="M{x-sz:.1f},{y-sz:.1f} L{x+sz:.1f},{y-sz:.1f} L{x:.1f},{y+sz*0.4:.1f} Z" fill="#fde8e8" stroke="{INK}" stroke-width="1.3"/>')
-        ln(x-sz,y+sz*0.4,x+sz,y+sz*0.4,INK,1.6)
-        for dx in (4,9):
-            ln(x+sz*0.6+dx,y-sz*0.7,x+sz*0.6+dx+4,y-sz*0.7-4,GRN,1.1); ln(x+sz*0.6+dx+4,y-sz*0.7-4,x+sz*0.6+dx+1.5,y-sz*0.7-3.2,GRN,1.1)
-    def gndsym(x,y):            # ground symbol
-        ln(x,y,x,y+7); ln(x-8,y+7,x+8,y+7,INK,1.6); ln(x-5,y+11,x+5,y+11,INK,1.4); ln(x-2.5,y+14.5,x+2.5,y+14.5,INK,1.2)
+    def txt(x,y,t,sz=11,fill=INK,a="middle",w="normal"): s.append(f'<text x="{x:.1f}" y="{y:.1f}" font-size="{sz}" fill="{fill}" text-anchor="{a}" font-weight="{w}" font-family="sans-serif">{t}</text>')
+    def dot(x,y,c=INK,r=3): s.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{r}" fill="{c}"/>')
+    def hop(x,y,r=5): s.append(f'<path d="M{x-r:.1f},{y:.1f} A{r},{r} 0 0 1 {x+r:.1f},{y:.1f}" fill="none" stroke="{INK}" stroke-width="1.4"/>')
+    def res(x,y,w=28,lab=""): rect(x-w/2,y-5,w,10,"#fff",INK,1.3,1); (txt(x,y-9,lab,8,MUT) if lab else None)
+    def led(x,y,z=9):
+        s.append(f'<path d="M{x-z:.1f},{y-z:.1f} L{x+z:.1f},{y-z:.1f} L{x:.1f},{y+z*0.5:.1f} Z" fill="#fde8e8" stroke="{INK}" stroke-width="1.3"/>')
+        ln(x-z,y+z*0.5,x+z,y+z*0.5,INK,1.7)
+        for d in (3,8): ln(x+z*0.6+d,y-z*0.7,x+z*0.6+d+4,y-z*0.7-4,GRN,1.1)
+    def gsym(x,y): ln(x,y,x,y+7); ln(x-8,y+7,x+8,y+7,INK,1.7); ln(x-5,y+11,x+5,y+11,INK,1.4); ln(x-2.5,y+15,x+2.5,y+15,INK,1.2)
     rect(6,6,W-12,H-12,"#ffffff","#d0d4da",1.2,10)
-    txt(W/2,28,"Circuit schematic — Raspberry Pi Pico → 74HC595 shift register → 8 LEDs",13,INK,"middle","bold")
-    txt(W/2,44,"3.3 V logic · serial in (SER), shift clock (SRCLK), latch (RCLK) · outputs Qₐ–Qₕ each through 240 Ω to an LED",9.5,MUT)
-    # power rails
-    yV=70; yG=H-40
-    ln(70,yV,W-30,yV,RED,1.8); txt(70,yV-6,"+3.3 V",10,RED,"start","bold")
-    ln(70,yG,W-30,yG,INK,1.8); txt(70,yG+16,"GND",10,INK,"start","bold"); gndsym(70,yG)
+    txt(W/2,28,"Circuit schematic — Raspberry Pi Pico → 74HC595 → 8 LEDs",13,INK,"middle","bold")
+    txt(W/2,44,"dot = connected junction · hop-arc = crossing, not connected · each output through 240 Ω to an LED",9,MUT)
+    yV,yG=72,512
+    ln(34,yV,786,yV,RED,1.8); txt(34,yV-7,"+3.3 V",10,RED,"start","bold")
+    ln(34,yG,786,yG,INK,1.8); txt(60,yG+17,"GND",10,INK,"start","bold"); gsym(44,yG)
+    # 0.1uF decoupling cap, on the rails clear of all signals (dotted to BOTH rails)
+    cx0=64
+    ln(cx0,yV,cx0,283,INK); dot(cx0,yV,RED)
+    ln(cx0-8,283,cx0+8,283,INK,1.8); ln(cx0-8,291,cx0+8,291,INK,1.8)
+    ln(cx0,291,cx0,yG,INK); dot(cx0,yG,INK); txt(cx0+12,289,"0.1 µF",8,MUT,"start")
     # ---- Pico ----
-    px,py,pw,ph=70,120,120,300
-    rect(px,py,pw,ph,"#eef6f4"); txt(px+pw/2,py+18,"Raspberry",10,INK,"middle","bold"); txt(px+pw/2,py+31,"Pi Pico",10,INK,"middle","bold")
-    txt(px+pw/2,py+ph-10,"(USB-powered)",8,MUT)
-    pico={"3V3":150,"GP19":210,"GP18":250,"GP17":290,"GND":360}
-    for nm,y in pico.items():
-        ln(px+pw,y,px+pw+16,y); txt(px+pw-5,y-4,nm,8.5,INK,"end","bold")
+    px,py,pw,ph=100,118,118,322
+    rect(px,py,pw,ph,"#eef6f4"); txt(px+pw/2,py+18,"Raspberry Pi",10,INK,"middle","bold"); txt(px+pw/2,py+31,"Pico",10,INK,"middle","bold"); txt(px+pw/2,py+ph-12,"(USB power)",8,MUT)
+    pico={"3V3":156,"GP19":232,"GP18":272,"GP17":312,"GND":402}
+    for nm,y in pico.items(): ln(px+pw,y,px+pw+18,y); txt(px+pw-5,y-4,nm,8.5,INK,"end","bold")
     # ---- 595 ----
-    qx,qy,qw,qh=320,120,120,300
-    rect(qx,qy,qw,qh,"#eef2fb"); txt(qx+qw/2,qy+16,"74HC595",10,INK,"middle","bold"); txt(qx+qw/2,qy+28,"shift register",8,MUT)
-    Lpin={"VCC":150,"SER":210,"SRCLK":250,"RCLK":290,"OE":330,"SRCLR":360,"GND":395}
-    for nm,y in Lpin.items():
-        ln(qx-16,y,qx,y); txt(qx+5,y-4,nm,8,INK,"start","bold")
-    Rpin={}
+    qx,qy,qw,qh=340,134,120,300
+    rect(qx,qy,qw,qh,"#eef2fb"); txt(qx+qw/2,qy+15,"74HC595",10,INK,"middle","bold")
+    Lp={"MR":168,"SER":232,"SRCLK":272,"RCLK":312,"OE":392}
+    for nm,y in Lp.items(): ln(qx-18,y,qx,y); txt(qx+5,y-4,nm,7.5,INK,"start","bold")
+    txt(qx+qw/2,qy-8,"VCC",8,INK,"middle","bold"); ln(qx+qw/2,qy,qx+qw/2,yV); dot(qx+qw/2,yV,RED)        # VCC -> 3V3 (top)
+    txt(qx+qw/2,qy+qh+13,"GND",8,INK,"middle","bold"); ln(qx+qw/2,qy+qh,qx+qw/2,yG); dot(qx+qw/2,yG,INK) # GND -> GND (bottom)
+    Rp={}
     for i,nm in enumerate(["QA","QB","QC","QD","QE","QF","QG","QH"]):
-        y=150+i*30; Rpin[nm]=y; ln(qx+qw,y,qx+qw+16,y); txt(qx+qw-5,y-4,nm,8,INK,"end","bold")
-    # ---- power wiring ----
-    # 3V3 -> Pico 3V3, 595 VCC, 595 SRCLR(MR active-low: tie high = never reset)
-    ln(px+pw+16,150,px+pw+16,yV); dot(px+pw+16,yV,RED)
-    ln(qx-16,150,qx-40,150); ln(qx-40,150,qx-40,yV); dot(qx-40,yV,RED); ln(qx-16,150,qx-40,150)   # VCC up to 3V3
-    ln(qx-16,360,qx-52,360); ln(qx-52,360,qx-52,yV); dot(qx-52,yV,RED)                              # SRCLR(MR) -> 3V3
-    txt(qx-52,355,"MR",7,MUT,"middle")
-    # GND -> Pico GND, 595 GND, 595 OE (active-low: tie low = outputs enabled)
-    ln(px+pw+16,360,px+pw+16,yG); dot(px+pw+16,yG,INK)
-    ln(qx-16,395,qx-30,395); ln(qx-30,395,qx-30,yG); dot(qx-30,yG,INK)                               # 595 GND -> GND
-    ln(qx-16,330,qx-64,330); ln(qx-64,330,qx-64,yG); dot(qx-64,yG,INK); txt(qx-64,325,"OE",7,MUT,"middle")  # OE -> GND
-    # decoupling cap across VCC-GND (near the chip)
-    cx0=qx-78
-    ln(cx0,158,cx0,yV); dot(cx0,yV,RED) if False else ln(cx0,yV,cx0,yV)
-    ln(cx0,yV,cx0,170); ln(cx0-7,170,cx0+7,170,INK,1.6); ln(cx0-7,176,cx0+7,176,INK,1.6); ln(cx0,176,cx0,yG); dot(cx0,yG,INK)
-    txt(cx0-10,173,"0.1µF",7,MUT,"end")
-    # ---- control wiring: GP -> SER/SRCLK/RCLK ----
-    for g,sgnl,clr in [("GP19","SER",RED),("GP18","SRCLK",BLU),("GP17","RCLK",GRN)]:
-        ya=pico[g]; yb=Lpin[sgnl]; xa=px+pw+16; xb=qx-16
-        midx=(xa+xb)/2 + (6 if sgnl=="SRCLK" else (-6 if sgnl=="RCLK" else 0))
-        ln(xa,ya,midx,ya,INK,1.5); ln(midx,ya,midx,yb,INK,1.5); ln(midx,yb,xb,yb,INK,1.5)
-    txt((px+pw+qx)/2,128,"3 control wires",8,MUT)
-    # ---- outputs: QA..QH -> 240Ω -> LED -> GND ----
+        y=158+i*32; Rp[nm]=y; ln(qx+qw,y,qx+qw+18,y); txt(qx+qw-5,y-4,nm,7.5,INK,"end","bold")
+    # ---- power: each pin straight to its rail, no crossings ----
+    ln(px+pw+18,156,px+pw+18,yV); dot(px+pw+18,yV,RED)            # Pico 3V3
+    ln(px+pw+18,402,px+pw+18,yG); dot(px+pw+18,yG,INK)            # Pico GND
+    ln(qx-18,168,qx-30,168); ln(qx-30,168,qx-30,yV); dot(qx-30,yV,RED); txt(qx-30,164,"(MR→hi)",6,MUT,"middle")  # MR up (above signals)
+    ln(qx-18,392,qx-30,392); ln(qx-30,392,qx-30,yG); dot(qx-30,yG,INK); txt(qx-30,405,"(OE→lo)",6,MUT,"middle")  # OE down (below signals)
+    # ---- 3 control wires: GP -> SER/SRCLK/RCLK, aligned & parallel (no crossings) ----
+    for g,sg,cl in [("GP19","SER",RED),("GP18","SRCLK",RED),("GP17","RCLK",RED)]:
+        ln(px+pw+18,pico[g],qx-18,Lp[sg],"#3a4252",1.6)
+    txt((px+pw+qx)/2,128,"3 control wires (data·shift·latch)",8,MUT)
+    # ---- outputs: QA..QH -> 240ohm -> LED -> GND ----
     for nm in ["QA","QB","QC","QD","QE","QF","QG","QH"]:
-        y=Rpin[nm]; x0=qx+qw+16; xr=x0+40; xl=x0+95
-        ln(x0,y,xr-13,y); res(xr,y,26,"240Ω" if nm=="QA" else "")
-        ln(xr+13,y,xl,y); led(xl,y); ln(xl,y+8,xl,yG);
-        if nm=="QA": dot(xl,yG,INK)
-        else: dot(xl,yG,INK)
-        txt(xl+16,y+2,nm,8,MUT,"start")
-    txt((qx+qw+16+qx+qw+16+95)/2+20,128,"8 × ( 240 Ω + LED )",8,MUT)
+        y=Rp[nm]; x0=qx+qw+18; xr=x0+42; xl=x0+96
+        ln(x0,y,xr-14,y); res(xr,y,28,"240 Ω" if nm=="QA" else ""); ln(xr+14,y,xl,y)
+        led(xl,y); ln(xl,y+9,xl,yG); dot(xl,yG,INK); txt(xl+15,y+2,nm,7.5,MUT,"start")
     return wrap("".join(s), W, H)
 
 DIAGRAMS = {
@@ -603,8 +588,8 @@ P.append('<p class="k"><b>Reader&rsquo;s map:</b> <b>build guide first</b> (wire
 P.append('<h2>The circuit &mdash; academic schematic</h2>')
 P.append('<p class="k">The logical circuit, independent of the breadboard: the Pico clocks a byte into the 595 over three control lines (<b>SER</b> data, <b>SRCLK</b> shift clock, <b>RCLK</b> latch); the chip latches the byte to its eight parallel outputs; each output drives an LED through a <b>240&nbsp;&Omega;</b> resistor to ground. <b>OE</b> tied low keeps the outputs enabled, <b>MR&nbsp;(SRCLR)</b> tied high prevents reset, and a <b>0.1&nbsp;&micro;F</b> cap decouples VCC.</p>')
 P.append(f'<figure>{DIAGRAMS["schematic"]}<figcaption><b>Figure. Circuit schematic.</b> Pico &rarr; 74HC595 &rarr; 8&times;(240&nbsp;&Omega; + LED) &mdash; the &ldquo;science&rdquo; the breadboard figures below realise physically.</figcaption></figure>')
-P.append('<h2 style="color:#f59e0b">Layout experiment &mdash; 595 on the left vs. the right (temporary)</h2>')
-P.append('<p class="k">Two physical layouts of that same circuit &mdash; we&rsquo;ll keep whichever reads cleaner, then delete this section. '
+P.append('<h2>Two breadboard layouts &mdash; 595 on the left (A) or right (B)</h2>')
+P.append('<p class="k">Two equally-valid physical layouts of the same circuit &mdash; we keep both as options. '
          '<b>Option&nbsp;A</b> stacks the Pico + 595 on the left and runs the eight outputs across the middle as one parallel ribbon. '
          '<b>Option&nbsp;B (revised)</b> raises the 595 onto the right strip <i>beside the Pico&rsquo;s GP17&ndash;19</i>, so the 3 control wires become short horizontal hops and the outputs stay local on the right, running down to a comb spread out below. '
          'Either way, <b>QA</b> is the one output that must bridge the chip (the 595&rsquo;s 7+1 pinout split).</p>')
