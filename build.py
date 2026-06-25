@@ -548,16 +548,18 @@ def svg_wiring_c():
     J("Rh",5,"RIGHT+",5,RED)                                  # Pico 3V3 -> RIGHT+
     J("Rj",23,"RIGHT+",23,RED); J("Rj",29,"RIGHT+",29,RED)   # 595 VCC(Rf23), MR(Rf29) -> RIGHT+ (tap Rj, clear of control)
     J("Ra",16,"MIDb-",16,BLUE)                               # Pico GND -> MIDb-
-    J("Ra",26,"MIDb-",26,BLUE); J("Ra",30,"MIDb-",30,BLUE)   # 595 OE(Re26), GND(Re30) -> MIDb-
+    J("Ra",30,"MIDb-",30,BLUE)                               # 595 GND (Re30, a-e) -> MIDb-
+    J("Rj",26,"RIGHT-",26,BLUE)                              # 595 OE (Rf26, f-j) -> RIGHT- (tied low). FIX: was tapping Ra26 = QE's node
     line(cx("LEFT-"),cy(2),cx("MIDb-"),cy(2),BLUE,1.8)       # GND tie: LED rail (LEFT-) <-> MIDb-
     line(cx("MIDa-"),cy(3),cx("MIDb-"),cy(3),BLUE,1.6)
+    line(cx("MIDb-"),cy(36),cx("RIGHT-"),cy(36),BLUE,1.6)    # GND tie: RIGHT- (OE + QA cathode) <-> MIDb-
     # ---- QA (the lone f-j output, sits with the control) -> local LED on the right ----
-    line(cx("Ri"),cy(24),cx("Ri"),cy(26),"#9a8050",1.4)      # QA resistor (Rf24 node, tap Ri) down to row 26
-    s.append(f'<line x1="{cx("Ri"):.1f}" y1="{cy(24.4):.1f}" x2="{cx("Ri"):.1f}" y2="{cy(25.6):.1f}" stroke="{TAN}" stroke-width="4.5" stroke-linecap="round"/>')
+    line(cx("Ri"),cy(24),cx("Ri"),cy(32),"#9a8050",1.4)      # QA resistor (Rf24 node, tap Ri) spans down to its LED at row 32 (clear of OE@26)
+    s.append(f'<line x1="{cx("Ri"):.1f}" y1="{cy(27):.1f}" x2="{cx("Ri"):.1f}" y2="{cy(29):.1f}" stroke="{TAN}" stroke-width="4.5" stroke-linecap="round"/>')
     aq=cx("Rj"); kq=cx("RIGHT-"); dq=(aq+kq)/2
-    line(aq,cy(26),dq-4,cy(26),"#9aa0a6",1.5); line(dq+4,cy(26),kq,cy(26),"#9aa0a6",1.5)
-    s.append(f'<circle cx="{dq:.1f}" cy="{cy(26):.1f}" r="4.6" fill="{GRN}" stroke="#15803d" stroke-width="0.7"/>')
-    txt(aq,cy(26)-7,"+",6.5,"#15803d","middle","bold"); txt(kq,cy(26)-7,"–",6.5,BLUE,"middle","bold"); txt(dq,cy(26)+10,"QA",5,"#7a818b","middle")
+    line(aq,cy(32),dq-4,cy(32),"#9aa0a6",1.5); line(dq+4,cy(32),kq,cy(32),"#9aa0a6",1.5)
+    s.append(f'<circle cx="{dq:.1f}" cy="{cy(32):.1f}" r="4.6" fill="{GRN}" stroke="#15803d" stroke-width="0.7"/>')
+    txt(aq,cy(32)-7,"+",6.5,"#15803d","middle","bold"); txt(kq,cy(32)-7,"–",6.5,BLUE,"middle","bold"); txt(dq,cy(32)+10,"QA",5,"#7a818b","middle")
     # ---- outputs QB-QH (Re, a-e) -> jumper across the roomy middle -> resistor + LED on the LEFT strip ----
     for nm,row in [("QB",23),("QC",24),("QD",25),("QE",26),("QF",27),("QG",28),("QH",29)]:
         ay=cy(row)
@@ -722,18 +724,18 @@ P.append('<div class="meta">DIY design plan &middot; updated 2026-06-17 &middot;
 P.append('<p class="k"><b>Reader&rsquo;s map:</b> <b>build guide first</b> (wire the first light-up, just below) &middot; '
          'then &sect;1 what this tool is for &middot; &sect;2 the order list &middot; &sect;3 the driver choice + exact parts &middot; '
          '&sect;4&ndash;&sect;9 the design rationale.</p>')
-P.append('<h2>The circuit &mdash; academic schematic</h2>')
+P.append('<h2>The circuit &mdash; schematic &amp; Option&nbsp;C (check the wiring net-by-net)</h2>')
 P.append('<p class="k">The logical circuit, independent of the breadboard: the Pico clocks a byte into the 595 over three control lines (<b>SER</b> data, <b>SRCLK</b> shift clock, <b>RCLK</b> latch); the chip latches the byte to its eight parallel outputs; each output drives an LED through a <b>240&nbsp;&Omega;</b> resistor to ground. <b>OE</b> tied low keeps the outputs enabled, <b>MR&nbsp;(SRCLR)</b> tied high prevents reset, and a <b>0.1&nbsp;&micro;F</b> cap decouples VCC.</p>')
 P.append(f'<figure>{DIAGRAMS["schematic"]}<figcaption><b>Figure. Circuit schematic.</b> Pico &rarr; 74HC595 &rarr; 8&times;(240&nbsp;&Omega; + LED) &mdash; the &ldquo;science&rdquo; the breadboard figures below realise physically.</figcaption></figure>')
-P.append('<h2>Three breadboard layouts &mdash; A, B, or C</h2>')
-P.append('<p class="k">Three physical layouts of the same circuit &mdash; we keep all three as options. '
+P.append('<p class="k">Read <b>Option&nbsp;C</b> below against that schematic, net by net &mdash; this is exactly how the OE-grounding error showed up: every output must go &rarr; 240&nbsp;&Omega; &rarr; LED &rarr; GND, <b>OE</b> ties low, <b>MR</b> ties high.</p>')
+P.append(f'<figure>{DIAGRAMS["wiring_c"]}<figcaption><b>Option C &mdash; Pico + 595 both on the RIGHT strip, 595 turned 180&deg; (shown here to check against the schematic).</b> Stacking the two on one strip keeps the 3 control wires short and on the same side; the 595 is notch-up so its outputs face left and fan across the centre as a clean parallel ribbon to the comb on the left strip. The 180&deg; rotation (not a reflection) reverses the output pin order versus Option&nbsp;A.</figcaption></figure>')
+P.append('<h2>The other two layouts &mdash; Option&nbsp;A and Option&nbsp;B</h2>')
+P.append('<p class="k">The other two physical layouts of the same circuit (Option&nbsp;C is up top, beside the schematic). '
          '<b>Option&nbsp;A</b> stacks the Pico + 595 on the left strip and runs the eight outputs across the middle as one parallel ribbon to the comb on the right. '
          '<b>Option&nbsp;B</b> puts the 595 on the right strip beside the Pico&rsquo;s GP17&ndash;19 (short control hops) and reaches each LED with a long resistor lead &mdash; no output jumpers. '
-         '<b>Option&nbsp;C</b> stacks the Pico + 595 together on the <i>right</i> strip with the 595 turned <b>180&deg;</b> so its control pins face the Pico (short, same-side control), and fans the outputs left across the roomy middle to the comb on the left. '
-         'Note C is <i>not</i> a mirror of A: you cannot mirror a chip, so rotating it 180&deg; flips the output pin order. Either way, <b>QA</b> is the one output sitting on the chip&rsquo;s control side (the 595&rsquo;s 7+1 pinout split).</p>')
+         'In every layout, <b>QA</b> is the one output sitting on the chip&rsquo;s control side (the 595&rsquo;s 7+1 pinout split).</p>')
 P.append(f'<figure>{DIAGRAMS["wiring"]}<figcaption><b>Option A (current) &mdash; 595 on the LEFT strip.</b> Pico + 595 stacked on the left; the eight outputs cross the centre rails as a parallel ribbon to the comb on the right.</figcaption></figure>')
 P.append(f'<figure>{DIAGRAMS["wiring_b"]}<figcaption><b>Option B (revised) &mdash; 595 raised beside GP17&ndash;19, outputs in a parallel ribbon.</b> The 595 is notch-down (matching the datasheet); the 3 control wires are short hops; the seven QB&ndash;QH outputs drop to the comb as evenly-spaced parallel diagonals (QA is the lone output that must bridge across); every jumper and resistor sits in its own hole.</figcaption></figure>')
-P.append(f'<figure>{DIAGRAMS["wiring_c"]}<figcaption><b>Option C &mdash; Pico + 595 both on the RIGHT strip, 595 turned 180&deg;.</b> Stacking the two on one strip keeps the 3 control wires short and on the same side; the 595 is notch-up so its outputs face left and fan across the centre as a clean parallel ribbon to the comb on the left strip. The 180&deg; rotation (not a reflection) reverses the output pin order versus Option&nbsp;A.</figcaption></figure>')
 P.append('<h2>Step 0 &mdash; blink one LED (the simplest possible test)</h2>')
 P.append('<p class="k">Before the 595 panel, prove the whole chain with the <b>smallest possible circuit</b>: the Pico drives '
          '<b>one</b> LED through <b>one</b> resistor, with <b>one</b> jumper to ground. If it blinks, your Pico, toolchain, and '
