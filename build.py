@@ -171,7 +171,7 @@ def svg_layout():
 # ---------- Diagram: bring-up wiring (breadboard, hole-level control wiring) ----------
 def svg_wiring():
     # Bring-up across BOTH MB-104 strips: Pico + 595 on the LEFT strip, 8-LED comb on the RIGHT. Exact holes.
-    P=17.0; HOLE=6.0; R0=1; RN=33; LX=120; TY=92
+    P=17.0; HOLE=6.0; R0=1; RN=33; LX=120; TY=150
     RED="#dc2626"; BLUE="#2563eb"; HOLEC="#39393c"; GRN="#22c55e"; ORA="#ea580c"; PUR="#7c3aed"; CYN="#0891b2"; TAN="#d6b06a"
     seq=[("LEFT+","rail"),("LEFT-","rail"),
          ("La","s"),("Lb","s"),("Lc","s"),("Ld","s"),("Le","s"),("|L","gap"),("Lf","s"),("Lg","s"),("Lh","s"),("Li","s"),("Lj","s"),
@@ -196,6 +196,13 @@ def svg_wiring():
     def hole(c,r,fill=HOLEC): s.append(f'<rect x="{cx(c)-HOLE/2:.1f}" y="{cy(r)-HOLE/2:.1f}" width="{HOLE}" height="{HOLE}" rx="1.3" fill="{fill}"/>')
     gtop=cy(R0)-9; gbot=cy(RN)+9
     rect(5,5,W-10,H-10,15,"#1d1d1d")
+    hy=TY-54   # MB-104 binding-post header (the terminal block above the strips, as on the real board)
+    rect(LX-12,hy-13,104,26,3,"#161616",'stroke="#caa83a" stroke-width="1.1"')
+    txt(LX+40,hy-1,"BREADBOARD",6.5,"#caa83a","middle","bold"); txt(LX+40,hy+8,"MB-104 · CIRCUIT-TEST",4.8,"#caa83a","middle")
+    for blab,bx in [("Va",LX+172),("Vb",LX+230),("⏚",LX+288)]:
+        s.append(f'<circle cx="{bx:.1f}" cy="{hy:.1f}" r="7.5" fill="#bfc3cb" stroke="#7c7f86" stroke-width="1.3"/>')
+        s.append(f'<circle cx="{bx:.1f}" cy="{hy:.1f}" r="3" fill="#8f9299"/>')
+        txt(bx+12,hy+3,blab,8.5,"#caa83a","start","bold")
     for grp in [("La","Lj"),("Ra","Rj")]:
         rect(cx(grp[0])-8,gtop,(cx(grp[1])-cx(grp[0]))+16,gbot-gtop,5,"#f3f1ea")
     railtint={"LEFT+":"#f7dede","LEFT-":"#dee5f7","MIDa+":"#f7dede","MIDa-":"#dee5f7","MIDb+":"#f7dede","MIDb-":"#dee5f7","RIGHT+":"#f7dede","RIGHT-":"#dee5f7"}
@@ -213,7 +220,9 @@ def svg_wiring():
     txt(cx("MIDa+"),gtop-18,"3V3",7,RED,"middle","bold"); txt(cx("MIDa-"),gtop-18,"GND",7,BLUE,"middle","bold")
     txt(cx("RIGHT-"),gtop-18,"GND",7,BLUE,"middle","bold")
     for r in range(R0,RN+1):
-        if r==1 or r%5==0: txt(LX-26,cy(r)+3,str(r),8,"#cbd5e1","middle")
+        if r==1 or r%5==0:
+            txt(LX-26,cy(r)+3,str(r),8,"#cbd5e1","middle")
+            txt(cx("RIGHT-")+16,cy(r)+3,str(r),8,"#cbd5e1","middle")
     px1,px2=cx("Lc"),cx("Lh"); py1,py2=cy(1),cy(20)
     rect(px1-8,py1-8,(px2-px1)+16,(py2-py1)+16,6,"#0b6b5e",'opacity="0.92"')
     txt((px1+px2)/2,py1-8+13,"Pico (USB ↑)",8,"#dffaf4","middle","bold")
@@ -329,7 +338,7 @@ def svg_blink():
 def svg_wiring_b():
     # OPTION B (revised): Pico LEFT; 595 on the RIGHT strip RAISED to sit beside the Pico's GP17-19,
     # so the 3 control wires are short near-horizontal hops. Comb spread out below. No two leads share a hole.
-    P=17.0; HOLE=6.0; R0=1; RN=40; LX=120; TY=92
+    P=17.0; HOLE=6.0; R0=1; RN=40; LX=120; TY=150
     RED="#dc2626"; BLUE="#2563eb"; HOLEC="#39393c"; GRN="#22c55e"; ORA="#ea580c"; PUR="#7c3aed"; CYN="#0891b2"; TAN="#d6b06a"
     seq=[("LEFT+","rail"),("LEFT-","rail"),
          ("La","s"),("Lb","s"),("Lc","s"),("Ld","s"),("Le","s"),("|L","gap"),("Lf","s"),("Lg","s"),("Lh","s"),("Li","s"),("Lj","s"),
@@ -354,6 +363,13 @@ def svg_wiring_b():
     def hole(c,r,fill=HOLEC): s.append(f'<rect x="{cx(c)-HOLE/2:.1f}" y="{cy(r)-HOLE/2:.1f}" width="{HOLE}" height="{HOLE}" rx="1.3" fill="{fill}"/>')
     gtop=cy(R0)-9; gbot=cy(RN)+9
     rect(5,5,W-10,H-10,15,"#1d1d1d")
+    hy=TY-54   # MB-104 binding-post header (the terminal block above the strips, as on the real board)
+    rect(LX-12,hy-13,104,26,3,"#161616",'stroke="#caa83a" stroke-width="1.1"')
+    txt(LX+40,hy-1,"BREADBOARD",6.5,"#caa83a","middle","bold"); txt(LX+40,hy+8,"MB-104 · CIRCUIT-TEST",4.8,"#caa83a","middle")
+    for blab,bx in [("Va",LX+172),("Vb",LX+230),("⏚",LX+288)]:
+        s.append(f'<circle cx="{bx:.1f}" cy="{hy:.1f}" r="7.5" fill="#bfc3cb" stroke="#7c7f86" stroke-width="1.3"/>')
+        s.append(f'<circle cx="{bx:.1f}" cy="{hy:.1f}" r="3" fill="#8f9299"/>')
+        txt(bx+12,hy+3,blab,8.5,"#caa83a","start","bold")
     for grp in [("La","Lj"),("Ra","Rj")]:
         rect(cx(grp[0])-8,gtop,(cx(grp[1])-cx(grp[0]))+16,gbot-gtop,5,"#f3f1ea")
     railtint={"LEFT+":"#f7dede","LEFT-":"#dee5f7","MIDa+":"#f7dede","MIDa-":"#dee5f7","MIDb+":"#f7dede","MIDb-":"#dee5f7","RIGHT+":"#f7dede","RIGHT-":"#dee5f7"}
@@ -371,7 +387,9 @@ def svg_wiring_b():
     txt(cx("MIDa+"),gtop-18,"3V3",7,RED,"middle","bold"); txt(cx("MIDa-"),gtop-18,"GND",7,BLUE,"middle","bold")
     txt(cx("MIDb+"),gtop-18,"3V3",7,RED,"middle","bold"); txt(cx("MIDb-"),gtop-18,"GND",7,BLUE,"middle","bold")
     for r in range(R0,RN+1):
-        if r==1 or r%5==0: txt(LX-26,cy(r)+3,str(r),8,"#cbd5e1","middle")
+        if r==1 or r%5==0:
+            txt(LX-26,cy(r)+3,str(r),8,"#cbd5e1","middle")
+            txt(cx("RIGHT-")+16,cy(r)+3,str(r),8,"#cbd5e1","middle")
     # Pico — left strip (unchanged)
     px1,px2=cx("Lc"),cx("Lh"); py1,py2=cy(1),cy(20)
     rect(px1-8,py1-8,(px2-px1)+16,(py2-py1)+16,6,"#0b6b5e",'opacity="0.92"')
@@ -383,9 +401,9 @@ def svg_wiring_b():
     qx1,qx2=cx("Re"),cx("Rf"); qy1,qy2=cy(14),cy(21)
     rect(qx1-7,qy1-7,(qx2-qx1)+14,(qy2-qy1)+14,3,"#23252b")
     txt((qx1+qx2)/2,(qy1+qy2)/2,"595",9,"#9fb0c0","middle","bold")
-    s.append(f'<circle cx="{(qx1+qx2)/2:.1f}" cy="{qy1-7:.1f}" r="5" fill="#f3f1ea"/>')   # notch UP (row-14 end)
-    p595={"QB":("Rf",14),"QC":("Rf",15),"QD":("Rf",16),"QE":("Rf",17),"QF":("Rf",18),"QG":("Rf",19),"QH":("Rf",20),"GNDp":("Rf",21),
-          "VCC":("Re",14),"QA":("Re",15),"SER":("Re",16),"OE":("Re",17),"RCLK":("Re",18),"SRCLK":("Re",19),"MR":("Re",20),"QHp":("Re",21)}
+    s.append(f'<circle cx="{(qx1+qx2)/2:.1f}" cy="{qy2+7:.1f}" r="5" fill="#f3f1ea"/>')   # notch DOWN (row-21 end); pin 1 (QB) bottom-right
+    p595={"GNDp":("Rf",14),"QH":("Rf",15),"QG":("Rf",16),"QF":("Rf",17),"QE":("Rf",18),"QD":("Rf",19),"QC":("Rf",20),"QB":("Rf",21),
+          "QHp":("Re",14),"MR":("Re",15),"SRCLK":("Re",16),"RCLK":("Re",17),"OE":("Re",18),"SER":("Re",19),"QA":("Re",20),"VCC":("Re",21)}
     for nm,(c,r) in p595.items():
         hole(c,r,"#c9a36a")
         if c=="Re":
@@ -395,16 +413,16 @@ def svg_wiring_b():
     J("Lj",5,"MIDa+",5,RED); J("Lj",18,"MIDa-",18,BLUE)
     line(cx("MIDa+"),cy(3),cx("MIDb+"),cy(3),RED,1.8)
     line(cx("MIDa-"),cy(2),cx("MIDb-"),cy(2),BLUE,1.8)
-    J("Ra",14,"MIDb+",14,RED); J("Ra",20,"MIDb+",20,RED)     # VCC(Re14), MR(Re20) -> + rail
-    J("Ra",17,"MIDb-",17,BLUE)                                # OE(Re17) -> - rail
-    J("Rg",21,"RIGHT-",21,BLUE); line(cx("RIGHT-"),cy(23),cx("MIDb-"),cy(23),BLUE,1.6)  # GND(8)(Rf21) -> right rail, tied to - bus
+    J("Ra",21,"MIDb+",21,RED); J("Ra",15,"MIDb+",15,RED)     # VCC(Re21), MR(Re15) -> + rail
+    J("Ra",18,"MIDb-",18,BLUE)                                # OE(Re18) -> - rail
+    J("Rg",14,"RIGHT-",14,BLUE); line(cx("RIGHT-"),cy(22),cx("MIDb-"),cy(22),BLUE,1.6)  # GND(8)(Rf14) -> right rail, tied to - bus
     # ---- 3 control wires: Pico (GP) -> 595 control (Re). Short, near-horizontal. ----
-    J("Li",16,"Rd",16,PUR)   # GP19 -> SER (Re16)   aligned
-    J("Li",17,"Rd",19,CYN)   # GP18 -> SRCLK (Re19)
-    J("Lj",19,"Rd",18,ORA)   # GP17 -> RCLK (Re18)
+    J("Li",16,"Rd",19,PUR)   # GP19 -> SER (Re19)
+    J("Li",17,"Rd",16,CYN)   # GP18 -> SRCLK (Re16)
+    J("Lj",19,"Rd",17,ORA)   # GP17 -> RCLK (Re17)
     # ---- outputs -> comb (spread, rows 24-39). output jumper lands at Rh; resistor sits at Rg (different hole). ----
-    leds=[("QB","Rf",14,24),("QC","Rf",15,26),("QD","Rf",16,28),("QE","Rf",17,30),
-          ("QF","Rf",18,32),("QG","Rf",19,34),("QH","Rf",20,36),("QA","Re",15,38)]
+    leds=[("QH","Rf",15,24),("QG","Rf",16,26),("QF","Rf",17,28),("QE","Rf",18,30),
+          ("QD","Rf",19,32),("QC","Rf",20,34),("QB","Rf",21,36),("QA","Re",20,38)]
     for nm,oc,orow,lr in leds:
         ay=cy(lr)
         tap="Ri" if oc=="Rf" else "Rd"             # free hole in the output's group
@@ -591,7 +609,7 @@ P.append('<p class="k">Two physical layouts of that same circuit &mdash; we&rsqu
          '<b>Option&nbsp;B (revised)</b> raises the 595 onto the right strip <i>beside the Pico&rsquo;s GP17&ndash;19</i>, so the 3 control wires become short horizontal hops and the outputs stay local on the right, running down to a comb spread out below. '
          'Either way, <b>QA</b> is the one output that must bridge the chip (the 595&rsquo;s 7+1 pinout split).</p>')
 P.append(f'<figure>{DIAGRAMS["wiring"]}<figcaption><b>Option A (current) &mdash; 595 on the LEFT strip.</b> Pico + 595 stacked on the left; the eight outputs cross the centre rails as a parallel ribbon to the comb on the right.</figcaption></figure>')
-P.append(f'<figure>{DIAGRAMS["wiring_b"]}<figcaption><b>Option B (revised) &mdash; 595 raised beside GP17&ndash;19, comb spread below.</b> The 3 control wires are short, near-horizontal hops (GP19&rarr;SER lines up exactly); the 8 outputs run down the right side to the spread-out comb; every jumper and resistor sits in its own hole.</figcaption></figure>')
+P.append(f'<figure>{DIAGRAMS["wiring_b"]}<figcaption><b>Option B (revised) &mdash; 595 raised beside GP17&ndash;19, comb spread below.</b> The 595 is notch-down (matching the datasheet); the 3 control wires are short hops (GP18&rarr;SRCLK nearly aligns); the 8 outputs run down the right side to the spread comb; every jumper and resistor sits in its own hole.</figcaption></figure>')
 P.append('<h2>Step 0 &mdash; blink one LED (the simplest possible test)</h2>')
 P.append('<p class="k">Before the 595 panel, prove the whole chain with the <b>smallest possible circuit</b>: the Pico drives '
          '<b>one</b> LED through <b>one</b> resistor, with <b>one</b> jumper to ground. If it blinks, your Pico, toolchain, and '
