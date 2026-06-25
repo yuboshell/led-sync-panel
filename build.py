@@ -239,10 +239,15 @@ def svg_wiring():
     J("La",31,"LEFT+",31,RED); J("La",25,"LEFT+",25,RED)           # 595 VCC(Le31), MR(Le25) -> + (left rail, free a-e edge hole)
     J("La",28,"LEFT-",28,BLUE)                                      # 595 OE(Le28) -> - (left rail)
     J("Lj",24,"MIDa-",24,BLUE)                                      # 595 GND(8)(Lf24) -> - (central rail)
-    line(cx("LEFT+"),cy(22),cx("MIDa+"),cy(22),RED,1.8)            # tie + bus -> left + rail (rows 21-23 clear the chip)
-    line(cx("LEFT-"),cy(21),cx("MIDa-"),cy(21),BLUE,1.8)          # tie - bus -> left - rail
-    line(cx("MIDa-"),cy(23),cx("RIGHT-"),cy(23),BLUE,1.8)         # tie - bus -> right - rail for the cathodes; row 23 clears the LEDs (24-31)
-    J("Li",16,"Ld",29,PUR); J("Li",17,"Ld",26,CYN); J("Li",19,"Ld",27,ORA)  # GP19->SER(Le29), GP18->SRCLK(Le26), GP17->RCLK(Le27) (free holes both ends)
+    line(cx("LEFT+"),cy(32),cx("MIDa+"),cy(32),RED,1.8)            # tie + bus -> left rail, BELOW the chip (clear)
+    line(cx("LEFT-"),cy(33),cx("MIDa-"),cy(33),BLUE,1.8)          # tie - bus -> left rail
+    line(cx("MIDa-"),cy(33),cx("RIGHT-"),cy(33),BLUE,1.8)         # tie - bus -> right rail for the cathodes
+    def sig(tap,r0,arow,dcol,r1,clr):   # route a signal AROUND the chips: down beside the Pico, across the clear gap (rows 21-23), down to the control tap
+        x0=cx(tap); xa=cx(dcol); ya=cy(arow)
+        line(x0,cy(r0),x0,ya,clr,1.8); line(x0,ya,xa,ya,clr,1.8); line(xa,ya,xa,cy(r1),clr,1.8)
+    sig("Li",16,21,"Ld",29,PUR)   # GP19 -> SER (Le29)
+    sig("Lj",17,22,"Lc",26,CYN)   # GP18 -> SRCLK (Le26)
+    sig("Li",19,23,"Lb",27,ORA)   # GP17 -> RCLK (Le27)
     leds=[("QB","Lf",31,31),("QC","Lf",30,30),("QD","Lf",29,29),("QE","Lf",28,28),
           ("QF","Lf",27,27),("QG","Lf",26,26),("QH","Lf",25,25),("QA","Le",30,24)]
     for nm,oc,orow,lr in leds:
