@@ -198,9 +198,9 @@ def svg_wiring():
     rect(5,5,W-10,H-10,15,"#1d1d1d")
     for grp in [("La","Lj"),("Ra","Rj")]:
         rect(cx(grp[0])-8,gtop,(cx(grp[1])-cx(grp[0]))+16,gbot-gtop,5,"#f3f1ea")
-    rails=[("LEFT+","#bbb"),("LEFT-","#bbb"),("MIDa+",RED),("MIDa-",BLUE),("MIDb+",RED),("MIDb-",BLUE),("RIGHT+","#bbb"),("RIGHT-",BLUE)]
-    for rl,clr in rails:
-        rect(cx(rl)-6,gtop,12,gbot-gtop,4,"#f3f1ea"); line(cx(rl),gtop+3,cx(rl),gbot-3,clr,2.0)
+    railtint={"LEFT+":"#f7dede","LEFT-":"#dee5f7","MIDa+":"#f7dede","MIDa-":"#dee5f7","MIDb+":"#f7dede","MIDb-":"#dee5f7","RIGHT+":"#f7dede","RIGHT-":"#dee5f7"}
+    for rl,t in railtint.items():
+        rect(cx(rl)-6,gtop,12,gbot-gtop,4,t)   # light polarity tint, NO line — the rail is an inherent bus, not a wire you add
     for gcx in [(cx("Le")+cx("Lf"))/2,(cx("Re")+cx("Rf"))/2]:
         rect(gcx-6,gtop+2,12,(gbot-2)-(gtop+2),2,"#d9d6cc")
     allcols=[c for c,k in seq if k in ("s","rail")]
@@ -230,23 +230,21 @@ def svg_wiring():
         if c=="Le":
             lab={"VCC":"VCC","QA":"QA","SER":"SER","OE":"OE","RCLK":"RCK","SRCLK":"SCK","MR":"MR","QHp":"QH'"}.get(nm,nm)
             txt(cx(c)-7,cy(r)+2.5,lab,5,"#9aa3ad","end")
-    J("Lh",5,"MIDa+",5,RED); J("Lh",18,"MIDa-",18,BLUE)
-    line(cx("MIDa+"),cy(22),cx("LEFT+"),cy(22),RED,1.8); line(cx("MIDa-"),cy(23),cx("LEFT-"),cy(23),BLUE,1.8)
-    line(cx("MIDa-"),cy(26),cx("RIGHT-"),cy(26),BLUE,1.8)        # GND tie -> RIGHT- moved up into the cathode zone (24-31)
-    J("Le",24,"LEFT+",24,RED); J("Le",30,"LEFT+",30,RED)
-    J("Le",27,"LEFT-",27,BLUE)
-    J("Lf",31,"MIDa-",31,BLUE)
-    # rail-bridge jumpers across the mid-board boundary (~row 31): make each bus one node even if the board splits a rail internally
-    def brg(rl,r1,r2,clr,dx):
-        x=cx(rl); s.append(f'<path d="M{x:.1f},{cy(r1):.1f} C{x+dx:.1f},{cy(r1):.1f} {x+dx:.1f},{cy(r2):.1f} {x:.1f},{cy(r2):.1f}" fill="none" stroke="{clr}" stroke-width="2.6" stroke-linecap="round"/>')
-    brg("MIDa+",29,33,RED,-11); brg("MIDa-",29,33,BLUE,11)
-    txt((cx("MIDa+")+cx("MIDa-"))/2,cy(33)+11,"rail bridges",5,"#d6dde5","middle")
-    J("Lh",16,"Le",26,PUR); J("Lh",17,"Le",29,CYN); J("Lh",19,"Le",28,ORA)
+    # power & signal jumpers — each plugs into a FREE hole of the pin's 5-hole group (never the pin hole), shortest path
+    J("Lj",5,"MIDa+",5,RED); J("Lj",18,"MIDa-",18,BLUE)             # Pico 3V3 / GND -> central rails (free f-j edge hole)
+    J("La",24,"LEFT+",24,RED); J("La",30,"LEFT+",30,RED)           # 595 VCC, MR -> + (left rail, free a-e edge hole)
+    J("La",27,"LEFT-",27,BLUE)                                      # 595 OE -> - (left rail)
+    J("Lj",31,"MIDa-",31,BLUE)                                      # 595 GND(8) -> - (central rail)
+    line(cx("LEFT+"),cy(22),cx("MIDa+"),cy(22),RED,1.8)            # tie + bus -> left + rail (rows 21-23 clear the chip)
+    line(cx("LEFT-"),cy(21),cx("MIDa-"),cy(21),BLUE,1.8)          # tie - bus -> left - rail
+    line(cx("MIDa-"),cy(23),cx("RIGHT-"),cy(23),BLUE,1.8)         # tie - bus -> right - rail for the cathodes; row 23 clears the LEDs (24-31)
+    J("Li",16,"Ld",26,PUR); J("Li",17,"Ld",29,CYN); J("Li",19,"Ld",28,ORA)  # GP19->SER, GP18->SRCLK, GP17->RCLK (free holes both ends)
     leds=[("QB","Lf",24,24),("QC","Lf",25,25),("QD","Lf",26,26),("QE","Lf",27,27),
           ("QF","Lf",28,28),("QG","Lf",29,29),("QH","Lf",30,30),("QA","Le",25,31)]
     for nm,oc,orow,lr in leds:
         ay=cy(lr)
-        J(oc,orow,"Ra",lr,TAN,1.7)
+        src="Lj" if oc=="Lf" else "Ld"          # plug the ribbon into a FREE edge hole of the output's group, not the pin
+        J(src,orow,"Ra",lr,TAN,1.7)
         line(cx("Rc"),ay,cx("Rg"),ay,"#9a8050",1.1)
         rect((cx("Rc")+cx("Rg"))/2-7,ay-2.5,14,5,2,TAN,'stroke="#a07d3a" stroke-width="0.5"')
         ah=cx("Rh"); rk=cx("RIGHT-"); dm=ah+0.6*(rk-ah)
@@ -383,11 +381,9 @@ P.append('<table>'
          '<tr><td>10</td><td>per LED row: <b>240&nbsp;&Omega;</b> <code>Rc&rarr;Rg</code>, then <b>LED</b> long&nbsp;lead&nbsp;(+) <code>Rh</code>, short&nbsp;lead&nbsp;(&ndash;) &rarr; <b>RIGHT&ndash;</b></td><td>rows 24&ndash;31</td><td>resistor across the channel, LED to ground; long lead is +</td></tr>'
          '</table>')
 P.append('<p class="k"><b>LED rows:</b> QB&rarr;24, QC&rarr;25, QD&rarr;26, QE&rarr;27, QF&rarr;28, QG&rarr;29, QH&rarr;30, QA&rarr;31.</p>')
-P.append('<p class="k"><b>Rail check.</b> We assume each power bus is one continuous node end-to-end. Large boards sometimes '
-         '<b>split a rail in the middle</b> (the tutorial&rsquo;s &ldquo;exception&rdquo;) &mdash; which would silently leave the chip '
-         'unpowered or the LEDs ungrounded. The two <b>rail-bridge jumpers</b> across the mid-board boundary guarantee continuity; '
-         'still, <b>test each rail end-to-end with a multimeter</b> (continuity mode) and drop in a bridge anywhere it reads open. '
-         'The terminal-strip 5-hole groups (columns a&ndash;e and f&ndash;j) are never an issue &mdash; they&rsquo;re always isolated per row, which is why the chips straddle the gap.</p>')
+P.append('<p class="k"><b>Reading the diagram.</b> A <b>line is a jumper you add</b>; the <b>rails are inherent buses</b> (shown by the red/blue tint, not a line) &mdash; you never wire <i>along</i> a rail, you just tap a free hole. '
+         'Every jumper plugs into a <b>free hole of the pin&rsquo;s 5-hole group</b> (e.g. the output at <code>Lf24</code> is tapped at the edge hole <code>Lj24</code>) &mdash; <b>never a second lead in an occupied hole</b>. '
+         'One caveat: large boards occasionally <b>split a rail in the middle</b> (the tutorial&rsquo;s &ldquo;exception&rdquo;); to be safe, <b>multimeter each rail end-to-end</b> (continuity mode) and add a bridge jumper only if it reads open.</p>')
 P.append('<p class="k"><b>Finding the Pico&rsquo;s pins.</b> The <b>Pico&nbsp;H</b> has its headers pre-soldered, so it drops '
          'straight into the breadboard <b>straddling the centre channel</b> (USB hanging off one end). All five pins we use '
          'are along <b>one long edge</b>: <b>3V3</b> (pin&nbsp;36) up near the USB, then a <b>GND</b> with '
