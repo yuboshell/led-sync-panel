@@ -223,8 +223,12 @@ def svg_wiring():
     qx1,qx2=cx("Le"),cx("Lf"); qy1,qy2=cy(24),cy(31)
     rect(qx1-7,qy1-7,(qx2-qx1)+14,(qy2-qy1)+14,3,"#23252b")
     txt((qx1+qx2)/2,(qy1+qy2)/2,"595",9,"#9fb0c0","middle","bold")
-    p595={"QB":("Lf",24),"QC":("Lf",25),"QD":("Lf",26),"QE":("Lf",27),"QF":("Lf",28),"QG":("Lf",29),"QH":("Lf",30),"GNDp":("Lf",31),
-          "VCC":("Le",24),"QA":("Le",25),"SER":("Le",26),"OE":("Le",27),"RCLK":("Le",28),"SRCLK":("Le",29),"MR":("Le",30),"QHp":("Le",31)}
+    # orientation: notch DOWN (row-31 end); pin 1 (QB) at bottom-right (Lf31)
+    s.append(f'<circle cx="{(qx1+qx2)/2:.1f}" cy="{qy2+7:.1f}" r="5" fill="#f3f1ea"/>')
+    s.append(f'<circle cx="{cx("Lf")-3:.1f}" cy="{cy(31)-3:.1f}" r="1.7" fill="#ffd27f"/>')
+    txt((qx1+qx2)/2,qy2+16,"notch ↓  (pin 1 = QB)",5,"#e0a0a0","middle","bold")
+    p595={"GNDp":("Lf",24),"QH":("Lf",25),"QG":("Lf",26),"QF":("Lf",27),"QE":("Lf",28),"QD":("Lf",29),"QC":("Lf",30),"QB":("Lf",31),
+          "QHp":("Le",24),"MR":("Le",25),"SRCLK":("Le",26),"RCLK":("Le",27),"OE":("Le",28),"SER":("Le",29),"QA":("Le",30),"VCC":("Le",31)}
     for nm,(c,r) in p595.items():
         hole(c,r,"#c9a36a")
         if c=="Le":
@@ -232,15 +236,15 @@ def svg_wiring():
             txt(cx(c)-7,cy(r)+2.5,lab,5,"#9aa3ad","end")
     # power & signal jumpers — each plugs into a FREE hole of the pin's 5-hole group (never the pin hole), shortest path
     J("Lj",5,"MIDa+",5,RED); J("Lj",18,"MIDa-",18,BLUE)             # Pico 3V3 / GND -> central rails (free f-j edge hole)
-    J("La",24,"LEFT+",24,RED); J("La",30,"LEFT+",30,RED)           # 595 VCC, MR -> + (left rail, free a-e edge hole)
-    J("La",27,"LEFT-",27,BLUE)                                      # 595 OE -> - (left rail)
-    J("Lj",31,"MIDa-",31,BLUE)                                      # 595 GND(8) -> - (central rail)
+    J("La",31,"LEFT+",31,RED); J("La",25,"LEFT+",25,RED)           # 595 VCC(Le31), MR(Le25) -> + (left rail, free a-e edge hole)
+    J("La",28,"LEFT-",28,BLUE)                                      # 595 OE(Le28) -> - (left rail)
+    J("Lj",24,"MIDa-",24,BLUE)                                      # 595 GND(8)(Lf24) -> - (central rail)
     line(cx("LEFT+"),cy(22),cx("MIDa+"),cy(22),RED,1.8)            # tie + bus -> left + rail (rows 21-23 clear the chip)
     line(cx("LEFT-"),cy(21),cx("MIDa-"),cy(21),BLUE,1.8)          # tie - bus -> left - rail
     line(cx("MIDa-"),cy(23),cx("RIGHT-"),cy(23),BLUE,1.8)         # tie - bus -> right - rail for the cathodes; row 23 clears the LEDs (24-31)
-    J("Li",16,"Ld",26,PUR); J("Li",17,"Ld",29,CYN); J("Li",19,"Ld",28,ORA)  # GP19->SER, GP18->SRCLK, GP17->RCLK (free holes both ends)
-    leds=[("QB","Lf",24,24),("QC","Lf",25,25),("QD","Lf",26,26),("QE","Lf",27,27),
-          ("QF","Lf",28,28),("QG","Lf",29,29),("QH","Lf",30,30),("QA","Le",25,31)]
+    J("Li",16,"Ld",29,PUR); J("Li",17,"Ld",26,CYN); J("Li",19,"Ld",27,ORA)  # GP19->SER(Le29), GP18->SRCLK(Le26), GP17->RCLK(Le27) (free holes both ends)
+    leds=[("QB","Lf",31,31),("QC","Lf",30,30),("QD","Lf",29,29),("QE","Lf",28,28),
+          ("QF","Lf",27,27),("QG","Lf",26,26),("QH","Lf",25,25),("QA","Le",30,24)]
     for nm,oc,orow,lr in leds:
         ay=cy(lr)
         src="Lj" if oc=="Lf" else "Ld"          # plug the ribbon into a FREE edge hole of the output's group, not the pin
@@ -437,7 +441,7 @@ P.append(f'<figure>{DIAGRAMS["wiring"]}<figcaption><b>Figure 1. Bring-up wiring 
          '240&nbsp;&Omega; resistor to ground. The 595&rsquo;s outputs face right, so <b>each LED sits in the same row as its '
          'output</b> and the eight output&rarr;LED wires run straight across as a tidy ribbon. Holes use the '
          '<b>L&hellip;&nbsp;/&nbsp;R&hellip;</b> convention (Left or Right strip, column&nbsp;a&ndash;j, row&nbsp;1&ndash;63).</figcaption></figure>')
-P.append('<p class="k"><b>Connect it in this order</b> (USB unplugged while wiring). Power runs on the <b>central rails</b> '
+P.append('<p class="k"><b>Connect it in this order</b> &mdash; USB unplugged the whole time. First seat both chips across the centre channel: the Pico up top, and the <b>595 just below with its notch / pin-1 dot pointing DOWN</b> (away from the Pico) so <b>VCC lands at <code>Le31</code> and GND at <code>Lf24</code></b>; add the 0.1&nbsp;&micro;F cap across the 595&rsquo;s VCC&harr;GND. Power runs on the <b>central rails</b> '
          'between the strips &mdash; Pico <b>3V3&nbsp;&rarr;&nbsp;+</b> rail and <b>GND&nbsp;&rarr;&nbsp;&ndash;</b> rail &mdash; with short '
          'ties carrying + / &ndash; to the left rails (for the 595) and ground out to the right rail (for the LED cathodes). Every '
          '<b>LED has two leads in two holes</b>: the <b>long lead (anode,&nbsp;+)</b> into the resistor&rsquo;s hole, the '
@@ -447,17 +451,20 @@ P.append('<table>'
          '<tr><td>1</td><td>Pico <b>3V3</b> (pin&nbsp;36) at <code>Lh5</code></td><td><b>+ rail</b> &mdash; centre <code>MIDa+</code></td><td>3.3&nbsp;V for the whole board</td></tr>'
          '<tr><td>2</td><td>Pico <b>GND</b> (pin&nbsp;23) at <code>Lh18</code></td><td><b>&ndash; rail</b> &mdash; centre <code>MIDa&ndash;</code></td><td>common ground</td></tr>'
          '<tr><td>3</td><td><b>rail ties</b></td><td><code>MIDa+&harr;LEFT+</code>, <code>MIDa&ndash;&harr;LEFT&ndash;</code>, <code>MIDa&ndash;&harr;RIGHT&ndash;</code></td><td>brings + / &ndash; to the left rails (595) and ground to the right rail (LED cathodes)</td></tr>'
-         '<tr><td>4</td><td>595 <b>VCC</b> <code>Le24</code>, <b>MR</b> <code>Le30</code></td><td><b>LEFT+</b> rail</td><td>power the chip; MR high = never reset</td></tr>'
-         '<tr><td>5</td><td>595 <b>GND&nbsp;(8)</b> <code>Lf31</code>; <b>OE</b> <code>Le27</code></td><td><code>MIDa&ndash;</code> ; <b>LEFT&ndash;</b></td><td>ground the chip; OE low = outputs on</td></tr>'
-         '<tr><td>6</td><td>Pico <b>GP19</b> <code>Lh16</code></td><td>595 <b>SER</b> <code>Le26</code></td><td>serial <b>data</b></td></tr>'
-         '<tr><td>7</td><td>Pico <b>GP18</b> <code>Lh17</code></td><td>595 <b>SRCLK</b> <code>Le29</code></td><td>shift <b>clock</b></td></tr>'
-         '<tr><td>8</td><td>Pico <b>GP17</b> <code>Lh19</code></td><td>595 <b>RCLK</b> <code>Le28</code></td><td><b>latch</b></td></tr>'
-         '<tr><td>9</td><td>each output QB&ndash;QH <code>Lf24&ndash;Lf30</code>, QA <code>Le25</code></td><td><code>Ra</code> of that LED&rsquo;s row (ribbon straight across)</td><td>output &rarr; right strip, same row</td></tr>'
+         '<tr><td>4</td><td>595 <b>VCC</b> <code>Le31</code>, <b>MR</b> <code>Le25</code></td><td><b>LEFT+</b> rail</td><td>power the chip; MR high = never reset</td></tr>'
+         '<tr><td>5</td><td>595 <b>GND&nbsp;(8)</b> <code>Lf24</code>; <b>OE</b> <code>Le28</code></td><td><code>MIDa&ndash;</code> ; <b>LEFT&ndash;</b></td><td>ground the chip; OE low = outputs on</td></tr>'
+         '<tr><td>6</td><td>Pico <b>GP19</b> <code>Lh16</code></td><td>595 <b>SER</b> <code>Le29</code></td><td>serial <b>data</b></td></tr>'
+         '<tr><td>7</td><td>Pico <b>GP18</b> <code>Lh17</code></td><td>595 <b>SRCLK</b> <code>Le26</code></td><td>shift <b>clock</b></td></tr>'
+         '<tr><td>8</td><td>Pico <b>GP17</b> <code>Lh19</code></td><td>595 <b>RCLK</b> <code>Le27</code></td><td><b>latch</b></td></tr>'
+         '<tr><td>9</td><td>each output QB&ndash;QH <code>Lf31&ndash;Lf25</code>, QA <code>Le30</code></td><td><code>Ra</code> of that LED&rsquo;s row (ribbon straight across)</td><td>output &rarr; right strip, same row</td></tr>'
          '<tr><td>10</td><td>per LED row: <b>240&nbsp;&Omega;</b> <code>Rc&rarr;Rg</code>, then <b>LED</b> long&nbsp;lead&nbsp;(+) <code>Rh</code>, short&nbsp;lead&nbsp;(&ndash;) &rarr; <b>RIGHT&ndash;</b></td><td>rows 24&ndash;31</td><td>resistor across the channel, LED to ground; long lead is +</td></tr>'
          '</table>')
-P.append('<p class="k"><b>LED rows:</b> QB&rarr;24, QC&rarr;25, QD&rarr;26, QE&rarr;27, QF&rarr;28, QG&rarr;29, QH&rarr;30, QA&rarr;31.</p>')
+P.append('<p class="k"><b>LED rows</b> (notch-down, so outputs run bottom&ndash;up): QB&rarr;31, QC&rarr;30, QD&rarr;29, QE&rarr;28, QF&rarr;27, QG&rarr;26, QH&rarr;25, QA&rarr;24.</p>')
+P.append('<p class="k"><b>Before you plug in USB &mdash; check:</b> &#9744; 595 <b>notch points down</b> (VCC <code>Le31</code>, GND <code>Lf24</code>) &middot; '
+         '&#9744; no jumper shorts <b>+ straight to &ndash;</b> &middot; &#9744; <b>OE&rarr;&ndash;</b> (outputs on) and <b>MR&rarr;+</b> (no reset) &middot; '
+         '&#9744; every LED&rsquo;s <b>long lead = +</b> (toward its resistor) &middot; &#9744; each lead in its own hole. Then plug in USB and run the test firmware.</p>')
 P.append('<p class="k"><b>Reading the diagram.</b> A <b>line is a jumper you add</b>; the <b>rails are inherent buses</b> (shown by the red/blue tint, not a line) &mdash; you never wire <i>along</i> a rail, you just tap a free hole. '
-         'Every jumper plugs into a <b>free hole of the pin&rsquo;s 5-hole group</b> (e.g. the output at <code>Lf24</code> is tapped at the edge hole <code>Lj24</code>) &mdash; <b>never a second lead in an occupied hole</b>. '
+         'Every jumper plugs into a <b>free hole of the pin&rsquo;s 5-hole group</b> (e.g. output QB at <code>Lf31</code> is tapped at the edge hole <code>Lj31</code>) &mdash; <b>never a second lead in an occupied hole</b>. '
          'One caveat: large boards occasionally <b>split a rail in the middle</b> (the tutorial&rsquo;s &ldquo;exception&rdquo;); to be safe, <b>multimeter each rail end-to-end</b> (continuity mode) and add a bridge jumper only if it reads open.</p>')
 P.append('<p class="k"><b>Finding the Pico&rsquo;s pins.</b> The <b>Pico&nbsp;H</b> has its headers pre-soldered, so it drops '
          'straight into the breadboard <b>straddling the centre channel</b> (USB hanging off one end). All five pins we use '
