@@ -263,12 +263,67 @@ def svg_wiring():
         line(lx,ly,lx+18,ly,col,3); txt(lx+22,ly+3.2,lab,8.5,"#d6dde5","start"); lx+=34+6.2*len(lab)
     return wrap("".join(s), W, H)
 
+def svg_blink():
+    # Simplest possible circuit: Pico GP15 -> 240Ω -> LED -> one jumper -> GND. One strip, no rails.
+    P=18.0; HOLE=6.5; R0=1; RN=27; LX=78; TY=66
+    ORA="#ea580c"; BLUE="#2563eb"; GRN="#22c55e"; TAN="#d6b06a"; HOLEC="#39393c"
+    cols=list("abcde")+["|"]+list("fghij")
+    X={}; x=LX
+    for c in cols:
+        if c=="|": x+=P*0.9; continue
+        X[c]=x; x+=P
+    GR=x; W=int(GR+70); H=int(TY+(RN-R0)*P+44)
+    def cx(c): return X[c]
+    def cy(r): return TY+(r-R0)*P
+    s=[]
+    def rect(x,y,w,h,r,fill,ex=""): s.append(f'<rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" height="{h:.1f}" rx="{r}" fill="{fill}" {ex}/>')
+    def txt(x,y,t,sz,fill,a="middle",w="normal"): s.append(f'<text x="{x:.1f}" y="{y:.1f}" font-size="{sz}" fill="{fill}" text-anchor="{a}" font-weight="{w}">{t}</text>')
+    def line(x1,y1,x2,y2,c,w=2.4): s.append(f'<line x1="{x1:.1f}" y1="{y1:.1f}" x2="{x2:.1f}" y2="{y2:.1f}" stroke="{c}" stroke-width="{w}" stroke-linecap="round"/>')
+    def hole(c,r,fill=HOLEC): s.append(f'<rect x="{cx(c)-HOLE/2:.1f}" y="{cy(r)-HOLE/2:.1f}" width="{HOLE}" height="{HOLE}" rx="1.4" fill="{fill}"/>')
+    gtop=cy(R0)-9; gbot=cy(RN)+9
+    rect(5,5,W-10,H-10,14,"#1d1d1d")
+    rect(cx("a")-9,gtop,(cx("j")-cx("a"))+18,gbot-gtop,5,"#f3f1ea")
+    gxc=(cx("e")+cx("f"))/2; rect(gxc-6,gtop+2,12,(gbot-2)-(gtop+2),2,"#d9d6cc")
+    for c in "abcdefghij":
+        for r in range(R0,RN+1): hole(c,r)
+    for c in "abcdefghij": txt(cx(c),gtop-5,c,9,"#d6dde5","middle","bold")
+    for r in range(R0,RN+1):
+        if r==1 or r%5==0: txt(LX-24,cy(r)+3,str(r),8.5,"#cbd5e1","middle")
+    # Pico (cols c-h, rows 1-20, USB up)
+    px1,px2=cx("c"),cx("h"); py1,py2=cy(1),cy(20)
+    rect(px1-8,py1-8,(px2-px1)+16,(py2-py1)+16,6,"#0b6b5e",'opacity="0.92"')
+    txt((px1+px2)/2,py1-8+14,"Pico (USB ↑)",9,"#dffaf4","middle","bold")
+    txt((px1+px2)/2,(py1+py2)/2,"PICO",15,"#0d4a41","middle","bold")
+    hole("c",18,BLUE); txt(cx("c")-10,cy(18)+3,"GND",7,BLUE,"end","bold")
+    hole("c",20,ORA); txt(cx("c")-10,cy(20)+3,"GP15",7,ORA,"end","bold")
+    # 240Ω resistor: Lb20 (GP15 group) -> Lb23
+    line(cx("b"),cy(20),cx("b"),cy(23),"#9a8050",1.4)
+    rect(cx("b")-3.2,(cy(20)+cy(23))/2-8,6.4,16,2,TAN,'stroke="#a07d3a" stroke-width="0.6"')
+    txt(cx("b")+10,(cy(20)+cy(23))/2+2,"240Ω",6.5,TAN,"start","bold")
+    # LED: anode (long,+) Lc23 -> cathode (short,-) Lc25
+    ax,ay=cx("c"),cy(23); ky=cy(25); dm=ay+0.62*(ky-ay)
+    line(ax,ay,ax,dm-4,"#9aa0a6",1.5)            # long anode lead (Lc23 -> dome)
+    line(ax,dm+4,ax,ky,"#9aa0a6",1.5)            # short cathode lead
+    s.append(f'<circle cx="{ax:.1f}" cy="{dm:.1f}" r="5.6" fill="{GRN}" stroke="#15803d" stroke-width="0.7"/>')
+    txt(ax+10,ay+3,"+ long leg",6.5,GRN,"start","bold")
+    txt(ax+10,ky+3,"– short leg",6.5,BLUE,"start","bold")
+    # the ONE jumper: cathode group (La25) -> GND group (La18)
+    x0=cx("a")
+    s.append(f'<path d="M{x0:.1f},{cy(25):.1f} C{x0-16:.1f},{cy(25):.1f} {x0-16:.1f},{cy(18):.1f} {x0:.1f},{cy(18):.1f}" fill="none" stroke="{BLUE}" stroke-width="2.6" stroke-linecap="round"/>')
+    txt(x0-20,(cy(18)+cy(25))/2,"1 jumper",6.2,"#bcd",a="middle",w="bold")
+    txt(x0-20,(cy(18)+cy(25))/2+9,"→ GND",6.2,"#bcd","middle")
+    # title + flow
+    txt(W/2,24,"Step 0 — the simplest blink (Pico + resistor + LED + 1 jumper)",11,"#ffffff","middle","bold")
+    txt(W/2,40,"GP15 → 240Ω → LED → GND   (toggle GP15 to blink)",9,"#aab2bd","middle")
+    return wrap("".join(s), W, H)
+
 DIAGRAMS = {
     "geometry": svg_geometry(),
     "encoding": svg_encoding(),
     "vernier":  svg_vernier(),
     "layout":   svg_layout(),
     "wiring":   svg_wiring(),
+    "blink":    svg_blink(),
 }
 
 # validate every SVG before writing the page
@@ -344,8 +399,28 @@ P.append('<div class="meta">DIY design plan &middot; updated 2026-06-17 &middot;
 P.append('<p class="k"><b>Reader&rsquo;s map:</b> <b>build guide first</b> (wire the first light-up, just below) &middot; '
          'then &sect;1 what this tool is for &middot; &sect;2 the order list &middot; &sect;3 the driver choice + exact parts &middot; '
          '&sect;4&ndash;&sect;9 the design rationale.</p>')
+P.append('<h2>Step 0 &mdash; blink one LED (the simplest possible test)</h2>')
+P.append('<p class="k">Before the 595 panel, prove the whole chain with the <b>smallest possible circuit</b>: the Pico drives '
+         '<b>one</b> LED through <b>one</b> resistor, with <b>one</b> jumper to ground. If it blinks, your Pico, toolchain, and '
+         'breadboard wiring are all good &mdash; then move on to the 595 below.</p>')
+P.append(f'<figure>{DIAGRAMS["blink"]}<figcaption><b>Figure 0. Simplest blink.</b> '
+         '<b>GP15</b>&nbsp;(pin&nbsp;20) &rarr; <b>240&nbsp;&Omega;</b> resistor &rarr; LED <b>long leg (+)</b>; LED <b>short leg (&ndash;)</b> &rarr; '
+         'one jumper &rarr; a Pico <b>GND</b> pin. The firmware just toggles GP15 high/low to blink it.</figcaption></figure>')
+P.append('<table>'
+         '<tr><th>#</th><th>From (hole)</th><th>To (hole)</th><th>Why</th></tr>'
+         '<tr><td>1</td><td><b>240&nbsp;&Omega; resistor</b> &mdash; into GP15&rsquo;s row <code>Lb20</code></td><td><code>Lb23</code></td><td>current limit (~4&ndash;5&nbsp;mA)</td></tr>'
+         '<tr><td>2</td><td><b>LED</b> long leg&nbsp;(+) <code>Lc23</code></td><td>short leg&nbsp;(&ndash;) <code>Lc25</code></td><td>anode to the resistor, cathode toward ground</td></tr>'
+         '<tr><td>3</td><td><b>one jumper</b> <code>La25</code> (cathode row)</td><td><code>La18</code> (GND pin&rsquo;s row)</td><td>completes the circuit to GND</td></tr>'
+         '</table>')
+P.append('<p class="k"><b>Firmware</b> (C/C++ SDK, <code>firmware/blink/main.c</code>) &mdash; toggle GP15 twice a second:</p>')
+P.append('<pre style="background:#0f172a;color:#e2e8f0;padding:11px 13px;border-radius:8px;overflow-x:auto;font-size:12.5px;line-height:1.5">'
+         '#include "pico/stdlib.h"\n#define LED 15            // GP15\n\nint main() {\n    gpio_init(LED);\n    gpio_set_dir(LED, GPIO_OUT);\n'
+         '    while (true) {\n        gpio_put(LED, 1); sleep_ms(250);\n        gpio_put(LED, 0); sleep_ms(250);\n    }\n}</pre>')
+P.append('<p class="k"><b>Build &amp; flash</b> (CLI): <code>cmake&nbsp;..&nbsp;&amp;&amp;&nbsp;make</code> &rarr; <code>blink.uf2</code>; '
+         'hold <b>BOOTSEL</b> while plugging in USB, then <code>picotool&nbsp;load&nbsp;blink.uf2&nbsp;&amp;&amp;&nbsp;picotool&nbsp;reboot</code>. '
+         'The LED blinks. Full build steps are in <code>firmware/blink/README.md</code>.</p>')
 P.append('<h2>Build the bring-up first &mdash; wiring the first light-up</h2>')
-P.append('<p class="k"><b>Got the parts? Start here.</b> This is the hands-on build; the numbered sections below '
+P.append('<p class="k"><b>Got the parts? Start here.</b> This is the hands-on build; the numbered sections below'
          '(&sect;1 onward) explain what the panel is for and why each part was chosen.</p>')
 P.append('<p class="k"><b>Bring-up</b> = power on the smallest version of the circuit and get it working in verified steps, '
          'before scaling to the full panel. Here that is just <b>the Pico + one 74HC595 + eight LEDs</b>, powered at '
