@@ -455,6 +455,127 @@ def svg_wiring_b():
         line(lx,ly,lx+18,ly,col,3); txt(lx+22,ly+3.2,lab,8.5,"#33404e","start"); lx+=34+6.2*len(lab)
     return wrap("".join(s), W, H)
 
+def svg_wiring_c():
+    # OPTION C: Pico AND 595 both on the RIGHT strip; 595 NOTCH-UP (the chip turned 180deg vs A) so its control
+    # pins land on the same side as the Pico's GP -> short same-side control. Outputs face LEFT, fanning across
+    # the roomy middle to the comb on the LEFT strip. (A rotated chip is NOT a mirror of A: the pin order flips.)
+    P=17.0; HOLE=6.0; R0=1; RN=40; LX=120; TY=150
+    RED="#dc2626"; BLUE="#2563eb"; HOLEC="#39393c"; GRN="#22c55e"; ORA="#ea580c"; PUR="#7c3aed"; CYN="#0891b2"; TAN="#d6b06a"
+    seq=[("LEFT+","rail"),("LEFT-","rail"),
+         ("La","s"),("Lb","s"),("Lc","s"),("Ld","s"),("Le","s"),("|L","gap"),("Lf","s"),("Lg","s"),("Lh","s"),("Li","s"),("Lj","s"),
+         ("MIDa+","rail"),("MIDa-","rail"),("MIDb+","rail"),("MIDb-","rail"),
+         ("Ra","s"),("Rb","s"),("Rc","s"),("Rd","s"),("Re","s"),("|R","gap"),("Rf","s"),("Rg","s"),("Rh","s"),("Ri","s"),("Rj","s"),
+         ("RIGHT+","rail"),("RIGHT-","rail")]
+    X={}; x=LX
+    for nm,k in seq:
+        if k=="gap": x+=P*0.85; continue
+        X[nm]=x; x+=P
+        if nm in ("LEFT-","Lj","MIDb-","Rj"): x+=P*0.55
+    GR=x; W=int(GR+30); H=int(TY+(RN-R0)*P+56)
+    def cx(c): return X[c]
+    def cy(r): return TY+(r-R0)*P
+    s=[]
+    def rect(x,y,w,h,r,fill,ex=""): s.append(f'<rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" height="{h:.1f}" rx="{r}" fill="{fill}" {ex}/>')
+    def txt(x,y,t,sz,fill,a="middle",w="normal"): s.append(f'<text x="{x:.1f}" y="{y:.1f}" font-size="{sz}" fill="{fill}" text-anchor="{a}" font-weight="{w}">{t}</text>')
+    def line(x1,y1,x2,y2,c,w=2.2): s.append(f'<line x1="{x1:.1f}" y1="{y1:.1f}" x2="{x2:.1f}" y2="{y2:.1f}" stroke="{c}" stroke-width="{w}" stroke-linecap="round"/>')
+    def J(c1,r1,c2,r2,clr,w=2.0):
+        x1,y1,x2,y2=cx(c1),cy(r1),cx(c2),cy(r2); mx=(x1+x2)/2
+        s.append(f'<path d="M{x1:.1f},{y1:.1f} C{mx:.1f},{y1:.1f} {mx:.1f},{y2:.1f} {x2:.1f},{y2:.1f}" fill="none" stroke="{clr}" stroke-width="{w}" stroke-linecap="round"/>')
+    def hole(c,r,fill=HOLEC): s.append(f'<rect x="{cx(c)-HOLE/2:.1f}" y="{cy(r)-HOLE/2:.1f}" width="{HOLE}" height="{HOLE}" rx="1.3" fill="{fill}"/>')
+    gtop=cy(R0)-9; gbot=cy(RN)+9
+    rect(5,5,W-10,H-10,12,"#e9ebee")
+    BPt=TY-88; BPb=cy(RN)+26
+    rect(14,BPt,W-28,BPb-BPt,9,"#141519")
+    hy=TY-54
+    rect(LX-12,hy-13,104,26,3,"#161616",'stroke="#caa83a" stroke-width="1.1"')
+    txt(LX+40,hy-1,"BREADBOARD",6.5,"#caa83a","middle","bold"); txt(LX+40,hy+8,"MB-104 · CIRCUIT-TEST",4.8,"#caa83a","middle")
+    for blab,bx in [("Va",LX+172),("Vb",LX+230),("⏚",LX+288)]:
+        s.append(f'<circle cx="{bx:.1f}" cy="{hy:.1f}" r="7.5" fill="#bfc3cb" stroke="#7c7f86" stroke-width="1.3"/>')
+        s.append(f'<circle cx="{bx:.1f}" cy="{hy:.1f}" r="3" fill="#8f9299"/>')
+        txt(bx+12,hy+3,blab,8.5,"#caa83a","start","bold")
+    for grp in [("La","Lj"),("Ra","Rj")]:
+        rect(cx(grp[0])-8,gtop,(cx(grp[1])-cx(grp[0]))+16,gbot-gtop,5,"#f3f1ea")
+    railtint={"LEFT+":"#f7dede","LEFT-":"#dee5f7","MIDa+":"#f7dede","MIDa-":"#dee5f7","MIDb+":"#f7dede","MIDb-":"#dee5f7","RIGHT+":"#f7dede","RIGHT-":"#dee5f7"}
+    for rl,t in railtint.items():
+        rect(cx(rl)-6,gtop,12,gbot-gtop,4,t)
+        sc=RED if rl.endswith("+") else BLUE
+        line(cx(rl)-5.5,gtop+3,cx(rl)-5.5,gbot-3,sc,1.2); line(cx(rl)+5.5,gtop+3,cx(rl)+5.5,gbot-3,sc,1.2)
+    for gcx in [(cx("Le")+cx("Lf"))/2,(cx("Re")+cx("Rf"))/2]:
+        rect(gcx-6,gtop+2,12,(gbot-2)-(gtop+2),2,"#d9d6cc")
+    allcols=[c for c,k in seq if k in ("s","rail")]
+    for c in allcols:
+        for r in range(R0,RN+1): hole(c,r)
+    for c in allcols:
+        lab=c[-1] if (c[0] in "LR" and len(c)==2) else ("+" if c.endswith("+") else "–")
+        cl=RED if c.endswith("+") else (BLUE if c.endswith("-") else "#d6dde5")
+        txt(cx(c),gtop-5,lab,8.5,cl,"middle","bold")
+        if not (c[0] in "LR" and len(c)==2):
+            txt(cx(c),gbot+12,("+" if c.endswith("+") else "–"),8.5,cl,"middle","bold")
+    txt(cx("MIDa+"),gtop-18,"3V3",7,RED,"middle","bold"); txt(cx("MIDa-"),gtop-18,"GND",7,BLUE,"middle","bold")
+    txt(cx("MIDb+"),gtop-18,"3V3",7,RED,"middle","bold"); txt(cx("MIDb-"),gtop-18,"GND",7,BLUE,"middle","bold")
+    for r in range(R0,RN+1):
+        if r==1 or r%5==0:
+            txt(LX-26,cy(r)+3,str(r),8,"#cbd5e1","middle")
+            txt(cx("RIGHT-")+16,cy(r)+3,str(r),8,"#cbd5e1","middle")
+    # ---- Pico — RIGHT strip ----
+    px1,px2=cx("Rc"),cx("Rj"); py1,py2=cy(1),cy(19)
+    rect(px1-8,py1-8,(px2-px1)+16,(py2-py1)+16,6,"#0b6b5e",'opacity="0.92"')
+    txt((px1+px2)/2,py1-8+13,"Pico (USB ↑)",8,"#dffaf4","middle","bold")
+    txt((px1+px2)/2,(py1+py2)/2,"PICO",13,"#0d4a41","middle","bold")
+    for nm,c,r,cl in [("3V3","Rh",5,RED),("GP19","Rh",14,PUR),("GP18","Ri",15,CYN),("GP17","Rj",17,ORA),("GND","Rd",16,BLUE)]:
+        hole(c,r,cl); txt(cx(c)+8,cy(r)+3,nm,6,cl,"start","bold")
+    # ---- 595 — NOTCH-UP, right strip, rows 23-30 ----
+    qx1,qx2=cx("Re"),cx("Rf"); qy1,qy2=cy(23),cy(30)
+    rect(qx1-7,qy1-7,(qx2-qx1)+14,(qy2-qy1)+14,3,"#23252b")
+    txt((qx1+qx2)/2,(qy1+qy2)/2,"595",9,"#9fb0c0","middle","bold")
+    s.append(f'<circle cx="{(qx1+qx2)/2:.1f}" cy="{qy1-7:.1f}" r="5" fill="#f3f1ea"/>')   # notch UP (row-23 end); pin 1 (QB) top-left
+    p595={"QB":("Re",23),"QC":("Re",24),"QD":("Re",25),"QE":("Re",26),"QF":("Re",27),"QG":("Re",28),"QH":("Re",29),"GNDp":("Re",30),
+          "VCC":("Rf",23),"QA":("Rf",24),"SER":("Rf",25),"OE":("Rf",26),"RCLK":("Rf",27),"SRCLK":("Rf",28),"MR":("Rf",29),"QHp":("Rf",30)}
+    for nm,(c,r) in p595.items():
+        hole(c,r,"#c9a36a")
+        if c=="Rf":
+            lab={"VCC":"VCC","QA":"QA","SER":"SER","OE":"OE","RCLK":"RCK","SRCLK":"SCK","MR":"MR","QHp":"QH'"}.get(nm,nm)
+            txt(cx(c)+7,cy(r)+2.5,lab,5,"#9aa3ad","start")
+        else:
+            txt(cx(c)-7,cy(r)+2.5,("GND" if nm=="GNDp" else nm),5,"#9aa3ad","end")
+    # ---- 3 control wires: Pico GP -> 595 control, SAME side (f-j) ----
+    J("Rh",14,"Rg",25,PUR)   # GP19 -> SER  (Rf25, tap Rg)
+    J("Ri",15,"Rg",28,CYN)   # GP18 -> SRCLK (Rf28, tap Rg)
+    J("Rj",17,"Rg",27,ORA)   # GP17 -> RCLK (Rf27, tap Rg)
+    # ---- power: 3V3 bus = RIGHT+ ; GND bus = MIDb- (tied to LEFT-, the LED rail) ----
+    J("Rh",5,"RIGHT+",5,RED)                                  # Pico 3V3 -> RIGHT+
+    J("Rh",23,"RIGHT+",23,RED); J("Rh",29,"RIGHT+",29,RED)   # 595 VCC(Rf23), MR(Rf29) -> RIGHT+
+    J("Ra",16,"MIDb-",16,BLUE)                               # Pico GND -> MIDb-
+    J("Ra",26,"MIDb-",26,BLUE); J("Ra",30,"MIDb-",30,BLUE)   # 595 OE(Re26), GND(Re30) -> MIDb-
+    line(cx("LEFT-"),cy(2),cx("MIDb-"),cy(2),BLUE,1.8)       # GND tie: LED rail (LEFT-) <-> MIDb-
+    line(cx("MIDa-"),cy(3),cx("MIDb-"),cy(3),BLUE,1.6)
+    # ---- QA (the lone f-j output, sits with the control) -> local LED on the right ----
+    line(cx("Ri"),cy(24),cx("Ri"),cy(26),"#9a8050",1.4)      # QA resistor (Rf24 node, tap Ri) down to row 26
+    s.append(f'<line x1="{cx("Ri"):.1f}" y1="{cy(24.4):.1f}" x2="{cx("Ri"):.1f}" y2="{cy(25.6):.1f}" stroke="{TAN}" stroke-width="4.5" stroke-linecap="round"/>')
+    aq=cx("Rj"); kq=cx("RIGHT-"); dq=(aq+kq)/2
+    line(aq,cy(26),dq-4,cy(26),"#9aa0a6",1.5); line(dq+4,cy(26),kq,cy(26),"#9aa0a6",1.5)
+    s.append(f'<circle cx="{dq:.1f}" cy="{cy(26):.1f}" r="4.6" fill="{GRN}" stroke="#15803d" stroke-width="0.7"/>')
+    txt(aq,cy(26)-7,"+",6.5,"#15803d","middle","bold"); txt(kq,cy(26)-7,"–",6.5,BLUE,"middle","bold"); txt(dq,cy(26)+10,"QA",5,"#7a818b","middle")
+    # ---- outputs QB-QH (Re, a-e) -> jumper across the roomy middle -> resistor + LED on the LEFT strip ----
+    for nm,row in [("QB",23),("QC",24),("QD",25),("QE",26),("QF",27),("QG",28),("QH",29)]:
+        ay=cy(row)
+        J("Ra",row,"Lj",row,TAN,1.7)                         # output -> across the middle to the left strip
+        line(cx("Ld"),ay,cx("Lh"),ay,"#9a8050",1.1)          # 240Ω bridges the LEFT gap (Lh f-j <-> Ld a-e)
+        rect((cx("Ld")+cx("Lh"))/2-7,ay-2.5,14,5,2,TAN,'stroke="#a07d3a" stroke-width="0.5"')
+        an=cx("Lb"); ka=cx("LEFT-"); dm=(an+ka)/2
+        line(an,ay,dm+4,ay,"#9aa0a6",1.5); line(dm-4,ay,ka,ay,"#9aa0a6",1.5)
+        s.append(f'<circle cx="{dm:.1f}" cy="{ay:.1f}" r="4.6" fill="{GRN}" stroke="#15803d" stroke-width="0.7"/>')
+        txt(an,ay-7,"+",6.5,"#15803d","middle","bold"); txt(ka,ay-7,"–",6.5,BLUE,"middle","bold")
+        txt(dm,ay+9,nm,5,"#7a818b","middle")
+    # ---- title / legend ----
+    txt(W/2,26,"Option C — Pico + 595 both on the right; 595 turned 180° so control is same-side; LEDs on the left",10.5,"#15171c","middle","bold")
+    txt(W/2,43,"Control stays on the right (same side as the Pico); the 7 outputs fan left across the roomy middle. A rotated chip ≠ a mirror of A.",8,"#5b6470","middle")
+    leg=[("3V3",RED),("GND",BLUE),("SER",PUR),("SRCLK",CYN),("RCLK",ORA),("output→LED",TAN)]
+    lx=40; ly=H-14
+    for lab,col in leg:
+        line(lx,ly,lx+18,ly,col,3); txt(lx+22,ly+3.2,lab,8.5,"#33404e","start"); lx+=34+6.2*len(lab)
+    return wrap("".join(s), W, H)
+
 def svg_schematic():
     # Academic schematic: Pico -> 74HC595 -> 8x(240ohm+LED). Conventions: dot = junction (connected);
     # hop-arc = crossing (NOT connected). Laid out so wires DON'T cross; every real join carries a dot.
@@ -521,6 +642,7 @@ DIAGRAMS = {
     "layout":   svg_layout(),
     "wiring":   svg_wiring(),
     "wiring_b": svg_wiring_b(),
+    "wiring_c": svg_wiring_c(),
     "schematic": svg_schematic(),
     "blink":    svg_blink(),
 }
@@ -601,13 +723,15 @@ P.append('<p class="k"><b>Reader&rsquo;s map:</b> <b>build guide first</b> (wire
 P.append('<h2>The circuit &mdash; academic schematic</h2>')
 P.append('<p class="k">The logical circuit, independent of the breadboard: the Pico clocks a byte into the 595 over three control lines (<b>SER</b> data, <b>SRCLK</b> shift clock, <b>RCLK</b> latch); the chip latches the byte to its eight parallel outputs; each output drives an LED through a <b>240&nbsp;&Omega;</b> resistor to ground. <b>OE</b> tied low keeps the outputs enabled, <b>MR&nbsp;(SRCLR)</b> tied high prevents reset, and a <b>0.1&nbsp;&micro;F</b> cap decouples VCC.</p>')
 P.append(f'<figure>{DIAGRAMS["schematic"]}<figcaption><b>Figure. Circuit schematic.</b> Pico &rarr; 74HC595 &rarr; 8&times;(240&nbsp;&Omega; + LED) &mdash; the &ldquo;science&rdquo; the breadboard figures below realise physically.</figcaption></figure>')
-P.append('<h2>Two breadboard layouts &mdash; 595 on the left (A) or right (B)</h2>')
-P.append('<p class="k">Two equally-valid physical layouts of the same circuit &mdash; we keep both as options. '
-         '<b>Option&nbsp;A</b> stacks the Pico + 595 on the left and runs the eight outputs across the middle as one parallel ribbon. '
-         '<b>Option&nbsp;B (revised)</b> raises the 595 onto the right strip <i>beside the Pico&rsquo;s GP17&ndash;19</i>, so the 3 control wires become short horizontal hops and the outputs stay local on the right, running down to a comb spread out below. '
-         'Either way, <b>QA</b> is the one output that must bridge the chip (the 595&rsquo;s 7+1 pinout split).</p>')
+P.append('<h2>Three breadboard layouts &mdash; A, B, or C</h2>')
+P.append('<p class="k">Three physical layouts of the same circuit &mdash; we keep all three as options. '
+         '<b>Option&nbsp;A</b> stacks the Pico + 595 on the left strip and runs the eight outputs across the middle as one parallel ribbon to the comb on the right. '
+         '<b>Option&nbsp;B</b> puts the 595 on the right strip beside the Pico&rsquo;s GP17&ndash;19 (short control hops) and reaches each LED with a long resistor lead &mdash; no output jumpers. '
+         '<b>Option&nbsp;C</b> stacks the Pico + 595 together on the <i>right</i> strip with the 595 turned <b>180&deg;</b> so its control pins face the Pico (short, same-side control), and fans the outputs left across the roomy middle to the comb on the left. '
+         'Note C is <i>not</i> a mirror of A: you cannot mirror a chip, so rotating it 180&deg; flips the output pin order. Either way, <b>QA</b> is the one output sitting on the chip&rsquo;s control side (the 595&rsquo;s 7+1 pinout split).</p>')
 P.append(f'<figure>{DIAGRAMS["wiring"]}<figcaption><b>Option A (current) &mdash; 595 on the LEFT strip.</b> Pico + 595 stacked on the left; the eight outputs cross the centre rails as a parallel ribbon to the comb on the right.</figcaption></figure>')
 P.append(f'<figure>{DIAGRAMS["wiring_b"]}<figcaption><b>Option B (revised) &mdash; 595 raised beside GP17&ndash;19, outputs in a parallel ribbon.</b> The 595 is notch-down (matching the datasheet); the 3 control wires are short hops; the seven QB&ndash;QH outputs drop to the comb as evenly-spaced parallel diagonals (QA is the lone output that must bridge across); every jumper and resistor sits in its own hole.</figcaption></figure>')
+P.append(f'<figure>{DIAGRAMS["wiring_c"]}<figcaption><b>Option C &mdash; Pico + 595 both on the RIGHT strip, 595 turned 180&deg;.</b> Stacking the two on one strip keeps the 3 control wires short and on the same side; the 595 is notch-up so its outputs face left and fan across the centre as a clean parallel ribbon to the comb on the left strip. The 180&deg; rotation (not a reflection) reverses the output pin order versus Option&nbsp;A.</figcaption></figure>')
 P.append('<h2>Step 0 &mdash; blink one LED (the simplest possible test)</h2>')
 P.append('<p class="k">Before the 595 panel, prove the whole chain with the <b>smallest possible circuit</b>: the Pico drives '
          '<b>one</b> LED through <b>one</b> resistor, with <b>one</b> jumper to ground. If it blinks, your Pico, toolchain, and '
