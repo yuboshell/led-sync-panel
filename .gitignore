@@ -3,3 +3,4 @@ __pycache__/
 *.pyc
 # purchase receipts / item photos — contain personal + payment info, keep local-only
 purchases/
+references/datasheets/
