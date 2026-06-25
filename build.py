@@ -195,7 +195,9 @@ def svg_wiring():
         s.append(f'<path d="M{x1:.1f},{y1:.1f} C{mx:.1f},{y1:.1f} {mx:.1f},{y2:.1f} {x2:.1f},{y2:.1f}" fill="none" stroke="{clr}" stroke-width="{w}" stroke-linecap="round"/>')
     def hole(c,r,fill=HOLEC): s.append(f'<rect x="{cx(c)-HOLE/2:.1f}" y="{cy(r)-HOLE/2:.1f}" width="{HOLE}" height="{HOLE}" rx="1.3" fill="{fill}"/>')
     gtop=cy(R0)-9; gbot=cy(RN)+9
-    rect(5,5,W-10,H-10,15,"#1d1d1d")
+    rect(5,5,W-10,H-10,12,"#e9ebee")                       # light figure background — my labels/legend live OUT here
+    BPt=TY-88; BPb=cy(RN)+26
+    rect(14,BPt,W-28,BPb-BPt,9,"#141519")                  # matte-black MB-104 baseplate = the real device
     hy=TY-54   # MB-104 binding-post header (the terminal block above the strips, as on the real board)
     rect(LX-12,hy-13,104,26,3,"#161616",'stroke="#caa83a" stroke-width="1.1"')
     txt(LX+40,hy-1,"BREADBOARD",6.5,"#caa83a","middle","bold"); txt(LX+40,hy+8,"MB-104 · CIRCUIT-TEST",4.8,"#caa83a","middle")
@@ -207,7 +209,9 @@ def svg_wiring():
         rect(cx(grp[0])-8,gtop,(cx(grp[1])-cx(grp[0]))+16,gbot-gtop,5,"#f3f1ea")
     railtint={"LEFT+":"#f7dede","LEFT-":"#dee5f7","MIDa+":"#f7dede","MIDa-":"#dee5f7","MIDb+":"#f7dede","MIDb-":"#dee5f7","RIGHT+":"#f7dede","RIGHT-":"#dee5f7"}
     for rl,t in railtint.items():
-        rect(cx(rl)-6,gtop,12,gbot-gtop,4,t)   # light polarity tint, NO line — the rail is an inherent bus, not a wire you add
+        rect(cx(rl)-6,gtop,12,gbot-gtop,4,t)
+        sc=RED if rl.endswith("+") else BLUE
+        line(cx(rl)-5.5,gtop+3,cx(rl)-5.5,gbot-3,sc,1.2); line(cx(rl)+5.5,gtop+3,cx(rl)+5.5,gbot-3,sc,1.2)   # red=+ / blue=– bus stripe   # light polarity tint, NO line — the rail is an inherent bus, not a wire you add
     for gcx in [(cx("Le")+cx("Lf"))/2,(cx("Re")+cx("Rf"))/2]:
         rect(gcx-6,gtop+2,12,(gbot-2)-(gtop+2),2,"#d9d6cc")
     allcols=[c for c,k in seq if k in ("s","rail")]
@@ -217,6 +221,8 @@ def svg_wiring():
         lab=c[-1] if (c[0] in "LR" and len(c)==2) else ("+" if c.endswith("+") else "–")
         cl=RED if c.endswith("+") else (BLUE if c.endswith("-") else "#d6dde5")
         txt(cx(c),gtop-5,lab,8.5,cl,"middle","bold")
+        if not (c[0] in "LR" and len(c)==2):                 # rails: repeat the +/– polarity at the BOTTOM end too
+            txt(cx(c),gbot+12,("+" if c.endswith("+") else "–"),8.5,cl,"middle","bold")
     txt(cx("MIDa+"),gtop-18,"3V3",7,RED,"middle","bold"); txt(cx("MIDa-"),gtop-18,"GND",7,BLUE,"middle","bold")
     txt(cx("RIGHT-"),gtop-18,"GND",7,BLUE,"middle","bold")
     for r in range(R0,RN+1):
@@ -273,12 +279,12 @@ def svg_wiring():
         txt(rk,ay-7,"–",6.5,BLUE,"middle","bold")
         txt(dm,ay+10,nm,5,"#9aa0a6","middle")
     txt((cx("Rc")+cx("RIGHT-"))/2,cy(24)-12,"LEDs: long lead (+) → hole Rh,  short lead (–) → GND rail",6,GRN,"middle","bold")
-    txt(W/2,24,"Bring-up across both strips — Pico + 595 (left), 8-LED comb (right)",12,"#ffffff","middle","bold")
-    txt(W/2,40,"595 outputs face right, so each LED sits across from its output (rows 24–31)",8.5,"#aab2bd","middle")
+    txt(W/2,26,"Option A — Pico + 595 on the left strip, 8-LED comb on the right",12,"#15171c","middle","bold")
+    txt(W/2,43,"595 outputs face right, so each LED sits across from its output. Black = the MB-104 baseplate.",8.5,"#5b6470","middle")
     leg=[("3V3",RED),("GND",BLUE),("SER",PUR),("SRCLK",CYN),("RCLK",ORA),("output→LED",TAN)]
     lx=40; ly=H-14
     for lab,col in leg:
-        line(lx,ly,lx+18,ly,col,3); txt(lx+22,ly+3.2,lab,8.5,"#d6dde5","start"); lx+=34+6.2*len(lab)
+        line(lx,ly,lx+18,ly,col,3); txt(lx+22,ly+3.2,lab,8.5,"#33404e","start"); lx+=34+6.2*len(lab)
     return wrap("".join(s), W, H)
 
 def svg_blink():
@@ -362,7 +368,9 @@ def svg_wiring_b():
         s.append(f'<path d="M{x1:.1f},{y1:.1f} C{mx:.1f},{y1:.1f} {mx:.1f},{y2:.1f} {x2:.1f},{y2:.1f}" fill="none" stroke="{clr}" stroke-width="{w}" stroke-linecap="round"/>')
     def hole(c,r,fill=HOLEC): s.append(f'<rect x="{cx(c)-HOLE/2:.1f}" y="{cy(r)-HOLE/2:.1f}" width="{HOLE}" height="{HOLE}" rx="1.3" fill="{fill}"/>')
     gtop=cy(R0)-9; gbot=cy(RN)+9
-    rect(5,5,W-10,H-10,15,"#1d1d1d")
+    rect(5,5,W-10,H-10,12,"#e9ebee")                       # light figure background — my labels/legend live OUT here
+    BPt=TY-88; BPb=cy(RN)+26
+    rect(14,BPt,W-28,BPb-BPt,9,"#141519")                  # matte-black MB-104 baseplate = the real device
     hy=TY-54   # MB-104 binding-post header (the terminal block above the strips, as on the real board)
     rect(LX-12,hy-13,104,26,3,"#161616",'stroke="#caa83a" stroke-width="1.1"')
     txt(LX+40,hy-1,"BREADBOARD",6.5,"#caa83a","middle","bold"); txt(LX+40,hy+8,"MB-104 · CIRCUIT-TEST",4.8,"#caa83a","middle")
@@ -375,6 +383,8 @@ def svg_wiring_b():
     railtint={"LEFT+":"#f7dede","LEFT-":"#dee5f7","MIDa+":"#f7dede","MIDa-":"#dee5f7","MIDb+":"#f7dede","MIDb-":"#dee5f7","RIGHT+":"#f7dede","RIGHT-":"#dee5f7"}
     for rl,t in railtint.items():
         rect(cx(rl)-6,gtop,12,gbot-gtop,4,t)
+        sc=RED if rl.endswith("+") else BLUE
+        line(cx(rl)-5.5,gtop+3,cx(rl)-5.5,gbot-3,sc,1.2); line(cx(rl)+5.5,gtop+3,cx(rl)+5.5,gbot-3,sc,1.2)   # red=+ / blue=– bus stripe
     for gcx in [(cx("Le")+cx("Lf"))/2,(cx("Re")+cx("Rf"))/2]:
         rect(gcx-6,gtop+2,12,(gbot-2)-(gtop+2),2,"#d9d6cc")
     allcols=[c for c,k in seq if k in ("s","rail")]
@@ -384,6 +394,8 @@ def svg_wiring_b():
         lab=c[-1] if (c[0] in "LR" and len(c)==2) else ("+" if c.endswith("+") else "–")
         cl=RED if c.endswith("+") else (BLUE if c.endswith("-") else "#d6dde5")
         txt(cx(c),gtop-5,lab,8.5,cl,"middle","bold")
+        if not (c[0] in "LR" and len(c)==2):                 # rails: repeat the +/– polarity at the BOTTOM end too
+            txt(cx(c),gbot+12,("+" if c.endswith("+") else "–"),8.5,cl,"middle","bold")
     txt(cx("MIDa+"),gtop-18,"3V3",7,RED,"middle","bold"); txt(cx("MIDa-"),gtop-18,"GND",7,BLUE,"middle","bold")
     txt(cx("MIDb+"),gtop-18,"3V3",7,RED,"middle","bold"); txt(cx("MIDb-"),gtop-18,"GND",7,BLUE,"middle","bold")
     for r in range(R0,RN+1):
@@ -420,26 +432,27 @@ def svg_wiring_b():
     J("Li",16,"Rd",19,PUR)   # GP19 -> SER (Re19)
     J("Li",17,"Rd",16,CYN)   # GP18 -> SRCLK (Re16)
     J("Lj",19,"Rd",17,ORA)   # GP17 -> RCLK (Re17)
-    # ---- outputs -> comb (spread, rows 24-39). output jumper lands at Rh; resistor sits at Rg (different hole). ----
-    leds=[("QH","Rf",15,24),("QG","Rf",16,26),("QF","Rf",17,28),("QE","Rf",18,30),
-          ("QD","Rf",19,32),("QC","Rf",20,34),("QB","Rf",21,36),("QA","Re",20,38)]
+    # ---- outputs -> comb as a clean parallel ribbon (QB-QH spacing now matches the chip's). lands at Rh; resistor at Rg (separate hole). ----
+    leds=[("QH","Rf",15,29),("QG","Rf",16,30),("QF","Rf",17,31),("QE","Rf",18,32),
+          ("QD","Rf",19,33),("QC","Rf",20,34),("QB","Rf",21,35),("QA","Re",20,28)]
     for nm,oc,orow,lr in leds:
-        ay=cy(lr)
-        tap="Ri" if oc=="Rf" else "Rd"             # free hole in the output's group
-        J(tap,orow,"Rh",lr,TAN,1.7)                # output -> comb input at Rh
-        line(cx("Rc"),ay,cx("Rg"),ay,"#9a8050",1.1)   # 240Ω bridges the channel (Rg<->Rc) — separate hole from Rh
-        rect((cx("Rc")+cx("Rg"))/2-7,ay-2.5,14,5,2,TAN,'stroke="#a07d3a" stroke-width="0.5"')
+        ay=cy(lr); oy=cy(orow)
+        rtop="Rg" if oc=="Rf" else "Rc"            # the resistor's top lead sits in the output's OWN node — so NO jumper wire is needed
+        rx1,ry1,rx2,ry2=cx(rtop),oy,cx("Rc"),ay
+        line(rx1,ry1,rx2,ry2,"#9a8050",1.4)        # ONE long resistor reaches from the output straight down to the LED (leads do the spanning)
+        bx1=rx1+0.34*(rx2-rx1); by1=ry1+0.34*(ry2-ry1); bx2=rx1+0.66*(rx2-rx1); by2=ry1+0.66*(ry2-ry1)
+        s.append(f'<line x1="{bx1:.1f}" y1="{by1:.1f}" x2="{bx2:.1f}" y2="{by2:.1f}" stroke="{TAN}" stroke-width="4.5" stroke-linecap="round"/>')  # resistor body
         an=cx("Rb"); ka=cx("MIDb-"); dm=an+0.5*(ka-an)
         line(an,ay,dm-4,ay,"#9aa0a6",1.5); line(dm+4,ay,ka,ay,"#9aa0a6",1.5)
         s.append(f'<circle cx="{dm:.1f}" cy="{ay:.1f}" r="4.6" fill="{GRN}" stroke="#15803d" stroke-width="0.7"/>')
         txt(an,ay-7,"+",6.5,"#15803d","middle","bold"); txt(ka,ay-7,"–",6.5,BLUE,"middle","bold")
-        txt(dm,ay+10,nm,5,"#9aa0a6","middle")
-    txt(W/2,24,"OPTION B (revised) — 595 raised beside GP17–19; comb spread below; no shared holes",11.5,"#ffffff","middle","bold")
-    txt(W/2,40,"3 control wires are short horizontal hops; the 8 outputs run down the right side to the comb",8.5,"#aab2bd","middle")
+        txt(dm,ay+9,nm,5,"#7a818b","middle")
+    txt(W/2,26,"Option B — 595 on the right strip, raised beside the Pico's GP17–19",12,"#15171c","middle","bold")
+    txt(W/2,43,"Short control hops; outputs reach their LEDs through long resistor leads. Black = the MB-104 baseplate.",8.5,"#5b6470","middle")
     leg=[("3V3",RED),("GND",BLUE),("SER",PUR),("SRCLK",CYN),("RCLK",ORA),("output→LED",TAN)]
     lx=40; ly=H-14
     for lab,col in leg:
-        line(lx,ly,lx+18,ly,col,3); txt(lx+22,ly+3.2,lab,8.5,"#d6dde5","start"); lx+=34+6.2*len(lab)
+        line(lx,ly,lx+18,ly,col,3); txt(lx+22,ly+3.2,lab,8.5,"#33404e","start"); lx+=34+6.2*len(lab)
     return wrap("".join(s), W, H)
 
 def svg_schematic():
@@ -594,7 +607,7 @@ P.append('<p class="k">Two equally-valid physical layouts of the same circuit &m
          '<b>Option&nbsp;B (revised)</b> raises the 595 onto the right strip <i>beside the Pico&rsquo;s GP17&ndash;19</i>, so the 3 control wires become short horizontal hops and the outputs stay local on the right, running down to a comb spread out below. '
          'Either way, <b>QA</b> is the one output that must bridge the chip (the 595&rsquo;s 7+1 pinout split).</p>')
 P.append(f'<figure>{DIAGRAMS["wiring"]}<figcaption><b>Option A (current) &mdash; 595 on the LEFT strip.</b> Pico + 595 stacked on the left; the eight outputs cross the centre rails as a parallel ribbon to the comb on the right.</figcaption></figure>')
-P.append(f'<figure>{DIAGRAMS["wiring_b"]}<figcaption><b>Option B (revised) &mdash; 595 raised beside GP17&ndash;19, comb spread below.</b> The 595 is notch-down (matching the datasheet); the 3 control wires are short hops (GP18&rarr;SRCLK nearly aligns); the 8 outputs run down the right side to the spread comb; every jumper and resistor sits in its own hole.</figcaption></figure>')
+P.append(f'<figure>{DIAGRAMS["wiring_b"]}<figcaption><b>Option B (revised) &mdash; 595 raised beside GP17&ndash;19, outputs in a parallel ribbon.</b> The 595 is notch-down (matching the datasheet); the 3 control wires are short hops; the seven QB&ndash;QH outputs drop to the comb as evenly-spaced parallel diagonals (QA is the lone output that must bridge across); every jumper and resistor sits in its own hole.</figcaption></figure>')
 P.append('<h2>Step 0 &mdash; blink one LED (the simplest possible test)</h2>')
 P.append('<p class="k">Before the 595 panel, prove the whole chain with the <b>smallest possible circuit</b>: the Pico drives '
          '<b>one</b> LED through <b>one</b> resistor, with <b>one</b> jumper to ground. If it blinks, your Pico, toolchain, and '
