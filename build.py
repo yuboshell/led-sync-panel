@@ -518,12 +518,14 @@ def svg_wiring_c():
             txt(LX-26,cy(r)+3,str(r),8,"#cbd5e1","middle")
             txt(cx("RIGHT-")+16,cy(r)+3,str(r),8,"#cbd5e1","middle")
     # ---- Pico — RIGHT strip ----
-    px1,px2=cx("Rc"),cx("Rj"); py1,py2=cy(1),cy(19)
+    px1,px2=cx("Rc"),cx("Rh"); py1,py2=cy(1),cy(19)   # Pico spans 6 cols (3 a-e + 3 f-j), same as A/B
     rect(px1-8,py1-8,(px2-px1)+16,(py2-py1)+16,6,"#0b6b5e",'opacity="0.92"')
     txt((px1+px2)/2,py1-8+13,"Pico (USB ↑)",8,"#dffaf4","middle","bold")
     txt((px1+px2)/2,(py1+py2)/2,"PICO",13,"#0d4a41","middle","bold")
-    for nm,c,r,cl in [("3V3","Rh",5,RED),("GP19","Rh",14,PUR),("GP18","Ri",15,CYN),("GP17","Rj",17,ORA),("GND","Rd",16,BLUE)]:
-        hole(c,r,cl); txt(cx(c)+8,cy(r)+3,nm,6,cl,"start","bold")
+    for nm,c,r,cl in [("3V3","Rh",5,RED),("GP19","Rh",14,PUR),("GP18","Rh",16,CYN),("GP17","Rh",18,ORA),("GND","Rc",16,BLUE)]:
+        hole(c,r,cl)
+        if c=="Rc": txt(cx(c)-8,cy(r)+3,nm,6,cl,"end","bold")     # a-e edge pin: label to the left
+        else: txt(cx(c)+8,cy(r)+3,nm,6,cl,"start","bold")
     # ---- 595 — NOTCH-UP, right strip, rows 23-30 ----
     qx1,qx2=cx("Re"),cx("Rf"); qy1,qy2=cy(23),cy(30)
     rect(qx1-7,qy1-7,(qx2-qx1)+14,(qy2-qy1)+14,3,"#23252b")
@@ -540,11 +542,11 @@ def svg_wiring_c():
             txt(cx(c)-7,cy(r)+2.5,("GND" if nm=="GNDp" else nm),5,"#9aa3ad","end")
     # ---- 3 control wires: Pico GP -> 595 control, SAME side (f-j) ----
     J("Rh",14,"Rg",25,PUR)   # GP19 -> SER  (Rf25, tap Rg)
-    J("Ri",15,"Rg",28,CYN)   # GP18 -> SRCLK (Rf28, tap Rg)
-    J("Rj",17,"Rg",27,ORA)   # GP17 -> RCLK (Rf27, tap Rg)
+    J("Rh",16,"Rg",28,CYN)   # GP18 -> SRCLK (Rf28, tap Rg)
+    J("Rh",18,"Rg",27,ORA)   # GP17 -> RCLK (Rf27, tap Rg)
     # ---- power: 3V3 bus = RIGHT+ ; GND bus = MIDb- (tied to LEFT-, the LED rail) ----
     J("Rh",5,"RIGHT+",5,RED)                                  # Pico 3V3 -> RIGHT+
-    J("Rh",23,"RIGHT+",23,RED); J("Rh",29,"RIGHT+",29,RED)   # 595 VCC(Rf23), MR(Rf29) -> RIGHT+
+    J("Rj",23,"RIGHT+",23,RED); J("Rj",29,"RIGHT+",29,RED)   # 595 VCC(Rf23), MR(Rf29) -> RIGHT+ (tap Rj, clear of control)
     J("Ra",16,"MIDb-",16,BLUE)                               # Pico GND -> MIDb-
     J("Ra",26,"MIDb-",26,BLUE); J("Ra",30,"MIDb-",30,BLUE)   # 595 OE(Re26), GND(Re30) -> MIDb-
     line(cx("LEFT-"),cy(2),cx("MIDb-"),cy(2),BLUE,1.8)       # GND tie: LED rail (LEFT-) <-> MIDb-
