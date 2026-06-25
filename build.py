@@ -541,11 +541,11 @@ def svg_wiring_c():
         else:
             txt(cx(c)-7,cy(r)+2.5,("GND" if nm=="GNDp" else nm),5,"#9aa3ad","end")
     # ---- 3 control wires: Pico GP -> 595 control, SAME side (f-j) ----
-    J("Rh",14,"Rg",25,PUR)   # GP19 -> SER  (Rf25, tap Rg)
-    J("Rh",16,"Rg",28,CYN)   # GP18 -> SRCLK (Rf28, tap Rg)
-    J("Rh",18,"Rg",27,ORA)   # GP17 -> RCLK (Rf27, tap Rg)
+    J("Ri",14,"Rg",25,PUR)   # GP19 -> SER. jumper plugs into Ri (free), NOT Rh (Pico's own pin hole)
+    J("Ri",16,"Rg",28,CYN)   # GP18 -> SRCLK (free hole Ri, same node as the GP18 pin at Rh16)
+    J("Ri",18,"Rg",27,ORA)   # GP17 -> RCLK (free hole Ri, same node as the GP17 pin at Rh18)
     # ---- power: 3V3 bus = RIGHT+ ; GND bus = MIDb- (tied to LEFT-, the LED rail) ----
-    J("Rh",5,"RIGHT+",5,RED)                                  # Pico 3V3 -> RIGHT+
+    J("Ri",5,"RIGHT+",5,RED)                                  # Pico 3V3 -> RIGHT+ (jumper in free hole Ri, NOT the Rh pin)
     J("Rj",23,"RIGHT+",23,RED); J("Rj",29,"RIGHT+",29,RED)   # 595 VCC(Rf23), MR(Rf29) -> RIGHT+ (tap Rj, clear of control)
     J("Ra",16,"MIDb-",16,BLUE)                               # Pico GND -> MIDb-
     J("Ra",30,"MIDb-",30,BLUE)                               # 595 GND (Re30, a-e) -> MIDb-
