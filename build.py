@@ -232,10 +232,15 @@ def svg_wiring():
             txt(cx(c)-7,cy(r)+2.5,lab,5,"#9aa3ad","end")
     J("Lh",5,"MIDa+",5,RED); J("Lh",18,"MIDa-",18,BLUE)
     line(cx("MIDa+"),cy(22),cx("LEFT+"),cy(22),RED,1.8); line(cx("MIDa-"),cy(23),cx("LEFT-"),cy(23),BLUE,1.8)
-    line(cx("MIDa-"),cy(33),cx("RIGHT-"),cy(33),BLUE,1.8)
+    line(cx("MIDa-"),cy(26),cx("RIGHT-"),cy(26),BLUE,1.8)        # GND tie -> RIGHT- moved up into the cathode zone (24-31)
     J("Le",24,"LEFT+",24,RED); J("Le",30,"LEFT+",30,RED)
     J("Le",27,"LEFT-",27,BLUE)
     J("Lf",31,"MIDa-",31,BLUE)
+    # rail-bridge jumpers across the mid-board boundary (~row 31): make each bus one node even if the board splits a rail internally
+    def brg(rl,r1,r2,clr,dx):
+        x=cx(rl); s.append(f'<path d="M{x:.1f},{cy(r1):.1f} C{x+dx:.1f},{cy(r1):.1f} {x+dx:.1f},{cy(r2):.1f} {x:.1f},{cy(r2):.1f}" fill="none" stroke="{clr}" stroke-width="2.6" stroke-linecap="round"/>')
+    brg("MIDa+",29,33,RED,-11); brg("MIDa-",29,33,BLUE,11)
+    txt((cx("MIDa+")+cx("MIDa-"))/2,cy(33)+11,"rail bridges",5,"#d6dde5","middle")
     J("Lh",16,"Le",26,PUR); J("Lh",17,"Le",29,CYN); J("Lh",19,"Le",28,ORA)
     leds=[("QB","Lf",24,24),("QC","Lf",25,25),("QD","Lf",26,26),("QE","Lf",27,27),
           ("QF","Lf",28,28),("QG","Lf",29,29),("QH","Lf",30,30),("QA","Le",25,31)]
@@ -378,6 +383,11 @@ P.append('<table>'
          '<tr><td>10</td><td>per LED row: <b>240&nbsp;&Omega;</b> <code>Rc&rarr;Rg</code>, then <b>LED</b> long&nbsp;lead&nbsp;(+) <code>Rh</code>, short&nbsp;lead&nbsp;(&ndash;) &rarr; <b>RIGHT&ndash;</b></td><td>rows 24&ndash;31</td><td>resistor across the channel, LED to ground; long lead is +</td></tr>'
          '</table>')
 P.append('<p class="k"><b>LED rows:</b> QB&rarr;24, QC&rarr;25, QD&rarr;26, QE&rarr;27, QF&rarr;28, QG&rarr;29, QH&rarr;30, QA&rarr;31.</p>')
+P.append('<p class="k"><b>Rail check.</b> We assume each power bus is one continuous node end-to-end. Large boards sometimes '
+         '<b>split a rail in the middle</b> (the tutorial&rsquo;s &ldquo;exception&rdquo;) &mdash; which would silently leave the chip '
+         'unpowered or the LEDs ungrounded. The two <b>rail-bridge jumpers</b> across the mid-board boundary guarantee continuity; '
+         'still, <b>test each rail end-to-end with a multimeter</b> (continuity mode) and drop in a bridge anywhere it reads open. '
+         'The terminal-strip 5-hole groups (columns a&ndash;e and f&ndash;j) are never an issue &mdash; they&rsquo;re always isolated per row, which is why the chips straddle the gap.</p>')
 P.append('<p class="k"><b>Finding the Pico&rsquo;s pins.</b> The <b>Pico&nbsp;H</b> has its headers pre-soldered, so it drops '
          'straight into the breadboard <b>straddling the centre channel</b> (USB hanging off one end). All five pins we use '
          'are along <b>one long edge</b>: <b>3V3</b> (pin&nbsp;36) up near the USB, then a <b>GND</b> with '
