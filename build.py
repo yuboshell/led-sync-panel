@@ -552,7 +552,11 @@ def svg_wiring_c():
     J("Rj",26,"RIGHT-",26,BLUE)                              # 595 OE (Rf26, f-j) -> RIGHT- (tied low). FIX: was tapping Ra26 = QE's node
     line(cx("LEFT-"),cy(2),cx("MIDb-"),cy(2),BLUE,1.8)       # GND tie: LED rail (LEFT-) <-> MIDb-
     line(cx("MIDa-"),cy(3),cx("MIDb-"),cy(3),BLUE,1.6)
-    line(cx("MIDb-"),cy(36),cx("RIGHT-"),cy(36),BLUE,1.6)    # GND tie: RIGHT- (OE + QA cathode) <-> MIDb-
+    line(cx("MIDb-"),cy(36),cx("RIGHT-"),cy(36),BLUE,1.6)    # GND tie: RIGHT- (OE) <-> MIDb-
+    cyc=cy(25); xpp=cx("RIGHT+"); xmm=cx("RIGHT-"); xcc=(xpp+xmm)/2   # 0.1µF decoupling cap across the 595's supply (RIGHT+ 3V3 <-> RIGHT- GND), right at the chip
+    line(xpp,cyc,xcc-3.5,cyc,"#9aa0a6",1.5); line(xcc+3.5,cyc,xmm,cyc,"#9aa0a6",1.5)
+    s.append(f'<ellipse cx="{xcc:.1f}" cy="{cyc:.1f}" rx="4.5" ry="6.5" fill="#d8cdb0" stroke="#a89a78" stroke-width="0.8"/>')
+    txt(xcc,cyc-11,"0.1µF",4.5,"#cbd5e1","middle")
     # ---- 7 outputs QB-QH -> one clean horizontal LED row on the LEFT strip. QA (pin 15) left unused -> NO bridging wire. ----
     def comb_led(ay,nm):                                      # resistor (bridges left gap) + LED -> LEFT- rail, one slot
         line(cx("Ld"),ay,cx("Lh"),ay,"#9a8050",1.1)
@@ -591,8 +595,8 @@ def svg_schematic():
         for d in (3,8): ln(x+z*0.6+d,y-z*0.7,x+z*0.6+d+4,y-z*0.7-4,GRN,1.1)
     def gsym(x,y): ln(x,y,x,y+7); ln(x-8,y+7,x+8,y+7,INK,1.7); ln(x-5,y+11,x+5,y+11,INK,1.4); ln(x-2.5,y+15,x+2.5,y+15,INK,1.2)
     rect(6,6,W-12,H-12,"#ffffff","#d0d4da",1.2,10)
-    txt(W/2,28,"Circuit schematic — Raspberry Pi Pico → 74HC595 → 8 LEDs",13,INK,"middle","bold")
-    txt(W/2,44,"dot = connected junction · hop-arc = crossing, not connected · each output through 240 Ω to an LED",9,MUT)
+    txt(W/2,28,"Circuit schematic — Raspberry Pi Pico → 74HC595 → 7 LEDs",13,INK,"middle","bold")
+    txt(W/2,44,"dot = connected junction · hop-arc = crossing, not connected · QB–QH each drive an LED through 240 Ω (QA unused)",9,MUT)
     yV,yG=72,512
     ln(34,yV,786,yV,RED,1.8); txt(34,yV-7,"+3.3 V",10,RED,"start","bold")
     ln(34,yG,786,yG,INK,1.8); txt(60,yG+17,"GND",10,INK,"start","bold"); gsym(44,yG)
@@ -627,8 +631,11 @@ def svg_schematic():
     txt((px+pw+qx)/2,128,"3 control wires (data·shift·latch)",8,MUT)
     # ---- outputs: QA..QH -> 240ohm -> LED -> GND ----
     for nm in ["QA","QB","QC","QD","QE","QF","QG","QH"]:
-        y=Rp[nm]; x0=qx+qw+18; xr=x0+42; xl=x0+96
-        ln(x0,y,xr-14,y); res(xr,y,28,"240 Ω" if nm=="QA" else ""); ln(xr+14,y,xl,y)
+        y=Rp[nm]; x0=qx+qw+18
+        if nm=="QA":                                  # QA unused in the 7-LED bring-up
+            txt(x0+10,y+2.5,"n/c",7,MUT,"start"); continue
+        xr=x0+42; xl=x0+96
+        ln(x0,y,xr-14,y); res(xr,y,28,"240 Ω" if nm=="QB" else ""); ln(xr+14,y,xl,y)
         led(xl,y); ln(xl,y+9,xl,yG); dot(xl,yG,INK); txt(xl+15,y+2,nm,7.5,MUT,"start")
     return wrap("".join(s), W, H)
 
@@ -718,9 +725,9 @@ P.append('<p class="k"><b>Reader&rsquo;s map:</b> <b>build guide first</b> (wire
          'then &sect;1 what this tool is for &middot; &sect;2 the order list &middot; &sect;3 the driver choice + exact parts &middot; '
          '&sect;4&ndash;&sect;9 the design rationale.</p>')
 P.append('<h2>The circuit &mdash; schematic &amp; Option&nbsp;C (check the wiring net-by-net)</h2>')
-P.append('<p class="k">The logical circuit, independent of the breadboard: the Pico clocks a byte into the 595 over three control lines (<b>SER</b> data, <b>SRCLK</b> shift clock, <b>RCLK</b> latch); the chip latches the byte to its eight parallel outputs; each output drives an LED through a <b>240&nbsp;&Omega;</b> resistor to ground. <b>OE</b> tied low keeps the outputs enabled, <b>MR&nbsp;(SRCLR)</b> tied high prevents reset, and a <b>0.1&nbsp;&micro;F</b> cap decouples VCC.</p>')
-P.append(f'<figure>{DIAGRAMS["schematic"]}<figcaption><b>Figure. Circuit schematic.</b> Pico &rarr; 74HC595 &rarr; 8&times;(240&nbsp;&Omega; + LED) &mdash; the &ldquo;science&rdquo; the breadboard figures below realise physically.</figcaption></figure>')
-P.append('<p class="k">Read <b>Option&nbsp;C</b> below against that schematic, net by net &mdash; this is exactly how the OE-grounding error showed up: every output must go &rarr; 240&nbsp;&Omega; &rarr; LED &rarr; GND, <b>OE</b> ties low, <b>MR</b> ties high.</p>')
+P.append('<p class="k">The logical circuit, independent of the breadboard: the Pico clocks a byte into the 595 over three control lines (<b>SER</b> data, <b>SRCLK</b> shift clock, <b>RCLK</b> latch); the chip latches the byte to its eight parallel outputs; for the bring-up, seven of them (<b>QB&ndash;QH</b>) each drive an LED through a <b>240&nbsp;&Omega;</b> resistor to ground, and <b>QA</b> is left unused. <b>OE</b> tied low keeps the outputs enabled, <b>MR&nbsp;(SRCLR)</b> tied high prevents reset, and a <b>0.1&nbsp;&micro;F</b> cap decouples VCC.</p>')
+P.append(f'<figure>{DIAGRAMS["schematic"]}<figcaption><b>Figure. Circuit schematic.</b> Pico &rarr; 74HC595 &rarr; 7&times;(240&nbsp;&Omega; + LED), QA unused &mdash; the &ldquo;science&rdquo; the breadboard figures below realise physically.</figcaption></figure>')
+P.append('<p class="k">Read <b>Option&nbsp;C</b> below against that schematic, net by net &mdash; this is exactly how the OE-grounding error showed up: each used output (QB&ndash;QH) goes &rarr; 240&nbsp;&Omega; &rarr; LED &rarr; GND, <b>OE</b> ties low, <b>MR</b> ties high (QA unused).</p>')
 P.append(f'<figure>{DIAGRAMS["wiring_c"]}<figcaption><b>Option C &mdash; Pico + 595 both on the RIGHT strip, 595 turned 180&deg; (shown here to check against the schematic).</b> Stacking the two on one strip keeps the 3 control wires short and on the same side; the 595 is notch-up so its outputs face left; the <b>seven QB&ndash;QH outputs make one clean LED row</b> on the left strip with no bridging wire. QA (pin&nbsp;15, the lone output on the chip&rsquo;s far side) is left unused &mdash; seven LEDs fully prove the shift&rarr;latch&rarr;LED chain, and the full panel scales by chaining a second 595. The 180&deg; rotation (not a reflection) reverses the output pin order versus Option&nbsp;A.</figcaption></figure>')
 P.append('<h2>The other two layouts &mdash; Option&nbsp;A and Option&nbsp;B</h2>')
 P.append('<p class="k">The other two physical layouts of the same circuit (Option&nbsp;C is up top, beside the schematic). '
