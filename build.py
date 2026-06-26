@@ -763,7 +763,7 @@ P.append('<p style="background:#e8f5e9;border-left:4px solid #2e7d32;padding:10p
          '<b>&#10003; First light-up verified &mdash; 2026-06-26.</b> The 7-LED 595 panel is wired and running on the Pico: the walking dot '
          'sweeps all seven, and the <b>binary counter is confirmed correct</b> &mdash; checked frame-by-frame from video, where each LED&rsquo;s '
          'toggle rate halves cleanly down the row (the signature of a clean binary count). The <b>encode &rarr; shift &rarr; latch &rarr; LED</b> '
-         'chain works end to end.</p>')
+         'chain works end to end. <br><b style="color:#1b5e20">&#10003; Step&nbsp;1 (2026-06-26):</b> the <b>real Gray-coded time-code</b> now runs (<code>firmware/timecode</code>) and is <b>camera-decoded</b> &mdash; a phone video decodes to a clean, monotonic count with <b>zero garbage straddles</b> (the Gray-code guarantee, confirmed on hardware, not just in <code>sim/</code>). Reusable decoder: <code>decode/decode_video.py</code>.</p>')
 P.append('<p class="k"><b>Got the parts? Start here.</b> This is the hands-on build; the numbered sections below'
          '(&sect;1 onward) explain what the panel is for and why each part was chosen.</p>')
 P.append('<p class="k"><b>Bring-up</b> = power on the smallest version of the circuit and get it working in verified steps, '
