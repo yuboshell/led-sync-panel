@@ -233,7 +233,7 @@ def svg_wiring():
     rect(px1-8,py1-8,(px2-px1)+16,(py2-py1)+16,6,"#0b6b5e",'opacity="0.92"')
     txt((px1+px2)/2,py1-8+13,"Pico (USB ↑)",8,"#dffaf4","middle","bold")
     txt((px1+px2)/2,(py1+py2)/2,"PICO",13,"#0d4a41","middle","bold")
-    for nm,c,r,cl in [("3V3","Lh",5,RED),("GP19","Lh",16,PUR),("GP18","Lh",17,CYN),("GND","Lh",18,BLUE),("GP17","Lh",19,ORA)]:
+    for nm,c,r,cl in [("3V3·36","Lh",5,RED),("GP19·25","Lh",16,PUR),("GP18·24","Lh",17,CYN),("GND·23","Lh",18,BLUE),("GP17·22","Lh",19,ORA)]:
         hole(c,r,cl); txt(cx(c)+8,cy(r)+3,nm,6,cl,"start","bold")
     qx1,qx2=cx("Le"),cx("Lf"); qy1,qy2=cy(24),cy(31)
     rect(qx1-7,qy1-7,(qx2-qx1)+14,(qy2-qy1)+14,3,"#23252b")
@@ -407,7 +407,7 @@ def svg_wiring_b():
     rect(px1-8,py1-8,(px2-px1)+16,(py2-py1)+16,6,"#0b6b5e",'opacity="0.92"')
     txt((px1+px2)/2,py1-8+13,"Pico (USB ↑)",8,"#dffaf4","middle","bold")
     txt((px1+px2)/2,(py1+py2)/2,"PICO",13,"#0d4a41","middle","bold")
-    for nm,c,r,cl in [("3V3","Lh",5,RED),("GP19","Lh",16,PUR),("GP18","Lh",17,CYN),("GND","Lh",18,BLUE),("GP17","Lh",19,ORA)]:
+    for nm,c,r,cl in [("3V3·36","Lh",5,RED),("GP19·25","Lh",16,PUR),("GP18·24","Lh",17,CYN),("GND·23","Lh",18,BLUE),("GP17·22","Lh",19,ORA)]:
         hole(c,r,cl); txt(cx(c)+8,cy(r)+3,nm,6,cl,"start","bold")
     # 595 — RIGHT strip, rows 14-21 (control SER@16 lines up with GP19@16). notch-up: control on Re, outputs QB-QH on Rf.
     qx1,qx2=cx("Re"),cx("Rf"); qy1,qy2=cy(14),cy(21)
@@ -533,13 +533,13 @@ def svg_wiring_c():
     s.append(f'<circle cx="{(qx1+qx2)/2:.1f}" cy="{qy1-7:.1f}" r="5" fill="#f3f1ea"/>')   # notch UP (row-23 end); pin 1 (QB) top-left
     p595={"QB":("Re",23),"QC":("Re",24),"QD":("Re",25),"QE":("Re",26),"QF":("Re",27),"QG":("Re",28),"QH":("Re",29),"GNDp":("Re",30),
           "VCC":("Rf",23),"QA":("Rf",24),"SER":("Rf",25),"OE":("Rf",26),"RCLK":("Rf",27),"SRCLK":("Rf",28),"MR":("Rf",29),"QHp":("Rf",30)}
-    for nm,(c,r) in p595.items():
+    pn595={"QB":1,"QC":2,"QD":3,"QE":4,"QF":5,"QG":6,"QH":7,"GNDp":8,"QHp":9,"MR":10,"SRCLK":11,"RCLK":12,"OE":13,"SER":14,"QA":15,"VCC":16}
+    abbr595={"RCLK":"RCK","SRCLK":"SCK","QHp":"QH'","GNDp":"GND"}
+    for nm,(c,r) in p595.items():                                 # label each 595 pin as name·datasheet-pin#
         hole(c,r,"#c9a36a")
-        if c=="Rf":
-            lab={"VCC":"VCC","QA":"QA·nc","SER":"SER","OE":"OE","RCLK":"RCK","SRCLK":"SCK","MR":"MR","QHp":"QH'"}.get(nm,nm)
-            txt(cx(c)+7,cy(r)+2.5,lab,5,"#9aa3ad","start")
-        else:
-            txt(cx(c)-7,cy(r)+2.5,("GND" if nm=="GNDp" else nm),5,"#9aa3ad","end")
+        lab=f"{abbr595.get(nm,nm)}·{pn595[nm]}"+("·nc" if nm=="QA" else "")
+        if c=="Rf": txt(cx(c)+7,cy(r)+2.5,lab,4.5,"#9aa3ad","start")
+        else: txt(cx(c)-7,cy(r)+2.5,lab,4.5,"#9aa3ad","end")
     # ---- 3 control wires: Pico GP -> 595 control, SAME side (f-j) ----
     J("Ri",16,"Rg",25,PUR)   # GP19 (pin25, Rh16) -> SER. jumper in free hole Ri, NOT Rh (Pico's pin)
     J("Ri",17,"Rg",28,CYN)   # GP18 (pin24, Rh17) -> SRCLK (free hole Ri)
@@ -772,7 +772,7 @@ P.append(f'<figure>{DIAGRAMS["wiring_c"]}<figcaption><b>Figure 1. Bring-up wirin
          '<b>right strip</b>; the seven LEDs form a comb on the <b>left strip</b>. The Pico clocks a byte into the 595 over three '
          'short same-side wires (data&nbsp;SER, clock&nbsp;SRCLK, latch&nbsp;RCLK); outputs <b>QB&ndash;QH</b> each drive one green LED through a '
          '240&nbsp;&Omega; resistor to ground, fanning left across the centre. <b>QA is left unused</b> (the lone output on the chip&rsquo;s '
-         'far side). Holes use the <b>L&hellip;&nbsp;/&nbsp;R&hellip;</b> convention (Left or Right strip, column&nbsp;a&ndash;j, row&nbsp;1&ndash;63).</figcaption></figure>')
+         'far side). Holes use the <b>L&hellip;&nbsp;/&nbsp;R&hellip;</b> convention (Left or Right strip, column&nbsp;a&ndash;j, row&nbsp;1&ndash;63); each chip pin is tagged <b>name&middot;pin#</b> (its datasheet number) for checking against the Pico and 595 pinouts.</figcaption></figure>')
 P.append('<p class="k"><b>Connect it in this order</b> &mdash; USB unplugged the whole time. Seat both chips on the <b>right strip</b>, across its centre channel: the <b>Pico up top</b> (cols&nbsp;c&ndash;h, rows&nbsp;1&ndash;20), and the <b>595 just below it, notch / pin-1 dot pointing UP</b> (toward the Pico) so <b>VCC lands at <code>Rf23</code> and GND at <code>Re30</code></b>. The <b>right rails carry power</b> &mdash; <b>RIGHT+&nbsp;=&nbsp;3.3&nbsp;V</b>, <b>RIGHT&ndash;&nbsp;=&nbsp;GND</b>; add the <b>0.1&nbsp;&micro;F cap across <code>RIGHT+&harr;RIGHT&ndash;</code></b> right by the chip. Ground also runs on the centre rail <code>MIDb&ndash;</code>, tied across to <code>RIGHT&ndash;</code> and out to the <b>left rail <code>LEFT&ndash;</code></b> the LED cathodes sit on. Every '
          '<b>LED has two leads in two holes</b>: the <b>long lead (anode,&nbsp;+)</b> into the resistor&rsquo;s hole, the '
          '<b>short lead (cathode,&nbsp;&ndash;)</b> into the adjacent <code>LEFT&ndash;</code> rail.</p>')
