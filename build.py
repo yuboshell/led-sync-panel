@@ -725,7 +725,7 @@ P.append('<div class="meta">DIY design plan &middot; updated 2026-06-17 &middot;
          'step-time 200&nbsp;µs, driver 74HC595, sweep encoding (Gray-bar upgrade), 2-camera same-row bring-up (sim-validated) &middot; 11&times;Pixel&nbsp;7 / Argus rig</div>')
 P.append('<p class="k"><b>Reader&rsquo;s map:</b> <b>build guide first</b> (wire the first light-up, just below) &middot; '
          'then &sect;1 what this tool is for &middot; &sect;2 the order list &middot; &sect;3 the driver choice + exact parts &middot; '
-         '&sect;4&ndash;&sect;9 the design rationale.</p>')
+         '&sect;4&ndash;&sect;9 the <b>archived</b> full-panel design.</p>')
 P.append('<h2>The circuit &mdash; schematic &amp; Option&nbsp;C (check the wiring net-by-net)</h2>')
 P.append('<p class="k">The logical circuit, independent of the breadboard: the Pico clocks a byte into the 595 over three control lines (<b>SER</b> data, <b>SRCLK</b> shift clock, <b>RCLK</b> latch); the chip latches the byte to its eight parallel outputs; for the bring-up, seven of them (<b>QB&ndash;QH</b>) each drive an LED through a <b>240&nbsp;&Omega;</b> resistor to ground, and <b>QA</b> is left unused. <b>OE</b> tied low keeps the outputs enabled, <b>MR&nbsp;(SRCLR)</b> tied high prevents reset, and a <b>0.1&nbsp;&micro;F</b> cap decouples VCC.</p>')
 P.append(f'<figure>{DIAGRAMS["schematic"]}<figcaption><b>Figure. Circuit schematic.</b> Pico &rarr; 74HC595 &rarr; 7&times;(240&nbsp;&Omega; + LED), QA unused &mdash; the &ldquo;science&rdquo; the breadboard figures below realise physically.</figcaption></figure>')
@@ -1024,6 +1024,9 @@ P.append('<p class="k"><b>Takeaway:</b> opened parts that work but do not suit a
          'rely on returns only for genuinely dead parts. '
          'You pay return shipping unless the item is defective. Policies change, so re-check before ordering.</p>')
 P.append('<p class="k"><b>Where to buy:</b> the order list in &sect;2 carries the per-part vendors, buy links, quantities and prices.</p>')
+P.append('<details style="margin:26px 0 0;border:1px solid #d4d8de;border-radius:6px;background:#f6f7f9;padding:2px 18px">'
+         '<summary style="cursor:pointer;font-size:1.12em;font-weight:700;color:#586271;padding:11px 0">Archived &mdash; full-panel target design (reference / later)</summary>')
+P.append('<p class="k" style="margin-top:6px">The end-goal panel: a <b>16&times;16 matrix</b> showing a <b>Gray-coded bar + parity + coarse vernier row</b> at <code>&tau;&nbsp;=&nbsp;200&nbsp;&micro;s</code>, decoded per camera frame. <b>Set aside while we grow the working bring-up step by step</b> &mdash; kept here (and proven in <code>sim/</code>) for when we scale up to it. &sect;4&ndash;&sect;9 below are that design.</p>')
 P.append('<h2>4. Geometry &mdash; Option C: one large flat panel</h2>')
 P.append('<p>You will place the cameras to face one large flat panel, so a single planar matrix is all '
          'that is needed (no prism, no multi-face latching). The only requirement is that the panel be '
@@ -1117,6 +1120,7 @@ P.append('<ul>'
          '<li><b>Validated in simulation</b> — the <code>sim/</code> decode model (test-driven) confirms encode→film→decode→offset recovery, including the coarse-row disambiguation, before any parts are bought.</li>'
          '</ul>')
 
+P.append('</details>')
 P.append('<h2>References</h2>')
 P.append('<ul>'
          '<li>Imatest Camera Timing System LED-Panel — <a href="https://www.imatest.com/product/camera-timing-system-led-panel/">product page</a> '
