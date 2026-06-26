@@ -511,8 +511,8 @@ def svg_wiring_c():
         txt(cx(c),gtop-5,lab,6.5 if c.endswith(("+","-")) else 8.5,cl,"middle","bold")
         if c.endswith(("+","-")):
             txt(cx(c),gbot+12,("+" if c.endswith("+") else "–"),8.5,cl,"middle","bold")
-    txt(cx("CL+"),gtop-18,"3V3",7,RED,"middle","bold"); txt(cx("CL-"),gtop-18,"GND",7,BLUE,"middle","bold")
-    txt(cx("CR+"),gtop-18,"3V3",7,RED,"middle","bold"); txt(cx("CR-"),gtop-18,"GND",7,BLUE,"middle","bold")
+    txt(cx("R+"),gtop-18,"3V3",7,RED,"middle","bold")                                                            # C powers off the RIGHT rails: 3V3 = R+
+    txt(cx("L-"),gtop-18,"GND",7,BLUE,"middle","bold"); txt(cx("CR-"),gtop-18,"GND",7,BLUE,"middle","bold"); txt(cx("R-"),gtop-18,"GND",7,BLUE,"middle","bold")  # the 3 ground rails used in C (CL+/CL-/CR+ unused)
     for r in range(R0,RN+1):
         if r==1 or r%5==0:
             txt(LX-26,cy(r)+3,str(r),8,"#cbd5e1","middle")
