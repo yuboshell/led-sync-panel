@@ -553,27 +553,25 @@ def svg_wiring_c():
     line(cx("LEFT-"),cy(2),cx("MIDb-"),cy(2),BLUE,1.8)       # GND tie: LED rail (LEFT-) <-> MIDb-
     line(cx("MIDa-"),cy(3),cx("MIDb-"),cy(3),BLUE,1.6)
     line(cx("MIDb-"),cy(36),cx("RIGHT-"),cy(36),BLUE,1.6)    # GND tie: RIGHT- (OE + QA cathode) <-> MIDb-
-    # ---- QA (the lone f-j output, sits with the control) -> local LED on the right ----
-    line(cx("Ri"),cy(24),cx("Ri"),cy(32),"#9a8050",1.4)      # QA resistor (Rf24 node, tap Ri) spans down to its LED at row 32 (clear of OE@26)
-    s.append(f'<line x1="{cx("Ri"):.1f}" y1="{cy(27):.1f}" x2="{cx("Ri"):.1f}" y2="{cy(29):.1f}" stroke="{TAN}" stroke-width="4.5" stroke-linecap="round"/>')
-    aq=cx("Rj"); kq=cx("RIGHT-"); dq=(aq+kq)/2
-    line(aq,cy(32),dq-4,cy(32),"#9aa0a6",1.5); line(dq+4,cy(32),kq,cy(32),"#9aa0a6",1.5)
-    s.append(f'<circle cx="{dq:.1f}" cy="{cy(32):.1f}" r="4.6" fill="{GRN}" stroke="#15803d" stroke-width="0.7"/>')
-    txt(aq,cy(32)-7,"+",6.5,"#15803d","middle","bold"); txt(kq,cy(32)-7,"–",6.5,BLUE,"middle","bold"); txt(dq,cy(32)+10,"QA",5,"#7a818b","middle")
-    # ---- outputs QB-QH (Re, a-e) -> jumper across the roomy middle -> resistor + LED on the LEFT strip ----
-    for nm,row in [("QB",23),("QC",24),("QD",25),("QE",26),("QF",27),("QG",28),("QH",29)]:
-        ay=cy(row)
-        J("Ra",row,"Lj",row,TAN,1.7)                         # output -> across the middle to the left strip
-        line(cx("Ld"),ay,cx("Lh"),ay,"#9a8050",1.1)          # 240Ω bridges the LEFT gap (Lh f-j <-> Ld a-e)
+    # ---- all 8 outputs -> ONE ordered LED row on the LEFT strip: QB..QH at rows 24-30, QA bridged into row 31 ----
+    def comb_led(ay,nm):                                      # resistor (bridges left gap) + LED -> LEFT- rail, one slot
+        line(cx("Ld"),ay,cx("Lh"),ay,"#9a8050",1.1)
         rect((cx("Ld")+cx("Lh"))/2-7,ay-2.5,14,5,2,TAN,'stroke="#a07d3a" stroke-width="0.5"')
         an=cx("Lb"); ka=cx("LEFT-"); dm=(an+ka)/2
         line(an,ay,dm+4,ay,"#9aa0a6",1.5); line(dm-4,ay,ka,ay,"#9aa0a6",1.5)
         s.append(f'<circle cx="{dm:.1f}" cy="{ay:.1f}" r="4.6" fill="{GRN}" stroke="#15803d" stroke-width="0.7"/>')
-        txt(an,ay-7,"+",6.5,"#15803d","middle","bold"); txt(ka,ay-7,"–",6.5,BLUE,"middle","bold")
-        txt(dm,ay+9,nm,5,"#7a818b","middle")
+        txt(an,ay-7,"+",6.5,"#15803d","middle","bold"); txt(ka,ay-7,"–",6.5,BLUE,"middle","bold"); txt(dm,ay+9,nm,5,"#7a818b","middle")
+    for nm,outrow in [("QB",23),("QC",24),("QD",25),("QE",26),("QF",27),("QG",28),("QH",29)]:
+        lr=outrow+1                                          # drop one row so QA can take the bottom slot, keeping all 8 contiguous
+        J("Ra",outrow,"Lj",lr,TAN,1.7)                       # output (a-e tap) -> across the middle to the left strip
+        comb_led(cy(lr),nm)
+    # QA — the lone output on the chip's far (f-j) side — bridges into the LAST slot of the SAME row (row 31)
+    line(cx("Ri"),cy(24),cx("Ri"),cy(31),TAN,1.7)            # QA out (Rf24, tapped at Ri) runs DOWN the f-j side, clear of the 595
+    J("Ri",31,"Lj",31,TAN,1.7)                                # then across the middle (below the 595) into its slot
+    comb_led(cy(31),"QA")
     # ---- title / legend ----
     txt(W/2,26,"Option C — Pico + 595 both on the right; 595 turned 180° so control is same-side; LEDs on the left",10.5,"#15171c","middle","bold")
-    txt(W/2,43,"Control stays on the right (same side as the Pico); the 7 outputs fan left across the roomy middle. A rotated chip ≠ a mirror of A.",8,"#5b6470","middle")
+    txt(W/2,43,"Control stays on the right; all 8 outputs land in one ordered LED row on the left — QA bridged into the last slot. A rotated chip ≠ a mirror of A.",8,"#5b6470","middle")
     leg=[("3V3",RED),("GND",BLUE),("SER",PUR),("SRCLK",CYN),("RCLK",ORA),("output→LED",TAN)]
     lx=40; ly=H-14
     for lab,col in leg:
@@ -728,7 +726,7 @@ P.append('<h2>The circuit &mdash; schematic &amp; Option&nbsp;C (check the wirin
 P.append('<p class="k">The logical circuit, independent of the breadboard: the Pico clocks a byte into the 595 over three control lines (<b>SER</b> data, <b>SRCLK</b> shift clock, <b>RCLK</b> latch); the chip latches the byte to its eight parallel outputs; each output drives an LED through a <b>240&nbsp;&Omega;</b> resistor to ground. <b>OE</b> tied low keeps the outputs enabled, <b>MR&nbsp;(SRCLR)</b> tied high prevents reset, and a <b>0.1&nbsp;&micro;F</b> cap decouples VCC.</p>')
 P.append(f'<figure>{DIAGRAMS["schematic"]}<figcaption><b>Figure. Circuit schematic.</b> Pico &rarr; 74HC595 &rarr; 8&times;(240&nbsp;&Omega; + LED) &mdash; the &ldquo;science&rdquo; the breadboard figures below realise physically.</figcaption></figure>')
 P.append('<p class="k">Read <b>Option&nbsp;C</b> below against that schematic, net by net &mdash; this is exactly how the OE-grounding error showed up: every output must go &rarr; 240&nbsp;&Omega; &rarr; LED &rarr; GND, <b>OE</b> ties low, <b>MR</b> ties high.</p>')
-P.append(f'<figure>{DIAGRAMS["wiring_c"]}<figcaption><b>Option C &mdash; Pico + 595 both on the RIGHT strip, 595 turned 180&deg; (shown here to check against the schematic).</b> Stacking the two on one strip keeps the 3 control wires short and on the same side; the 595 is notch-up so its outputs face left and fan across the centre as a clean parallel ribbon to the comb on the left strip. The 180&deg; rotation (not a reflection) reverses the output pin order versus Option&nbsp;A.</figcaption></figure>')
+P.append(f'<figure>{DIAGRAMS["wiring_c"]}<figcaption><b>Option C &mdash; Pico + 595 both on the RIGHT strip, 595 turned 180&deg; (shown here to check against the schematic).</b> Stacking the two on one strip keeps the 3 control wires short and on the same side; the 595 is notch-up so its outputs face left, landing as <b>one ordered row of 8 LEDs</b> on the left strip &mdash; QA (the lone output on the chip&rsquo;s far side) bridges down and across into the last slot, so no LED sits apart. The 180&deg; rotation (not a reflection) reverses the output pin order versus Option&nbsp;A.</figcaption></figure>')
 P.append('<h2>The other two layouts &mdash; Option&nbsp;A and Option&nbsp;B</h2>')
 P.append('<p class="k">The other two physical layouts of the same circuit (Option&nbsp;C is up top, beside the schematic). '
          '<b>Option&nbsp;A</b> stacks the Pico + 595 on the left strip and runs the eight outputs across the middle as one parallel ribbon to the comb on the right. '
