@@ -541,9 +541,10 @@ def svg_wiring_c():
         if c=="Rf": txt(cx(c)+7,cy(r)+2.5,lab,4.5,"#9aa3ad","start")
         else: txt(cx(c)-7,cy(r)+2.5,lab,4.5,"#9aa3ad","end")
     # ---- 3 control wires: Pico GP -> 595 control, SAME side (f-j) ----
-    line(cx("Ri"),cy(16),cx("Rg"),cy(25),PUR,2.4)   # GP19 (Rh16) -> SER (Rf25)
-    line(cx("Ri"),cy(17),cx("Rg"),cy(28),CYN,2.4)   # GP18 (Rh17) -> SRCLK (Rf28)
-    line(cx("Ri"),cy(19),cx("Rg"),cy(27),ORA,2.4)   # GP17 (Rh19) -> RCLK (Rf27). Straight lines routed left to Rg, clear of the VCC/OE/MR power taps on Rj. True vertical needs 3 free columns; only Ri/Rj are free here and Rj carries the power.
+    ox=3.4                                            # all 3 control wires VERTICAL in column Ri (Ri is power-free); small x-offset so they read as 3 parallel lines. VCC/OE/MR power taps stay on Rj, to the right -> no crossings.
+    line(cx("Ri")-ox,cy(16),cx("Ri")-ox,cy(25),PUR,2.2)   # GP19 (Rh16) -> SER  : Ri16 -> Ri25
+    line(cx("Ri"),   cy(17),cx("Ri"),   cy(28),CYN,2.2)   # GP18 (Rh17) -> SRCLK: Ri17 -> Ri28
+    line(cx("Ri")+ox,cy(19),cx("Ri")+ox,cy(27),ORA,2.2)   # GP17 (Rh19) -> RCLK : Ri19 -> Ri27
     # ---- power: 3V3 bus = R+ ; GND bus = CR- (tied to L-, the LED rail) ----
     J("Ri",5,"R+",5,RED)                                  # Pico 3V3 -> R+ (jumper in free hole Ri, NOT the Rh pin)
     J("Rj",23,"R+",23,RED); J("Rj",29,"R+",29,RED)   # 595 VCC(Rf23), MR(Rf29) -> R+ (tap Rj, clear of control)
