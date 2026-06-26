@@ -518,14 +518,14 @@ def svg_wiring_c():
             txt(LX-26,cy(r)+3,str(r),8,"#cbd5e1","middle")
             txt(cx("RIGHT-")+16,cy(r)+3,str(r),8,"#cbd5e1","middle")
     # ---- Pico — RIGHT strip ----
-    px1,px2=cx("Rc"),cx("Rh"); py1,py2=cy(1),cy(19)   # Pico spans 6 cols (3 a-e + 3 f-j), same as A/B
+    px1,px2=cx("Rc"),cx("Rh"); py1,py2=cy(1),cy(20)   # Pico: 6 cols wide (3 a-e + 3 f-j), 20 pins/side -> rows 1-20
     rect(px1-8,py1-8,(px2-px1)+16,(py2-py1)+16,6,"#0b6b5e",'opacity="0.92"')
     txt((px1+px2)/2,py1-8+13,"Pico (USB ↑)",8,"#dffaf4","middle","bold")
     txt((px1+px2)/2,(py1+py2)/2,"PICO",13,"#0d4a41","middle","bold")
-    for nm,c,r,cl in [("3V3","Rh",5,RED),("GP19","Rh",14,PUR),("GP18","Rh",16,CYN),("GP17","Rh",18,ORA),("GND","Rc",16,BLUE)]:
+    for nm,c,r,cl in [("3V3·36","Rh",5,RED),("GP19·25","Rh",16,PUR),("GP18·24","Rh",17,CYN),("GP17·22","Rh",19,ORA),("GND·18","Rc",18,BLUE)]:   # name·pin# (Pico datasheet); rows = real pinout, USB up
         hole(c,r,cl)
-        if c=="Rc": txt(cx(c)-8,cy(r)+3,nm,6,cl,"end","bold")     # a-e edge pin: label to the left
-        else: txt(cx(c)+8,cy(r)+3,nm,6,cl,"start","bold")
+        if c=="Rc": txt(cx(c)-8,cy(r)+3,nm,5.5,cl,"end","bold")   # a-e edge pin: label to the left
+        else: txt(cx(c)+8,cy(r)+3,nm,5.5,cl,"start","bold")
     # ---- 595 — NOTCH-UP, right strip, rows 23-30 ----
     qx1,qx2=cx("Re"),cx("Rf"); qy1,qy2=cy(23),cy(30)
     rect(qx1-7,qy1-7,(qx2-qx1)+14,(qy2-qy1)+14,3,"#23252b")
@@ -541,13 +541,13 @@ def svg_wiring_c():
         else:
             txt(cx(c)-7,cy(r)+2.5,("GND" if nm=="GNDp" else nm),5,"#9aa3ad","end")
     # ---- 3 control wires: Pico GP -> 595 control, SAME side (f-j) ----
-    J("Ri",14,"Rg",25,PUR)   # GP19 -> SER. jumper plugs into Ri (free), NOT Rh (Pico's own pin hole)
-    J("Ri",16,"Rg",28,CYN)   # GP18 -> SRCLK (free hole Ri, same node as the GP18 pin at Rh16)
-    J("Ri",18,"Rg",27,ORA)   # GP17 -> RCLK (free hole Ri, same node as the GP17 pin at Rh18)
+    J("Ri",16,"Rg",25,PUR)   # GP19 (pin25, Rh16) -> SER. jumper in free hole Ri, NOT Rh (Pico's pin)
+    J("Ri",17,"Rg",28,CYN)   # GP18 (pin24, Rh17) -> SRCLK (free hole Ri)
+    J("Ri",19,"Rg",27,ORA)   # GP17 (pin22, Rh19) -> RCLK (free hole Ri)
     # ---- power: 3V3 bus = RIGHT+ ; GND bus = MIDb- (tied to LEFT-, the LED rail) ----
     J("Ri",5,"RIGHT+",5,RED)                                  # Pico 3V3 -> RIGHT+ (jumper in free hole Ri, NOT the Rh pin)
     J("Rj",23,"RIGHT+",23,RED); J("Rj",29,"RIGHT+",29,RED)   # 595 VCC(Rf23), MR(Rf29) -> RIGHT+ (tap Rj, clear of control)
-    J("Ra",16,"MIDb-",16,BLUE)                               # Pico GND -> MIDb-
+    J("Ra",18,"MIDb-",18,BLUE)                               # Pico GND (pin18, Rc18) -> MIDb-
     J("Ra",30,"MIDb-",30,BLUE)                               # 595 GND (Re30, a-e) -> MIDb-
     J("Rj",26,"RIGHT-",26,BLUE)                              # 595 OE (Rf26, f-j) -> RIGHT- (tied low). FIX: was tapping Ra26 = QE's node
     line(cx("LEFT-"),cy(2),cx("MIDb-"),cy(2),BLUE,1.8)       # GND tie: LED rail (LEFT-) <-> MIDb-
@@ -773,20 +773,20 @@ P.append(f'<figure>{DIAGRAMS["wiring_c"]}<figcaption><b>Figure 1. Bring-up wirin
          'short same-side wires (data&nbsp;SER, clock&nbsp;SRCLK, latch&nbsp;RCLK); outputs <b>QB&ndash;QH</b> each drive one green LED through a '
          '240&nbsp;&Omega; resistor to ground, fanning left across the centre. <b>QA is left unused</b> (the lone output on the chip&rsquo;s '
          'far side). Holes use the <b>L&hellip;&nbsp;/&nbsp;R&hellip;</b> convention (Left or Right strip, column&nbsp;a&ndash;j, row&nbsp;1&ndash;63).</figcaption></figure>')
-P.append('<p class="k"><b>Connect it in this order</b> &mdash; USB unplugged the whole time. Seat both chips on the <b>right strip</b>, across its centre channel: the <b>Pico up top</b> (cols&nbsp;c&ndash;h, rows&nbsp;1&ndash;19), and the <b>595 just below it, notch / pin-1 dot pointing UP</b> (toward the Pico) so <b>VCC lands at <code>Rf23</code> and GND at <code>Re30</code></b>. The <b>right rails carry power</b> &mdash; <b>RIGHT+&nbsp;=&nbsp;3.3&nbsp;V</b>, <b>RIGHT&ndash;&nbsp;=&nbsp;GND</b>; add the <b>0.1&nbsp;&micro;F cap across <code>RIGHT+&harr;RIGHT&ndash;</code></b> right by the chip. Ground also runs on the centre rail <code>MIDb&ndash;</code>, tied across to <code>RIGHT&ndash;</code> and out to the <b>left rail <code>LEFT&ndash;</code></b> the LED cathodes sit on. Every '
+P.append('<p class="k"><b>Connect it in this order</b> &mdash; USB unplugged the whole time. Seat both chips on the <b>right strip</b>, across its centre channel: the <b>Pico up top</b> (cols&nbsp;c&ndash;h, rows&nbsp;1&ndash;20), and the <b>595 just below it, notch / pin-1 dot pointing UP</b> (toward the Pico) so <b>VCC lands at <code>Rf23</code> and GND at <code>Re30</code></b>. The <b>right rails carry power</b> &mdash; <b>RIGHT+&nbsp;=&nbsp;3.3&nbsp;V</b>, <b>RIGHT&ndash;&nbsp;=&nbsp;GND</b>; add the <b>0.1&nbsp;&micro;F cap across <code>RIGHT+&harr;RIGHT&ndash;</code></b> right by the chip. Ground also runs on the centre rail <code>MIDb&ndash;</code>, tied across to <code>RIGHT&ndash;</code> and out to the <b>left rail <code>LEFT&ndash;</code></b> the LED cathodes sit on. Every '
          '<b>LED has two leads in two holes</b>: the <b>long lead (anode,&nbsp;+)</b> into the resistor&rsquo;s hole, the '
          '<b>short lead (cathode,&nbsp;&ndash;)</b> into the adjacent <code>LEFT&ndash;</code> rail.</p>')
 P.append('<table>'
          '<tr><th>#</th><th>From (hole)</th><th>To (hole)</th><th>Why</th></tr>'
          '<tr><td>1</td><td>Pico <b>3V3</b> (pin&nbsp;36) at <code>Rh5</code></td><td><b>RIGHT+</b> rail (3.3&nbsp;V bus)</td><td>3.3&nbsp;V for the whole board</td></tr>'
-         '<tr><td>2</td><td>Pico <b>GND</b> (pin&nbsp;23) at <code>Rc16</code></td><td><b>MIDb&ndash;</b> rail (ground bus)</td><td>common ground</td></tr>'
+         '<tr><td>2</td><td>Pico <b>GND</b> (pin&nbsp;18) at <code>Rc18</code></td><td><b>MIDb&ndash;</b> rail (ground bus)</td><td>common ground</td></tr>'
          '<tr><td>3</td><td><b>rail ties</b></td><td><code>MIDb&ndash;&harr;LEFT&ndash;</code>, <code>MIDb&ndash;&harr;RIGHT&ndash;</code>, <code>MIDb&ndash;&harr;MIDa&ndash;</code></td><td>ground out to the LED rail (LEFT&ndash;) and the chip&rsquo;s right rail (RIGHT&ndash;)</td></tr>'
          '<tr><td>4</td><td>595 <b>VCC</b> <code>Rf23</code>, <b>MR</b> <code>Rf29</code></td><td><b>RIGHT+</b> rail</td><td>power the chip; MR high = never reset</td></tr>'
          '<tr><td>5</td><td>595 <b>GND&nbsp;(8)</b> <code>Re30</code> ; <b>OE</b> <code>Rf26</code></td><td><code>MIDb&ndash;</code> ; <b>RIGHT&ndash;</b></td><td>ground the chip; OE low = outputs on</td></tr>'
          '<tr><td>6</td><td><b>0.1&nbsp;&micro;F cap</b></td><td><code>RIGHT+&harr;RIGHT&ndash;</code> by the chip</td><td>decouple VCC</td></tr>'
-         '<tr><td>7</td><td>Pico <b>GP19</b> <code>Rh14</code></td><td>595 <b>SER</b> <code>Rf25</code></td><td>serial <b>data</b></td></tr>'
-         '<tr><td>8</td><td>Pico <b>GP18</b> <code>Rh16</code></td><td>595 <b>SRCLK</b> <code>Rf28</code></td><td>shift <b>clock</b></td></tr>'
-         '<tr><td>9</td><td>Pico <b>GP17</b> <code>Rh18</code></td><td>595 <b>RCLK</b> <code>Rf27</code></td><td><b>latch</b></td></tr>'
+         '<tr><td>7</td><td>Pico <b>GP19</b> (pin&nbsp;25) <code>Rh16</code></td><td>595 <b>SER</b> <code>Rf25</code></td><td>serial <b>data</b></td></tr>'
+         '<tr><td>8</td><td>Pico <b>GP18</b> (pin&nbsp;24) <code>Rh17</code></td><td>595 <b>SRCLK</b> <code>Rf28</code></td><td>shift <b>clock</b></td></tr>'
+         '<tr><td>9</td><td>Pico <b>GP17</b> (pin&nbsp;22) <code>Rh19</code></td><td>595 <b>RCLK</b> <code>Rf27</code></td><td><b>latch</b></td></tr>'
          '<tr><td>10</td><td>each output <b>QB&ndash;QH</b> <code>Re23&ndash;Re29</code></td><td><code>Lj</code> of that LED&rsquo;s row (jumper across the middle)</td><td>output &rarr; left strip, same row</td></tr>'
          '<tr><td>11</td><td>per LED row: <b>240&nbsp;&Omega;</b> <code>Lh&rarr;Ld</code>, then <b>LED</b> long&nbsp;lead&nbsp;(+) <code>Lb</code>, short&nbsp;lead&nbsp;(&ndash;) &rarr; <b>LEFT&ndash;</b></td><td>rows 23&ndash;29</td><td>resistor bridges the left gap, LED to ground; long lead is +</td></tr>'
          '</table>')
