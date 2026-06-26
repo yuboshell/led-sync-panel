@@ -38,6 +38,8 @@ int main() {
     gpio_set_function(SCK, GPIO_FUNC_SPI);
     gpio_set_function(TX,  GPIO_FUNC_SPI);
     gpio_init(LATCH); gpio_set_dir(LATCH, GPIO_OUT); gpio_put(LATCH, 0);
+    stdio_init_all();                     // bring up USB (CDC + reset interface) so future reflashes need
+                                          // no button: `picotool load -fx`. Non-blocking; LED output unaffected.
 
     uint32_t count = 0;
     absolute_time_t next = get_absolute_time();

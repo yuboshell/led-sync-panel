@@ -45,6 +45,11 @@ export PATH="$(echo ~/pico/toolchain/xpack-arm-none-eabi-gcc-*/bin):$PATH"
 export PICO_SDK_PATH=~/pico-sdk
 cp "$PICO_SDK_PATH/external/pico_sdk_import.cmake" .
 mkdir build && cd build && cmake .. && make        # -> timecode.uf2
-# hold BOOTSEL while plugging in USB, then:
+# FIRST load (over no-USB firmware): hold BOOTSEL while plugging in USB, then:
 picotool load -x build/timecode.uf2
+```
+**After this firmware is running, updates need no button** — it brings up the USB reset
+interface, so just rebuild and:
+```bash
+picotool load -fx build/timecode.uf2   # -f reboots to BOOTSEL over USB, loads, and runs
 ```
