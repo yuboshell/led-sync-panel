@@ -734,7 +734,7 @@ P.append('<p class="k">The other two physical layouts of the same circuit (Optio
          '<b>Option&nbsp;A</b> stacks the Pico + 595 on the left strip and runs the eight outputs across the middle as one parallel ribbon to the comb on the right. '
          '<b>Option&nbsp;B</b> puts the 595 on the right strip beside the Pico&rsquo;s GP17&ndash;19 (short control hops) and reaches each LED with a long resistor lead &mdash; no output jumpers. '
          'In every layout, <b>QA</b> is the one output sitting on the chip&rsquo;s control side (the 595&rsquo;s 7+1 pinout split).</p>')
-P.append(f'<figure>{DIAGRAMS["wiring"]}<figcaption><b>Option A (current) &mdash; 595 on the LEFT strip.</b> Pico + 595 stacked on the left; the eight outputs cross the centre rails as a parallel ribbon to the comb on the right.</figcaption></figure>')
+P.append(f'<figure>{DIAGRAMS["wiring"]}<figcaption><b>Option A &mdash; 595 on the LEFT strip.</b> Pico + 595 stacked on the left; the eight outputs cross the centre rails as a parallel ribbon to the comb on the right.</figcaption></figure>')
 P.append(f'<figure>{DIAGRAMS["wiring_b"]}<figcaption><b>Option B (revised) &mdash; 595 raised beside GP17&ndash;19, outputs in a parallel ribbon.</b> The 595 is notch-down (matching the datasheet); the 3 control wires are short hops; the seven QB&ndash;QH outputs drop to the comb as evenly-spaced parallel diagonals (QA is the lone output that must bridge across); every jumper and resistor sits in its own hole.</figcaption></figure>')
 P.append('<h2>Step 0 &mdash; blink one LED (the simplest possible test)</h2>')
 P.append('<p class="k">Before the 595 panel, prove the whole chain with the <b>smallest possible circuit</b>: the Pico drives '
@@ -760,7 +760,7 @@ P.append('<h2>Build the bring-up first &mdash; wiring the first light-up</h2>')
 P.append('<p class="k"><b>Got the parts? Start here.</b> This is the hands-on build; the numbered sections below'
          '(&sect;1 onward) explain what the panel is for and why each part was chosen.</p>')
 P.append('<p class="k"><b>Bring-up</b> = power on the smallest version of the circuit and get it working in verified steps, '
-         'before scaling to the full panel. Here that is just <b>the Pico + one 74HC595 + eight LEDs</b>, powered at '
+         'before scaling to the full panel. Here that is just <b>the Pico + one 74HC595 + seven LEDs</b>, powered at'
          '<b>3.3&nbsp;V from the Pico</b> (no ULN2803, no external supply): the Pico&rsquo;s 3.3&nbsp;V logic drives a '
          '3.3&nbsp;V-powered 595 directly, so <b>no level shifter is needed</b>. Green LEDs through 240&nbsp;&Omega; at '
          '3.3&nbsp;V draw ~5&nbsp;mA &mdash; a little dim, but plenty to confirm the chain works.</p>')
@@ -768,36 +768,35 @@ P.append('<p class="k"><b>No display panel needed yet.</b> For this first light-
          'breadboard</b> (as drawn). You only need the separate display panel <i>later</i>, for the actual multi-camera '
          'filming &mdash; there the LEDs must spread out at 3&ndash;5&nbsp;cm pitch so every camera can resolve them, and '
          '10&nbsp;mm domes are too wide to pack on a breadboard. The panel board is in &sect;2.</p>')
-P.append(f'<figure>{DIAGRAMS["wiring"]}<figcaption><b>Figure 1. Bring-up wiring (exact holes).</b> The Pico and 595 sit on the '
-         '<b>left strip</b>; the eight LEDs form a comb on the <b>right strip</b>. The Pico clocks a byte into the 595 over three '
-         'wires (data&nbsp;SER, clock&nbsp;SRCLK, latch&nbsp;RCLK); each output QA&ndash;QH drives one green LED through a '
-         '240&nbsp;&Omega; resistor to ground. The 595&rsquo;s outputs face right, so <b>each LED sits in the same row as its '
-         'output</b> and the eight output&rarr;LED wires run straight across as a tidy ribbon. Holes use the '
-         '<b>L&hellip;&nbsp;/&nbsp;R&hellip;</b> convention (Left or Right strip, column&nbsp;a&ndash;j, row&nbsp;1&ndash;63).</figcaption></figure>')
-P.append('<p class="k"><b>Connect it in this order</b> &mdash; USB unplugged the whole time. First seat both chips across the centre channel: the Pico up top, and the <b>595 just below with its notch / pin-1 dot pointing DOWN</b> (away from the Pico) so <b>VCC lands at <code>Le31</code> and GND at <code>Lf24</code></b>; add the 0.1&nbsp;&micro;F cap across the 595&rsquo;s VCC&harr;GND. Power runs on the <b>central rails</b> '
-         'between the strips &mdash; Pico <b>3V3&nbsp;&rarr;&nbsp;+</b> rail and <b>GND&nbsp;&rarr;&nbsp;&ndash;</b> rail &mdash; with short '
-         'ties carrying + / &ndash; to the left rails (for the 595) and ground out to the right rail (for the LED cathodes). Every '
+P.append(f'<figure>{DIAGRAMS["wiring_c"]}<figcaption><b>Figure 1. Bring-up wiring (exact holes).</b> The Pico and 595 sit stacked on the '
+         '<b>right strip</b>; the seven LEDs form a comb on the <b>left strip</b>. The Pico clocks a byte into the 595 over three '
+         'short same-side wires (data&nbsp;SER, clock&nbsp;SRCLK, latch&nbsp;RCLK); outputs <b>QB&ndash;QH</b> each drive one green LED through a '
+         '240&nbsp;&Omega; resistor to ground, fanning left across the centre. <b>QA is left unused</b> (the lone output on the chip&rsquo;s '
+         'far side). Holes use the <b>L&hellip;&nbsp;/&nbsp;R&hellip;</b> convention (Left or Right strip, column&nbsp;a&ndash;j, row&nbsp;1&ndash;63).</figcaption></figure>')
+P.append('<p class="k"><b>Connect it in this order</b> &mdash; USB unplugged the whole time. Seat both chips on the <b>right strip</b>, across its centre channel: the <b>Pico up top</b> (cols&nbsp;c&ndash;h, rows&nbsp;1&ndash;19), and the <b>595 just below it, notch / pin-1 dot pointing UP</b> (toward the Pico) so <b>VCC lands at <code>Rf23</code> and GND at <code>Re30</code></b>. The <b>right rails carry power</b> &mdash; <b>RIGHT+&nbsp;=&nbsp;3.3&nbsp;V</b>, <b>RIGHT&ndash;&nbsp;=&nbsp;GND</b>; add the <b>0.1&nbsp;&micro;F cap across <code>RIGHT+&harr;RIGHT&ndash;</code></b> right by the chip. Ground also runs on the centre rail <code>MIDb&ndash;</code>, tied across to <code>RIGHT&ndash;</code> and out to the <b>left rail <code>LEFT&ndash;</code></b> the LED cathodes sit on. Every '
          '<b>LED has two leads in two holes</b>: the <b>long lead (anode,&nbsp;+)</b> into the resistor&rsquo;s hole, the '
-         '<b>short lead (cathode,&nbsp;&ndash;)</b> into the adjacent ground rail.</p>')
+         '<b>short lead (cathode,&nbsp;&ndash;)</b> into the adjacent <code>LEFT&ndash;</code> rail.</p>')
 P.append('<table>'
          '<tr><th>#</th><th>From (hole)</th><th>To (hole)</th><th>Why</th></tr>'
-         '<tr><td>1</td><td>Pico <b>3V3</b> (pin&nbsp;36) at <code>Lh5</code></td><td><b>+ rail</b> &mdash; centre <code>MIDa+</code></td><td>3.3&nbsp;V for the whole board</td></tr>'
-         '<tr><td>2</td><td>Pico <b>GND</b> (pin&nbsp;23) at <code>Lh18</code></td><td><b>&ndash; rail</b> &mdash; centre <code>MIDa&ndash;</code></td><td>common ground</td></tr>'
-         '<tr><td>3</td><td><b>rail ties</b></td><td><code>MIDa+&harr;LEFT+</code>, <code>MIDa&ndash;&harr;LEFT&ndash;</code>, <code>MIDa&ndash;&harr;RIGHT&ndash;</code></td><td>brings + / &ndash; to the left rails (595) and ground to the right rail (LED cathodes)</td></tr>'
-         '<tr><td>4</td><td>595 <b>VCC</b> <code>Le31</code>, <b>MR</b> <code>Le25</code></td><td><b>LEFT+</b> rail</td><td>power the chip; MR high = never reset</td></tr>'
-         '<tr><td>5</td><td>595 <b>GND&nbsp;(8)</b> <code>Lf24</code>; <b>OE</b> <code>Le28</code></td><td><code>MIDa&ndash;</code> ; <b>LEFT&ndash;</b></td><td>ground the chip; OE low = outputs on</td></tr>'
-         '<tr><td>6</td><td>Pico <b>GP19</b> <code>Lh16</code></td><td>595 <b>SER</b> <code>Le29</code></td><td>serial <b>data</b></td></tr>'
-         '<tr><td>7</td><td>Pico <b>GP18</b> <code>Lh17</code></td><td>595 <b>SRCLK</b> <code>Le26</code></td><td>shift <b>clock</b></td></tr>'
-         '<tr><td>8</td><td>Pico <b>GP17</b> <code>Lh19</code></td><td>595 <b>RCLK</b> <code>Le27</code></td><td><b>latch</b></td></tr>'
-         '<tr><td>9</td><td>each output QB&ndash;QH <code>Lf31&ndash;Lf25</code>, QA <code>Le30</code></td><td><code>Ra</code> of that LED&rsquo;s row (ribbon straight across)</td><td>output &rarr; right strip, same row</td></tr>'
-         '<tr><td>10</td><td>per LED row: <b>240&nbsp;&Omega;</b> <code>Rc&rarr;Rg</code>, then <b>LED</b> long&nbsp;lead&nbsp;(+) <code>Rh</code>, short&nbsp;lead&nbsp;(&ndash;) &rarr; <b>RIGHT&ndash;</b></td><td>rows 24&ndash;31</td><td>resistor across the channel, LED to ground; long lead is +</td></tr>'
+         '<tr><td>1</td><td>Pico <b>3V3</b> (pin&nbsp;36) at <code>Rh5</code></td><td><b>RIGHT+</b> rail (3.3&nbsp;V bus)</td><td>3.3&nbsp;V for the whole board</td></tr>'
+         '<tr><td>2</td><td>Pico <b>GND</b> (pin&nbsp;23) at <code>Rc16</code></td><td><b>MIDb&ndash;</b> rail (ground bus)</td><td>common ground</td></tr>'
+         '<tr><td>3</td><td><b>rail ties</b></td><td><code>MIDb&ndash;&harr;LEFT&ndash;</code>, <code>MIDb&ndash;&harr;RIGHT&ndash;</code>, <code>MIDb&ndash;&harr;MIDa&ndash;</code></td><td>ground out to the LED rail (LEFT&ndash;) and the chip&rsquo;s right rail (RIGHT&ndash;)</td></tr>'
+         '<tr><td>4</td><td>595 <b>VCC</b> <code>Rf23</code>, <b>MR</b> <code>Rf29</code></td><td><b>RIGHT+</b> rail</td><td>power the chip; MR high = never reset</td></tr>'
+         '<tr><td>5</td><td>595 <b>GND&nbsp;(8)</b> <code>Re30</code> ; <b>OE</b> <code>Rf26</code></td><td><code>MIDb&ndash;</code> ; <b>RIGHT&ndash;</b></td><td>ground the chip; OE low = outputs on</td></tr>'
+         '<tr><td>6</td><td><b>0.1&nbsp;&micro;F cap</b></td><td><code>RIGHT+&harr;RIGHT&ndash;</code> by the chip</td><td>decouple VCC</td></tr>'
+         '<tr><td>7</td><td>Pico <b>GP19</b> <code>Rh14</code></td><td>595 <b>SER</b> <code>Rf25</code></td><td>serial <b>data</b></td></tr>'
+         '<tr><td>8</td><td>Pico <b>GP18</b> <code>Rh16</code></td><td>595 <b>SRCLK</b> <code>Rf28</code></td><td>shift <b>clock</b></td></tr>'
+         '<tr><td>9</td><td>Pico <b>GP17</b> <code>Rh18</code></td><td>595 <b>RCLK</b> <code>Rf27</code></td><td><b>latch</b></td></tr>'
+         '<tr><td>10</td><td>each output <b>QB&ndash;QH</b> <code>Re23&ndash;Re29</code></td><td><code>Lj</code> of that LED&rsquo;s row (jumper across the middle)</td><td>output &rarr; left strip, same row</td></tr>'
+         '<tr><td>11</td><td>per LED row: <b>240&nbsp;&Omega;</b> <code>Lh&rarr;Ld</code>, then <b>LED</b> long&nbsp;lead&nbsp;(+) <code>Lb</code>, short&nbsp;lead&nbsp;(&ndash;) &rarr; <b>LEFT&ndash;</b></td><td>rows 23&ndash;29</td><td>resistor bridges the left gap, LED to ground; long lead is +</td></tr>'
          '</table>')
-P.append('<p class="k"><b>LED rows</b> (notch-down, so outputs run bottom&ndash;up): QB&rarr;31, QC&rarr;30, QD&rarr;29, QE&rarr;28, QF&rarr;27, QG&rarr;26, QH&rarr;25, QA&rarr;24.</p>')
-P.append('<p class="k"><b>Before you plug in USB &mdash; check:</b> &#9744; 595 <b>notch points down</b> (VCC <code>Le31</code>, GND <code>Lf24</code>) &middot; '
+P.append('<p class="k"><b>LED rows</b> (notch-up, so outputs run top&ndash;down): QB&rarr;23, QC&rarr;24, QD&rarr;25, QE&rarr;26, QF&rarr;27, QG&rarr;28, QH&rarr;29. QA&rsquo;s output (<code>Rf24</code>) is left unconnected.</p>')
+P.append('<p class="k"><b>Before you plug in USB &mdash; check:</b> &#9744; 595 <b>notch points UP</b> (VCC <code>Rf23</code>, GND <code>Re30</code>) &middot; '
+         '&#9744; the <b>0.1&nbsp;&micro;F cap</b> is across <code>RIGHT+&harr;RIGHT&ndash;</code> &middot; '
          '&#9744; no jumper shorts <b>+ straight to &ndash;</b> &middot; &#9744; <b>OE&rarr;&ndash;</b> (outputs on) and <b>MR&rarr;+</b> (no reset) &middot; '
          '&#9744; every LED&rsquo;s <b>long lead = +</b> (toward its resistor) &middot; &#9744; each lead in its own hole. Then plug in USB and run the test firmware.</p>')
 P.append('<p class="k"><b>Reading the diagram.</b> A <b>line is a jumper you add</b>; the <b>rails are inherent buses</b> (shown by the red/blue tint, not a line) &mdash; you never wire <i>along</i> a rail, you just tap a free hole. '
-         'Every jumper plugs into a <b>free hole of the pin&rsquo;s 5-hole group</b> (e.g. output QB at <code>Lf31</code> is tapped at the edge hole <code>Lj31</code>) &mdash; <b>never a second lead in an occupied hole</b>. '
+         'Every jumper plugs into a <b>free hole of the pin&rsquo;s 5-hole group</b> (e.g. output QB at <code>Re23</code> is tapped at the free hole <code>Ra23</code>) &mdash; <b>never a second lead in an occupied hole</b>. '
          'One caveat: large boards occasionally <b>split a rail in the middle</b> (the tutorial&rsquo;s &ldquo;exception&rdquo;); to be safe, <b>multimeter each rail end-to-end</b> (continuity mode) and add a bridge jumper only if it reads open.</p>')
 P.append('<p class="k"><b>Finding the Pico&rsquo;s pins.</b> The <b>Pico&nbsp;H</b> has its headers pre-soldered, so it drops '
          'straight into the breadboard <b>straddling the centre channel</b> (USB hanging off one end). All five pins we use '
