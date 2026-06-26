@@ -541,33 +541,34 @@ def svg_wiring_c():
         if c=="Rf": txt(cx(c)+7,cy(r)+2.5,lab,4.5,"#9aa3ad","start")
         else: txt(cx(c)-7,cy(r)+2.5,lab,4.5,"#9aa3ad","end")
     # ---- 3 control wires: Pico GP -> 595 control, SAME side (f-j) ----
-    J("Ri",16,"Rg",25,PUR)   # GP19 (pin25, Rh16) -> SER. jumper in free hole Ri, NOT Rh (Pico's pin)
-    J("Ri",17,"Rg",28,CYN)   # GP18 (pin24, Rh17) -> SRCLK (free hole Ri)
-    J("Ri",19,"Rg",27,ORA)   # GP17 (pin22, Rh19) -> RCLK (free hole Ri)
+    line(cx("Ri"),cy(16),cx("Rg"),cy(25),PUR,2.4)   # GP19 (Rh16) -> SER (Rf25)
+    line(cx("Ri"),cy(17),cx("Rg"),cy(28),CYN,2.4)   # GP18 (Rh17) -> SRCLK (Rf28)
+    line(cx("Ri"),cy(19),cx("Rg"),cy(27),ORA,2.4)   # GP17 (Rh19) -> RCLK (Rf27). Straight lines routed left to Rg, clear of the VCC/OE/MR power taps on Rj. True vertical needs 3 free columns; only Ri/Rj are free here and Rj carries the power.
     # ---- power: 3V3 bus = R+ ; GND bus = CR- (tied to L-, the LED rail) ----
     J("Ri",5,"R+",5,RED)                                  # Pico 3V3 -> R+ (jumper in free hole Ri, NOT the Rh pin)
     J("Rj",23,"R+",23,RED); J("Rj",29,"R+",29,RED)   # 595 VCC(Rf23), MR(Rf29) -> R+ (tap Rj, clear of control)
     J("Ra",18,"CR-",18,BLUE)                               # Pico GND (pin18, Rc18) -> CR-
     J("Ra",30,"CR-",30,BLUE)                               # 595 GND (Re30, a-e) -> CR-
     J("Rj",26,"R-",26,BLUE)                              # 595 OE (Rf26, f-j) -> R- (tied low). FIX: was tapping Ra26 = QE's node
-    line(cx("L-"),cy(2),cx("CR-"),cy(2),BLUE,1.8)       # GND tie: LED rail (L-) <-> CR-
-    line(cx("CL-"),cy(3),cx("CR-"),cy(3),BLUE,1.6)
-    line(cx("CR-"),cy(36),cx("R-"),cy(36),BLUE,1.6)    # GND tie: R- (OE) <-> CR-
+    line(cx("L-"),cy(37),cx("CR-"),cy(37),BLUE,1.8)     # GND ties moved to the BOTTOM, clear of the circuit: L- <-> CR-
+    line(cx("CL-"),cy(38),cx("CR-"),cy(38),BLUE,1.6)    # CL- (spare ground) <-> CR-
+    line(cx("CR-"),cy(39),cx("R-"),cy(39),BLUE,1.6)     # R- (OE) <-> CR-
     cyc=cy(25); xpp=cx("R+"); xmm=cx("R-"); xcc=(xpp+xmm)/2   # 0.1µF decoupling cap across the 595's supply (R+ 3V3 <-> R- GND), right at the chip
     line(xpp,cyc,xcc-3.5,cyc,"#9aa0a6",1.5); line(xcc+3.5,cyc,xmm,cyc,"#9aa0a6",1.5)
     s.append(f'<ellipse cx="{xcc:.1f}" cy="{cyc:.1f}" rx="4.5" ry="6.5" fill="#d8cdb0" stroke="#a89a78" stroke-width="0.8"/>')
     txt(xcc,cyc-11,"0.1µF",4.5,"#cbd5e1","middle")
     # ---- 7 outputs QB-QH -> one clean horizontal LED row on the LEFT strip. QA (pin 15) left unused -> NO bridging wire. ----
-    def comb_led(ay,nm):                                      # resistor (bridges left gap) + LED -> L- rail, one slot
-        line(cx("Ld"),ay,cx("Lh"),ay,"#9a8050",1.1)
-        rect((cx("Ld")+cx("Lh"))/2-7,ay-2.5,14,5,2,TAN,'stroke="#a07d3a" stroke-width="0.5"')
-        an=cx("Lb"); ka=cx("L-"); dm=(an+ka)/2
-        line(an,ay,dm+4,ay,"#9aa0a6",1.5); line(dm-4,ay,ka,ay,"#9aa0a6",1.5)
-        s.append(f'<circle cx="{dm:.1f}" cy="{ay:.1f}" r="4.6" fill="{GRN}" stroke="#15803d" stroke-width="0.7"/>')
-        txt(an,ay-7,"+",6.5,"#15803d","middle","bold"); txt(ka,ay-7,"–",6.5,BLUE,"middle","bold"); txt(dm,ay+9,nm,5,"#7a818b","middle")
-    for nm,row in [("QB",23),("QC",24),("QD",25),("QE",26),("QF",27),("QG",28),("QH",29)]:
-        J("Ra",row,"Lj",row,TAN,1.7)                         # output (a-e tap) -> straight across the middle to the left strip
-        comb_led(cy(row),nm)
+    def comb_led(ay,nm):                                      # resistor (6 holes, symmetric across the gap) + 5mm LED -> L- rail
+        line(cx("Lc"),ay,cx("Lh"),ay,"#9a8050",1.1)          # resistor leads Lc..Lh = 6 holes
+        rect((cx("Lc")+cx("Lh"))/2-7,ay-2.5,14,5,2,TAN,'stroke="#a07d3a" stroke-width="0.5"')
+        an=cx("La"); ka=cx("L-"); dm=(an+ka)/2               # LED straddles 2 holes: anode La, cathode L-
+        line(an,ay,dm+5,ay,"#9aa0a6",1.5); line(dm-5,ay,ka,ay,"#9aa0a6",1.5)
+        s.append(f'<circle cx="{dm:.1f}" cy="{ay:.1f}" r="6.5" fill="{GRN}" stroke="#15803d" stroke-width="0.8"/>')   # ~5mm dome
+        txt(an,ay-9,"+",6,"#15803d","middle","bold"); txt(ka,ay-9,"–",6,BLUE,"middle","bold"); txt(dm,ay+13,nm,5,"#7a818b","middle")
+    for i,(nm,outrow) in enumerate([("QB",23),("QC",24),("QD",25),("QE",26),("QF",27),("QG",28),("QH",29)]):
+        ledrow=23+2*i                                         # 5mm LEDs need a 2-row gap -> LED rows 23,25,...,35
+        J("Ra",outrow,"Lj",ledrow,TAN,1.7)                   # output (a-e tap) -> spaced LED row on the left strip
+        comb_led(cy(ledrow),nm)
     # ---- title / legend ----
     txt(W/2,26,"Option C — Pico + 595 both on the right; 595 turned 180° so control is same-side; LEDs on the left",10.5,"#15171c","middle","bold")
     txt(W/2,43,"Control stays on the right; the 7 outputs QB–QH make a clean LED row on the left — no bridging wire (QA·pin15 left unused for the bring-up). A rotated chip ≠ a mirror of A.",8,"#5b6470","middle")
