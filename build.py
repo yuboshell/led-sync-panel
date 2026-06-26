@@ -759,6 +759,11 @@ P.append('<p class="k"><b>Build &amp; flash</b> (CLI): <code>cmake&nbsp;..&nbsp;
          'hold <b>BOOTSEL</b> while plugging in USB, then <code>picotool&nbsp;load&nbsp;blink.uf2&nbsp;&amp;&amp;&nbsp;picotool&nbsp;reboot</code>. '
          'The LED blinks. Full build steps are in <code>firmware/blink/README.md</code>.</p>')
 P.append('<h2>Build the bring-up first &mdash; wiring the first light-up</h2>')
+P.append('<p style="background:#e8f5e9;border-left:4px solid #2e7d32;padding:10px 14px;border-radius:5px;margin:14px 0">'
+         '<b>&#10003; First light-up verified &mdash; 2026-06-26.</b> The 7-LED 595 panel is wired and running on the Pico: the walking dot '
+         'sweeps all seven, and the <b>binary counter is confirmed correct</b> &mdash; checked frame-by-frame from video, where each LED&rsquo;s '
+         'toggle rate halves cleanly down the row (the signature of a clean binary count). The <b>encode &rarr; shift &rarr; latch &rarr; LED</b> '
+         'chain works end to end.</p>')
 P.append('<p class="k"><b>Got the parts? Start here.</b> This is the hands-on build; the numbered sections below'
          '(&sect;1 onward) explain what the panel is for and why each part was chosen.</p>')
 P.append('<p class="k"><b>Bring-up</b> = power on the smallest version of the circuit and get it working in verified steps, '
