@@ -1,0 +1,50 @@
+# Step 1 — minimal time-code (7-bit Gray, camera-decodable)
+
+The bring-up's plain binary counter, upgraded into a **real time code**: a 7-bit counter
+shown in **Gray code** on the 7 LEDs (QB–QH), advancing on a fixed step **τ**. This is the
+first time the **encode → film → decode → offset** loop runs on real hardware, not just `sim/`.
+
+## Why Gray code
+A camera frame's exposure is a *window*; the count can tick *during* it. With plain binary,
+a multi-bit tick (e.g. `0111111 → 1000000`, six LEDs flipping) caught mid-exposure can decode
+to **garbage**. **Gray code changes only one LED per step** (including the 127→0 wrap), so a
+straddled frame is off by **at most ±1** — never garbage. The latch keeps the *board* clean;
+Gray handles the *camera* straddle.
+
+## Wiring
+Identical to the bring-up (Option C, 595 notch-UP) — **no rewiring, just reflash.**
+| Pico | → | 595 |
+|---|---|---|
+| GP18 | → | SRCLK (11) |
+| GP19 | → | SER (14) |
+| GP17 | → | RCLK (12) |
+
+Plus VCC→3V3, GND→GND, OE→GND, MR→3V3; QB..QH → 240 Ω → LED → GND (QA unused).
+
+## What it does
+- Each step τ (default **50 ms**, `STEP_US`), output `gray(count) = count ^ (count>>1)` on
+  QB–QH, with `count` advancing 0→127 and wrapping (period = 128·τ = **6.4 s**).
+- Drift-free stepping (`sleep_until` on absolute τ boundaries), so `count × τ` is a faithful
+  timestamp within one wrap.
+- **Tune `STEP_US`** to your camera: slower = more frames per value (easier decode), faster =
+  finer time. Start at 50 ms (20/s) for a 30–60 fps phone.
+
+## Decode (per camera frame)
+```
+read QB..QH as 7-bit g            # QB = bit0 ... QH = bit6
+b = g; b ^= b>>1; b ^= b>>2; b ^= b>>4   # Gray -> binary
+count = b
+t ≈ count * τ                     # modulo the 6.4 s wrap
+```
+Two cameras' decoded counts (mod wrap) differ by their capture-time offset.
+
+## Build & flash
+Same toolchain as `../blink` / `../panel8`:
+```bash
+export PATH="$(echo ~/pico/toolchain/xpack-arm-none-eabi-gcc-*/bin):$PATH"
+export PICO_SDK_PATH=~/pico-sdk
+cp "$PICO_SDK_PATH/external/pico_sdk_import.cmake" .
+mkdir build && cd build && cmake .. && make        # -> timecode.uf2
+# hold BOOTSEL while plugging in USB, then:
+picotool load -x build/timecode.uf2
+```
