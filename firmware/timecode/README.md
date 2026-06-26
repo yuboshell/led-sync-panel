@@ -22,14 +22,16 @@ Identical to the bring-up (Option C, 595 notch-UP) — **no rewiring, just refla
 Plus VCC→3V3, GND→GND, OE→GND, MR→3V3; QB..QH → 240 Ω → LED → GND (QA unused).
 
 ## What it does
-- Each step τ (currently **1 ms**, `STEP_US`), output `gray(count) = count ^ (count>>1)` on
-  QB–QH, with `count` advancing 0→127 and wrapping (period = 128·τ = **128 ms**).
+- Each step τ (currently **0.5 ms**, `STEP_US`), output `gray(count) = count ^ (count>>1)` on
+  QB–QH, with `count` advancing 0→127 and wrapping (period = 128·τ = **64 ms**).
 - Drift-free stepping (`sleep_until` on absolute τ boundaries), so `count × τ` is a faithful
   timestamp within one wrap.
-- **Tune `STEP_US`** to your camera. **50 ms** (20/s) is the easy single-camera regime (many
-  frames per value). **1 ms** (1000/s — the current value) gives sub-frame resolution for
-  **two-camera sync**, but each frame then needs a **fast shutter (≤ ~1 ms)**: τ must stay
-  **≥ the exposure**, else the LEDs smear across several ticks and decode to garbage.
+- **Tune `STEP_US`** to your camera. **50 ms** (20/s) is the easy single-camera regime. Finer
+  τ buys sub-frame resolution for **two-camera sync**: **1 ms** works on a phone, **0.5 ms**
+  (2000/s — the current value) is the practical floor. Each frame then needs a **shutter ≤ τ**
+  (≤ 1/2000 s at 0.5 ms), else the Gray code smears to garbage — and judge a finer-τ run by the
+  per-frame **spread**, not the identical-count fraction (finer resolution lowers that fraction
+  legitimately, as it resolves sub-τ residual the coarser step rounded to zero).
 
 ## Decode (per camera frame)
 ```

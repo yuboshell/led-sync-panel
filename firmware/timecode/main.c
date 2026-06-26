@@ -23,8 +23,8 @@
 #define SCK   18                 // GP18 -> SRCLK (SPI0 SCK)
 #define TX    19                 // GP19 -> SER   (SPI0 TX)
 
-#define STEP_US 1000u            // step interval tau = 1 ms (1000 steps/s) for 2-camera sync. Needs camera shutter <= ~1 ms, else exposure smear.
-#define NSTEPS  128u             // 7-bit count 0..127; wraps every NSTEPS*tau = 128 ms
+#define STEP_US 500u             // step interval tau = 0.5 ms (2000 steps/s). Needs camera shutter <= ~0.5 ms (1/2000 s), else exposure smear.
+#define NSTEPS  128u             // 7-bit count 0..127; wraps every NSTEPS*tau = 64 ms (still > one 30fps frame = 33 ms)
 
 static void put595(uint8_t bits) {
     spi_write_blocking(spi0, &bits, 1);   // MSB-first: bit7->QH ... bit1->QB, bit0->QA (unused)
