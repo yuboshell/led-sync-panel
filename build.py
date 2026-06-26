@@ -789,10 +789,10 @@ P.append('<table>'
          '<tr><td>7</td><td>Pico <b>GP19</b> (pin&nbsp;25) <code>Rh16</code></td><td>595 <b>SER</b> <code>Rf25</code></td><td>serial <b>data</b></td></tr>'
          '<tr><td>8</td><td>Pico <b>GP18</b> (pin&nbsp;24) <code>Rh17</code></td><td>595 <b>SRCLK</b> <code>Rf28</code></td><td>shift <b>clock</b></td></tr>'
          '<tr><td>9</td><td>Pico <b>GP17</b> (pin&nbsp;22) <code>Rh19</code></td><td>595 <b>RCLK</b> <code>Rf27</code></td><td><b>latch</b></td></tr>'
-         '<tr><td>10</td><td>each output <b>QB&ndash;QH</b> <code>Re23&ndash;Re29</code></td><td><code>Lj</code> of that LED&rsquo;s row (jumper across the middle)</td><td>output &rarr; left strip, same row</td></tr>'
-         '<tr><td>11</td><td>per LED row: <b>240&nbsp;&Omega;</b> <code>Lh&rarr;Ld</code>, then <b>LED</b> long&nbsp;lead&nbsp;(+) <code>Lb</code>, short&nbsp;lead&nbsp;(&ndash;) &rarr; <b>L&ndash;</b></td><td>rows 23&ndash;29</td><td>resistor bridges the left gap, LED to ground; long lead is +</td></tr>'
+         '<tr><td>10</td><td>each output <b>QB&ndash;QH</b> <code>Re23&ndash;Re29</code></td><td><code>Lj</code> of its LED&rsquo;s row &mdash; <code>23, 25, &hellip; 35</code></td><td>jumper fans out to the 2-row-spaced LEDs</td></tr>'
+         '<tr><td>11</td><td>per LED row: <b>240&nbsp;&Omega;</b> <code>Lh&rarr;Lc</code> (6 holes), then <b>LED</b> long&nbsp;lead&nbsp;(+) <code>La</code>, short&nbsp;lead&nbsp;(&ndash;) &rarr; <b>L&ndash;</b></td><td>rows 23, 25, &hellip; 35</td><td>resistor spans 6 holes (symmetric); LED straddles 2 holes, cathode to ground</td></tr>'
          '</table>')
-P.append('<p class="k"><b>LED rows</b> (notch-up, so outputs run top&ndash;down): QB&rarr;23, QC&rarr;24, QD&rarr;25, QE&rarr;26, QF&rarr;27, QG&rarr;28, QH&rarr;29. QA&rsquo;s output (<code>Rf24</code>) is left unconnected.</p>')
+P.append('<p class="k"><b>LED rows</b> (notch-up; <b>2-row spacing</b> so the 5&nbsp;mm domes don&rsquo;t touch): QB&rarr;23, QC&rarr;25, QD&rarr;27, QE&rarr;29, QF&rarr;31, QG&rarr;33, QH&rarr;35. The 595&rsquo;s outputs sit on consecutive rows 23&ndash;29, so the output&rarr;LED jumpers <b>fan out</b>. QA&rsquo;s output (<code>Rf24</code>) is left unconnected.</p>')
 P.append('<p class="k"><b>Before you plug in USB &mdash; check:</b> &#9744; 595 <b>notch points UP</b> (VCC <code>Rf23</code>, GND <code>Re30</code>) &middot; '
          '&#9744; the <b>0.1&nbsp;&micro;F cap</b> is across <code>R+&harr;R&ndash;</code> &middot; '
          '&#9744; no jumper shorts <b>+ straight to &ndash;</b> &middot; &#9744; <b>OE&rarr;&ndash;</b> (outputs on) and <b>MR&rarr;+</b> (no reset) &middot; '
