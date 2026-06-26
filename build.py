@@ -173,16 +173,16 @@ def svg_wiring():
     # Bring-up across BOTH MB-104 strips: Pico + 595 on the LEFT strip, 8-LED comb on the RIGHT. Exact holes.
     P=17.0; HOLE=6.0; R0=1; RN=33; LX=120; TY=150
     RED="#dc2626"; BLUE="#2563eb"; HOLEC="#39393c"; GRN="#22c55e"; ORA="#ea580c"; PUR="#7c3aed"; CYN="#0891b2"; TAN="#d6b06a"
-    seq=[("LEFT+","rail"),("LEFT-","rail"),
+    seq=[("L+","rail"),("L-","rail"),
          ("La","s"),("Lb","s"),("Lc","s"),("Ld","s"),("Le","s"),("|L","gap"),("Lf","s"),("Lg","s"),("Lh","s"),("Li","s"),("Lj","s"),
-         ("MIDa+","rail"),("MIDa-","rail"),("MIDb+","rail"),("MIDb-","rail"),
+         ("CL+","rail"),("CL-","rail"),("CR+","rail"),("CR-","rail"),
          ("Ra","s"),("Rb","s"),("Rc","s"),("Rd","s"),("Re","s"),("|R","gap"),("Rf","s"),("Rg","s"),("Rh","s"),("Ri","s"),("Rj","s"),
-         ("RIGHT+","rail"),("RIGHT-","rail")]
+         ("R+","rail"),("R-","rail")]
     X={}; x=LX
     for nm,k in seq:
         if k=="gap": x+=P*0.85; continue
         X[nm]=x; x+=P
-        if nm in ("LEFT-","Lj","MIDb-","Rj"): x+=P*0.55
+        if nm in ("L-","Lj","CR-","Rj"): x+=P*0.55
     GR=x; W=int(GR+30); H=int(TY+(RN-R0)*P+56)
     def cx(c): return X[c]
     def cy(r): return TY+(r-R0)*P
@@ -207,7 +207,7 @@ def svg_wiring():
         txt(bx+12,hy+3,blab,8.5,"#caa83a","start","bold")
     for grp in [("La","Lj"),("Ra","Rj")]:
         rect(cx(grp[0])-8,gtop,(cx(grp[1])-cx(grp[0]))+16,gbot-gtop,5,"#f3f1ea")
-    railtint={"LEFT+":"#f7dede","LEFT-":"#dee5f7","MIDa+":"#f7dede","MIDa-":"#dee5f7","MIDb+":"#f7dede","MIDb-":"#dee5f7","RIGHT+":"#f7dede","RIGHT-":"#dee5f7"}
+    railtint={"L+":"#f7dede","L-":"#dee5f7","CL+":"#f7dede","CL-":"#dee5f7","CR+":"#f7dede","CR-":"#dee5f7","R+":"#f7dede","R-":"#dee5f7"}
     for rl,t in railtint.items():
         rect(cx(rl)-6,gtop,12,gbot-gtop,4,t)
         sc=RED if rl.endswith("+") else BLUE
@@ -218,17 +218,17 @@ def svg_wiring():
     for c in allcols:
         for r in range(R0,RN+1): hole(c,r)
     for c in allcols:
-        lab=c[-1] if (c[0] in "LR" and len(c)==2) else ("+" if c.endswith("+") else "–")
+        lab=c.replace("-","–") if c.endswith(("+","-")) else c[-1]
         cl=RED if c.endswith("+") else (BLUE if c.endswith("-") else "#d6dde5")
-        txt(cx(c),gtop-5,lab,8.5,cl,"middle","bold")
-        if not (c[0] in "LR" and len(c)==2):                 # rails: repeat the +/– polarity at the BOTTOM end too
+        txt(cx(c),gtop-5,lab,6.5 if c.endswith(("+","-")) else 8.5,cl,"middle","bold")
+        if c.endswith(("+","-")):                 # rails: repeat the +/– polarity at the BOTTOM end too
             txt(cx(c),gbot+12,("+" if c.endswith("+") else "–"),8.5,cl,"middle","bold")
-    txt(cx("MIDa+"),gtop-18,"3V3",7,RED,"middle","bold"); txt(cx("MIDa-"),gtop-18,"GND",7,BLUE,"middle","bold")
-    txt(cx("RIGHT-"),gtop-18,"GND",7,BLUE,"middle","bold")
+    txt(cx("CL+"),gtop-18,"3V3",7,RED,"middle","bold"); txt(cx("CL-"),gtop-18,"GND",7,BLUE,"middle","bold")
+    txt(cx("R-"),gtop-18,"GND",7,BLUE,"middle","bold")
     for r in range(R0,RN+1):
         if r==1 or r%5==0:
             txt(LX-26,cy(r)+3,str(r),8,"#cbd5e1","middle")
-            txt(cx("RIGHT-")+16,cy(r)+3,str(r),8,"#cbd5e1","middle")
+            txt(cx("R-")+16,cy(r)+3,str(r),8,"#cbd5e1","middle")
     px1,px2=cx("Lc"),cx("Lh"); py1,py2=cy(1),cy(20)
     rect(px1-8,py1-8,(px2-px1)+16,(py2-py1)+16,6,"#0b6b5e",'opacity="0.92"')
     txt((px1+px2)/2,py1-8+13,"Pico (USB ↑)",8,"#dffaf4","middle","bold")
@@ -250,13 +250,13 @@ def svg_wiring():
             lab={"VCC":"VCC","QA":"QA","SER":"SER","OE":"OE","RCLK":"RCK","SRCLK":"SCK","MR":"MR","QHp":"QH'"}.get(nm,nm)
             txt(cx(c)-7,cy(r)+2.5,lab,5,"#9aa3ad","end")
     # power & signal jumpers — each plugs into a FREE hole of the pin's 5-hole group (never the pin hole), shortest path
-    J("Lj",5,"MIDa+",5,RED); J("Lj",18,"MIDa-",18,BLUE)             # Pico 3V3 / GND -> central rails (free f-j edge hole)
-    J("La",31,"LEFT+",31,RED); J("La",25,"LEFT+",25,RED)           # 595 VCC(Le31), MR(Le25) -> + (left rail, free a-e edge hole)
-    J("La",28,"LEFT-",28,BLUE)                                      # 595 OE(Le28) -> - (left rail)
-    J("Lj",24,"MIDa-",24,BLUE)                                      # 595 GND(8)(Lf24) -> - (central rail)
-    line(cx("LEFT+"),cy(32),cx("MIDa+"),cy(32),RED,1.8)            # tie + bus -> left rail, BELOW the chip (clear)
-    line(cx("LEFT-"),cy(33),cx("MIDa-"),cy(33),BLUE,1.8)          # tie - bus -> left rail
-    line(cx("MIDa-"),cy(33),cx("RIGHT-"),cy(33),BLUE,1.8)         # tie - bus -> right rail for the cathodes
+    J("Lj",5,"CL+",5,RED); J("Lj",18,"CL-",18,BLUE)             # Pico 3V3 / GND -> central rails (free f-j edge hole)
+    J("La",31,"L+",31,RED); J("La",25,"L+",25,RED)           # 595 VCC(Le31), MR(Le25) -> + (left rail, free a-e edge hole)
+    J("La",28,"L-",28,BLUE)                                      # 595 OE(Le28) -> - (left rail)
+    J("Lj",24,"CL-",24,BLUE)                                      # 595 GND(8)(Lf24) -> - (central rail)
+    line(cx("L+"),cy(32),cx("CL+"),cy(32),RED,1.8)            # tie + bus -> left rail, BELOW the chip (clear)
+    line(cx("L-"),cy(33),cx("CL-"),cy(33),BLUE,1.8)          # tie - bus -> left rail
+    line(cx("CL-"),cy(33),cx("R-"),cy(33),BLUE,1.8)         # tie - bus -> right rail for the cathodes
     def sig(tap,r0,arow,dcol,r1,clr):   # route a signal AROUND the chips: down beside the Pico, across the clear gap (rows 21-23), down to the control tap
         x0=cx(tap); xa=cx(dcol); ya=cy(arow)
         line(x0,cy(r0),x0,ya,clr,1.8); line(x0,ya,xa,ya,clr,1.8); line(xa,ya,xa,cy(r1),clr,1.8)
@@ -271,14 +271,14 @@ def svg_wiring():
         J(src,orow,"Ra",lr,TAN,1.7)
         line(cx("Rc"),ay,cx("Rg"),ay,"#9a8050",1.1)
         rect((cx("Rc")+cx("Rg"))/2-7,ay-2.5,14,5,2,TAN,'stroke="#a07d3a" stroke-width="0.5"')
-        ah=cx("Rh"); rk=cx("RIGHT-"); dm=ah+0.6*(rk-ah)
+        ah=cx("Rh"); rk=cx("R-"); dm=ah+0.6*(rk-ah)
         line(ah,ay,dm-4,ay,"#9aa0a6",1.5)
         line(dm+4,ay,rk,ay,"#9aa0a6",1.5)
         s.append(f'<circle cx="{dm:.1f}" cy="{ay:.1f}" r="4.6" fill="{GRN}" stroke="#15803d" stroke-width="0.7"/>')
         hole("Rh",lr,"#2a2a2a"); txt(ah,ay-7,"+",6.5,"#15803d","middle","bold")
         txt(rk,ay-7,"–",6.5,BLUE,"middle","bold")
         txt(dm,ay+10,nm,5,"#9aa0a6","middle")
-    txt((cx("Rc")+cx("RIGHT-"))/2,cy(24)-12,"LEDs: long lead (+) → hole Rh,  short lead (–) → GND rail",6,GRN,"middle","bold")
+    txt((cx("Rc")+cx("R-"))/2,cy(24)-12,"LEDs: long lead (+) → hole Rh,  short lead (–) → GND rail",6,GRN,"middle","bold")
     txt(W/2,26,"Option A — Pico + 595 on the left strip, 8-LED comb on the right",12,"#15171c","middle","bold")
     txt(W/2,43,"595 outputs face right, so each LED sits across from its output. Black = the MB-104 baseplate.",8.5,"#5b6470","middle")
     leg=[("3V3",RED),("GND",BLUE),("SER",PUR),("SRCLK",CYN),("RCLK",ORA),("output→LED",TAN)]
@@ -346,16 +346,16 @@ def svg_wiring_b():
     # so the 3 control wires are short near-horizontal hops. Comb spread out below. No two leads share a hole.
     P=17.0; HOLE=6.0; R0=1; RN=40; LX=120; TY=150
     RED="#dc2626"; BLUE="#2563eb"; HOLEC="#39393c"; GRN="#22c55e"; ORA="#ea580c"; PUR="#7c3aed"; CYN="#0891b2"; TAN="#d6b06a"
-    seq=[("LEFT+","rail"),("LEFT-","rail"),
+    seq=[("L+","rail"),("L-","rail"),
          ("La","s"),("Lb","s"),("Lc","s"),("Ld","s"),("Le","s"),("|L","gap"),("Lf","s"),("Lg","s"),("Lh","s"),("Li","s"),("Lj","s"),
-         ("MIDa+","rail"),("MIDa-","rail"),("MIDb+","rail"),("MIDb-","rail"),
+         ("CL+","rail"),("CL-","rail"),("CR+","rail"),("CR-","rail"),
          ("Ra","s"),("Rb","s"),("Rc","s"),("Rd","s"),("Re","s"),("|R","gap"),("Rf","s"),("Rg","s"),("Rh","s"),("Ri","s"),("Rj","s"),
-         ("RIGHT+","rail"),("RIGHT-","rail")]
+         ("R+","rail"),("R-","rail")]
     X={}; x=LX
     for nm,k in seq:
         if k=="gap": x+=P*0.85; continue
         X[nm]=x; x+=P
-        if nm in ("LEFT-","Lj","MIDb-","Rj"): x+=P*0.55
+        if nm in ("L-","Lj","CR-","Rj"): x+=P*0.55
     GR=x; W=int(GR+30); H=int(TY+(RN-R0)*P+56)
     def cx(c): return X[c]
     def cy(r): return TY+(r-R0)*P
@@ -380,7 +380,7 @@ def svg_wiring_b():
         txt(bx+12,hy+3,blab,8.5,"#caa83a","start","bold")
     for grp in [("La","Lj"),("Ra","Rj")]:
         rect(cx(grp[0])-8,gtop,(cx(grp[1])-cx(grp[0]))+16,gbot-gtop,5,"#f3f1ea")
-    railtint={"LEFT+":"#f7dede","LEFT-":"#dee5f7","MIDa+":"#f7dede","MIDa-":"#dee5f7","MIDb+":"#f7dede","MIDb-":"#dee5f7","RIGHT+":"#f7dede","RIGHT-":"#dee5f7"}
+    railtint={"L+":"#f7dede","L-":"#dee5f7","CL+":"#f7dede","CL-":"#dee5f7","CR+":"#f7dede","CR-":"#dee5f7","R+":"#f7dede","R-":"#dee5f7"}
     for rl,t in railtint.items():
         rect(cx(rl)-6,gtop,12,gbot-gtop,4,t)
         sc=RED if rl.endswith("+") else BLUE
@@ -391,17 +391,17 @@ def svg_wiring_b():
     for c in allcols:
         for r in range(R0,RN+1): hole(c,r)
     for c in allcols:
-        lab=c[-1] if (c[0] in "LR" and len(c)==2) else ("+" if c.endswith("+") else "–")
+        lab=c.replace("-","–") if c.endswith(("+","-")) else c[-1]
         cl=RED if c.endswith("+") else (BLUE if c.endswith("-") else "#d6dde5")
-        txt(cx(c),gtop-5,lab,8.5,cl,"middle","bold")
-        if not (c[0] in "LR" and len(c)==2):                 # rails: repeat the +/– polarity at the BOTTOM end too
+        txt(cx(c),gtop-5,lab,6.5 if c.endswith(("+","-")) else 8.5,cl,"middle","bold")
+        if c.endswith(("+","-")):                 # rails: repeat the +/– polarity at the BOTTOM end too
             txt(cx(c),gbot+12,("+" if c.endswith("+") else "–"),8.5,cl,"middle","bold")
-    txt(cx("MIDa+"),gtop-18,"3V3",7,RED,"middle","bold"); txt(cx("MIDa-"),gtop-18,"GND",7,BLUE,"middle","bold")
-    txt(cx("MIDb+"),gtop-18,"3V3",7,RED,"middle","bold"); txt(cx("MIDb-"),gtop-18,"GND",7,BLUE,"middle","bold")
+    txt(cx("CL+"),gtop-18,"3V3",7,RED,"middle","bold"); txt(cx("CL-"),gtop-18,"GND",7,BLUE,"middle","bold")
+    txt(cx("CR+"),gtop-18,"3V3",7,RED,"middle","bold"); txt(cx("CR-"),gtop-18,"GND",7,BLUE,"middle","bold")
     for r in range(R0,RN+1):
         if r==1 or r%5==0:
             txt(LX-26,cy(r)+3,str(r),8,"#cbd5e1","middle")
-            txt(cx("RIGHT-")+16,cy(r)+3,str(r),8,"#cbd5e1","middle")
+            txt(cx("R-")+16,cy(r)+3,str(r),8,"#cbd5e1","middle")
     # Pico — left strip (unchanged)
     px1,px2=cx("Lc"),cx("Lh"); py1,py2=cy(1),cy(20)
     rect(px1-8,py1-8,(px2-px1)+16,(py2-py1)+16,6,"#0b6b5e",'opacity="0.92"')
@@ -422,12 +422,12 @@ def svg_wiring_b():
             lab={"VCC":"VCC","QA":"QA","SER":"SER","OE":"OE","RCLK":"RCK","SRCLK":"SCK","MR":"MR","QHp":"QH'"}.get(nm,nm)
             txt(cx(c)-7,cy(r)+2.5,lab,5,"#9aa3ad","end")
     # ---- power ----
-    J("Lj",5,"MIDa+",5,RED); J("Lj",18,"MIDa-",18,BLUE)
-    line(cx("MIDa+"),cy(3),cx("MIDb+"),cy(3),RED,1.8)
-    line(cx("MIDa-"),cy(2),cx("MIDb-"),cy(2),BLUE,1.8)
-    J("Ra",21,"MIDb+",21,RED); J("Ra",15,"MIDb+",15,RED)     # VCC(Re21), MR(Re15) -> + rail
-    J("Ra",18,"MIDb-",18,BLUE)                                # OE(Re18) -> - rail
-    J("Rg",14,"RIGHT-",14,BLUE); line(cx("RIGHT-"),cy(22),cx("MIDb-"),cy(22),BLUE,1.6)  # GND(8)(Rf14) -> right rail, tied to - bus
+    J("Lj",5,"CL+",5,RED); J("Lj",18,"CL-",18,BLUE)
+    line(cx("CL+"),cy(3),cx("CR+"),cy(3),RED,1.8)
+    line(cx("CL-"),cy(2),cx("CR-"),cy(2),BLUE,1.8)
+    J("Ra",21,"CR+",21,RED); J("Ra",15,"CR+",15,RED)     # VCC(Re21), MR(Re15) -> + rail
+    J("Ra",18,"CR-",18,BLUE)                                # OE(Re18) -> - rail
+    J("Rg",14,"R-",14,BLUE); line(cx("R-"),cy(22),cx("CR-"),cy(22),BLUE,1.6)  # GND(8)(Rf14) -> right rail, tied to - bus
     # ---- 3 control wires: Pico (GP) -> 595 control (Re). Short, near-horizontal. ----
     J("Li",16,"Rd",19,PUR)   # GP19 -> SER (Re19)
     J("Li",17,"Rd",16,CYN)   # GP18 -> SRCLK (Re16)
@@ -442,7 +442,7 @@ def svg_wiring_b():
         line(rx1,ry1,rx2,ry2,"#9a8050",1.4)        # ONE long resistor reaches from the output straight down to the LED (leads do the spanning)
         bx1=rx1+0.34*(rx2-rx1); by1=ry1+0.34*(ry2-ry1); bx2=rx1+0.66*(rx2-rx1); by2=ry1+0.66*(ry2-ry1)
         s.append(f'<line x1="{bx1:.1f}" y1="{by1:.1f}" x2="{bx2:.1f}" y2="{by2:.1f}" stroke="{TAN}" stroke-width="4.5" stroke-linecap="round"/>')  # resistor body
-        an=cx("Rb"); ka=cx("MIDb-"); dm=an+0.5*(ka-an)
+        an=cx("Rb"); ka=cx("CR-"); dm=an+0.5*(ka-an)
         line(an,ay,dm-4,ay,"#9aa0a6",1.5); line(dm+4,ay,ka,ay,"#9aa0a6",1.5)
         s.append(f'<circle cx="{dm:.1f}" cy="{ay:.1f}" r="4.6" fill="{GRN}" stroke="#15803d" stroke-width="0.7"/>')
         txt(an,ay-7,"+",6.5,"#15803d","middle","bold"); txt(ka,ay-7,"–",6.5,BLUE,"middle","bold")
@@ -461,16 +461,16 @@ def svg_wiring_c():
     # the roomy middle to the comb on the LEFT strip. (A rotated chip is NOT a mirror of A: the pin order flips.)
     P=17.0; HOLE=6.0; R0=1; RN=40; LX=120; TY=150
     RED="#dc2626"; BLUE="#2563eb"; HOLEC="#39393c"; GRN="#22c55e"; ORA="#ea580c"; PUR="#7c3aed"; CYN="#0891b2"; TAN="#d6b06a"
-    seq=[("LEFT+","rail"),("LEFT-","rail"),
+    seq=[("L+","rail"),("L-","rail"),
          ("La","s"),("Lb","s"),("Lc","s"),("Ld","s"),("Le","s"),("|L","gap"),("Lf","s"),("Lg","s"),("Lh","s"),("Li","s"),("Lj","s"),
-         ("MIDa+","rail"),("MIDa-","rail"),("MIDb+","rail"),("MIDb-","rail"),
+         ("CL+","rail"),("CL-","rail"),("CR+","rail"),("CR-","rail"),
          ("Ra","s"),("Rb","s"),("Rc","s"),("Rd","s"),("Re","s"),("|R","gap"),("Rf","s"),("Rg","s"),("Rh","s"),("Ri","s"),("Rj","s"),
-         ("RIGHT+","rail"),("RIGHT-","rail")]
+         ("R+","rail"),("R-","rail")]
     X={}; x=LX
     for nm,k in seq:
         if k=="gap": x+=P*0.85; continue
         X[nm]=x; x+=P
-        if nm in ("LEFT-","Lj","MIDb-","Rj"): x+=P*0.55
+        if nm in ("L-","Lj","CR-","Rj"): x+=P*0.55
     GR=x; W=int(GR+30); H=int(TY+(RN-R0)*P+56)
     def cx(c): return X[c]
     def cy(r): return TY+(r-R0)*P
@@ -495,7 +495,7 @@ def svg_wiring_c():
         txt(bx+12,hy+3,blab,8.5,"#caa83a","start","bold")
     for grp in [("La","Lj"),("Ra","Rj")]:
         rect(cx(grp[0])-8,gtop,(cx(grp[1])-cx(grp[0]))+16,gbot-gtop,5,"#f3f1ea")
-    railtint={"LEFT+":"#f7dede","LEFT-":"#dee5f7","MIDa+":"#f7dede","MIDa-":"#dee5f7","MIDb+":"#f7dede","MIDb-":"#dee5f7","RIGHT+":"#f7dede","RIGHT-":"#dee5f7"}
+    railtint={"L+":"#f7dede","L-":"#dee5f7","CL+":"#f7dede","CL-":"#dee5f7","CR+":"#f7dede","CR-":"#dee5f7","R+":"#f7dede","R-":"#dee5f7"}
     for rl,t in railtint.items():
         rect(cx(rl)-6,gtop,12,gbot-gtop,4,t)
         sc=RED if rl.endswith("+") else BLUE
@@ -506,17 +506,17 @@ def svg_wiring_c():
     for c in allcols:
         for r in range(R0,RN+1): hole(c,r)
     for c in allcols:
-        lab=c[-1] if (c[0] in "LR" and len(c)==2) else ("+" if c.endswith("+") else "–")
+        lab=c.replace("-","–") if c.endswith(("+","-")) else c[-1]
         cl=RED if c.endswith("+") else (BLUE if c.endswith("-") else "#d6dde5")
-        txt(cx(c),gtop-5,lab,8.5,cl,"middle","bold")
-        if not (c[0] in "LR" and len(c)==2):
+        txt(cx(c),gtop-5,lab,6.5 if c.endswith(("+","-")) else 8.5,cl,"middle","bold")
+        if c.endswith(("+","-")):
             txt(cx(c),gbot+12,("+" if c.endswith("+") else "–"),8.5,cl,"middle","bold")
-    txt(cx("MIDa+"),gtop-18,"3V3",7,RED,"middle","bold"); txt(cx("MIDa-"),gtop-18,"GND",7,BLUE,"middle","bold")
-    txt(cx("MIDb+"),gtop-18,"3V3",7,RED,"middle","bold"); txt(cx("MIDb-"),gtop-18,"GND",7,BLUE,"middle","bold")
+    txt(cx("CL+"),gtop-18,"3V3",7,RED,"middle","bold"); txt(cx("CL-"),gtop-18,"GND",7,BLUE,"middle","bold")
+    txt(cx("CR+"),gtop-18,"3V3",7,RED,"middle","bold"); txt(cx("CR-"),gtop-18,"GND",7,BLUE,"middle","bold")
     for r in range(R0,RN+1):
         if r==1 or r%5==0:
             txt(LX-26,cy(r)+3,str(r),8,"#cbd5e1","middle")
-            txt(cx("RIGHT-")+16,cy(r)+3,str(r),8,"#cbd5e1","middle")
+            txt(cx("R-")+16,cy(r)+3,str(r),8,"#cbd5e1","middle")
     # ---- Pico — RIGHT strip ----
     px1,px2=cx("Rc"),cx("Rh"); py1,py2=cy(1),cy(20)   # Pico: 6 cols wide (3 a-e + 3 f-j), 20 pins/side -> rows 1-20
     rect(px1-8,py1-8,(px2-px1)+16,(py2-py1)+16,6,"#0b6b5e",'opacity="0.92"')
@@ -544,24 +544,24 @@ def svg_wiring_c():
     J("Ri",16,"Rg",25,PUR)   # GP19 (pin25, Rh16) -> SER. jumper in free hole Ri, NOT Rh (Pico's pin)
     J("Ri",17,"Rg",28,CYN)   # GP18 (pin24, Rh17) -> SRCLK (free hole Ri)
     J("Ri",19,"Rg",27,ORA)   # GP17 (pin22, Rh19) -> RCLK (free hole Ri)
-    # ---- power: 3V3 bus = RIGHT+ ; GND bus = MIDb- (tied to LEFT-, the LED rail) ----
-    J("Ri",5,"RIGHT+",5,RED)                                  # Pico 3V3 -> RIGHT+ (jumper in free hole Ri, NOT the Rh pin)
-    J("Rj",23,"RIGHT+",23,RED); J("Rj",29,"RIGHT+",29,RED)   # 595 VCC(Rf23), MR(Rf29) -> RIGHT+ (tap Rj, clear of control)
-    J("Ra",18,"MIDb-",18,BLUE)                               # Pico GND (pin18, Rc18) -> MIDb-
-    J("Ra",30,"MIDb-",30,BLUE)                               # 595 GND (Re30, a-e) -> MIDb-
-    J("Rj",26,"RIGHT-",26,BLUE)                              # 595 OE (Rf26, f-j) -> RIGHT- (tied low). FIX: was tapping Ra26 = QE's node
-    line(cx("LEFT-"),cy(2),cx("MIDb-"),cy(2),BLUE,1.8)       # GND tie: LED rail (LEFT-) <-> MIDb-
-    line(cx("MIDa-"),cy(3),cx("MIDb-"),cy(3),BLUE,1.6)
-    line(cx("MIDb-"),cy(36),cx("RIGHT-"),cy(36),BLUE,1.6)    # GND tie: RIGHT- (OE) <-> MIDb-
-    cyc=cy(25); xpp=cx("RIGHT+"); xmm=cx("RIGHT-"); xcc=(xpp+xmm)/2   # 0.1µF decoupling cap across the 595's supply (RIGHT+ 3V3 <-> RIGHT- GND), right at the chip
+    # ---- power: 3V3 bus = R+ ; GND bus = CR- (tied to L-, the LED rail) ----
+    J("Ri",5,"R+",5,RED)                                  # Pico 3V3 -> R+ (jumper in free hole Ri, NOT the Rh pin)
+    J("Rj",23,"R+",23,RED); J("Rj",29,"R+",29,RED)   # 595 VCC(Rf23), MR(Rf29) -> R+ (tap Rj, clear of control)
+    J("Ra",18,"CR-",18,BLUE)                               # Pico GND (pin18, Rc18) -> CR-
+    J("Ra",30,"CR-",30,BLUE)                               # 595 GND (Re30, a-e) -> CR-
+    J("Rj",26,"R-",26,BLUE)                              # 595 OE (Rf26, f-j) -> R- (tied low). FIX: was tapping Ra26 = QE's node
+    line(cx("L-"),cy(2),cx("CR-"),cy(2),BLUE,1.8)       # GND tie: LED rail (L-) <-> CR-
+    line(cx("CL-"),cy(3),cx("CR-"),cy(3),BLUE,1.6)
+    line(cx("CR-"),cy(36),cx("R-"),cy(36),BLUE,1.6)    # GND tie: R- (OE) <-> CR-
+    cyc=cy(25); xpp=cx("R+"); xmm=cx("R-"); xcc=(xpp+xmm)/2   # 0.1µF decoupling cap across the 595's supply (R+ 3V3 <-> R- GND), right at the chip
     line(xpp,cyc,xcc-3.5,cyc,"#9aa0a6",1.5); line(xcc+3.5,cyc,xmm,cyc,"#9aa0a6",1.5)
     s.append(f'<ellipse cx="{xcc:.1f}" cy="{cyc:.1f}" rx="4.5" ry="6.5" fill="#d8cdb0" stroke="#a89a78" stroke-width="0.8"/>')
     txt(xcc,cyc-11,"0.1µF",4.5,"#cbd5e1","middle")
     # ---- 7 outputs QB-QH -> one clean horizontal LED row on the LEFT strip. QA (pin 15) left unused -> NO bridging wire. ----
-    def comb_led(ay,nm):                                      # resistor (bridges left gap) + LED -> LEFT- rail, one slot
+    def comb_led(ay,nm):                                      # resistor (bridges left gap) + LED -> L- rail, one slot
         line(cx("Ld"),ay,cx("Lh"),ay,"#9a8050",1.1)
         rect((cx("Ld")+cx("Lh"))/2-7,ay-2.5,14,5,2,TAN,'stroke="#a07d3a" stroke-width="0.5"')
-        an=cx("Lb"); ka=cx("LEFT-"); dm=(an+ka)/2
+        an=cx("Lb"); ka=cx("L-"); dm=(an+ka)/2
         line(an,ay,dm+4,ay,"#9aa0a6",1.5); line(dm-4,ay,ka,ay,"#9aa0a6",1.5)
         s.append(f'<circle cx="{dm:.1f}" cy="{ay:.1f}" r="4.6" fill="{GRN}" stroke="#15803d" stroke-width="0.7"/>')
         txt(an,ay-7,"+",6.5,"#15803d","middle","bold"); txt(ka,ay-7,"–",6.5,BLUE,"middle","bold"); txt(dm,ay+9,nm,5,"#7a818b","middle")
@@ -773,26 +773,26 @@ P.append(f'<figure>{DIAGRAMS["wiring_c"]}<figcaption><b>Figure 1. Bring-up wirin
          'short same-side wires (data&nbsp;SER, clock&nbsp;SRCLK, latch&nbsp;RCLK); outputs <b>QB&ndash;QH</b> each drive one green LED through a '
          '240&nbsp;&Omega; resistor to ground, fanning left across the centre. <b>QA is left unused</b> (the lone output on the chip&rsquo;s '
          'far side). Holes use the <b>L&hellip;&nbsp;/&nbsp;R&hellip;</b> convention (Left or Right strip, column&nbsp;a&ndash;j, row&nbsp;1&ndash;63); each chip pin is tagged <b>name&middot;pin#</b> (its datasheet number) for checking against the Pico and 595 pinouts.</figcaption></figure>')
-P.append('<p class="k"><b>Connect it in this order</b> &mdash; USB unplugged the whole time. Seat both chips on the <b>right strip</b>, across its centre channel: the <b>Pico up top</b> (cols&nbsp;c&ndash;h, rows&nbsp;1&ndash;20), and the <b>595 just below it, notch / pin-1 dot pointing UP</b> (toward the Pico) so <b>VCC lands at <code>Rf23</code> and GND at <code>Re30</code></b>. The <b>right rails carry power</b> &mdash; <b>RIGHT+&nbsp;=&nbsp;3.3&nbsp;V</b>, <b>RIGHT&ndash;&nbsp;=&nbsp;GND</b>; add the <b>0.1&nbsp;&micro;F cap across <code>RIGHT+&harr;RIGHT&ndash;</code></b> right by the chip. Ground also runs on the centre rail <code>MIDb&ndash;</code>, tied across to <code>RIGHT&ndash;</code> and out to the <b>left rail <code>LEFT&ndash;</code></b> the LED cathodes sit on. Every '
+P.append('<p class="k"><b>Connect it in this order</b> &mdash; USB unplugged the whole time. Seat both chips on the <b>right strip</b>, across its centre channel: the <b>Pico up top</b> (cols&nbsp;c&ndash;h, rows&nbsp;1&ndash;20), and the <b>595 just below it, notch / pin-1 dot pointing UP</b> (toward the Pico) so <b>VCC lands at <code>Rf23</code> and GND at <code>Re30</code></b>. The <b>right rails carry power</b> &mdash; <b>R+&nbsp;=&nbsp;3.3&nbsp;V</b>, <b>R&ndash;&nbsp;=&nbsp;GND</b>; add the <b>0.1&nbsp;&micro;F cap across <code>R+&harr;R&ndash;</code></b> right by the chip. Ground also runs on the centre rail <code>CR&ndash;</code>, tied across to <code>R&ndash;</code> and out to the <b>left rail <code>L&ndash;</code></b> the LED cathodes sit on. Every '
          '<b>LED has two leads in two holes</b>: the <b>long lead (anode,&nbsp;+)</b> into the resistor&rsquo;s hole, the '
-         '<b>short lead (cathode,&nbsp;&ndash;)</b> into the adjacent <code>LEFT&ndash;</code> rail.</p>')
+         '<b>short lead (cathode,&nbsp;&ndash;)</b> into the adjacent <code>L&ndash;</code> rail.</p>')
 P.append('<table>'
          '<tr><th>#</th><th>From (hole)</th><th>To (hole)</th><th>Why</th></tr>'
-         '<tr><td>1</td><td>Pico <b>3V3</b> (pin&nbsp;36) at <code>Rh5</code></td><td><b>RIGHT+</b> rail (3.3&nbsp;V bus)</td><td>3.3&nbsp;V for the whole board</td></tr>'
-         '<tr><td>2</td><td>Pico <b>GND</b> (pin&nbsp;18) at <code>Rc18</code></td><td><b>MIDb&ndash;</b> rail (ground bus)</td><td>common ground</td></tr>'
-         '<tr><td>3</td><td><b>rail ties</b></td><td><code>MIDb&ndash;&harr;LEFT&ndash;</code>, <code>MIDb&ndash;&harr;RIGHT&ndash;</code>, <code>MIDb&ndash;&harr;MIDa&ndash;</code></td><td>ground out to the LED rail (LEFT&ndash;) and the chip&rsquo;s right rail (RIGHT&ndash;)</td></tr>'
-         '<tr><td>4</td><td>595 <b>VCC</b> <code>Rf23</code>, <b>MR</b> <code>Rf29</code></td><td><b>RIGHT+</b> rail</td><td>power the chip; MR high = never reset</td></tr>'
-         '<tr><td>5</td><td>595 <b>GND&nbsp;(8)</b> <code>Re30</code> ; <b>OE</b> <code>Rf26</code></td><td><code>MIDb&ndash;</code> ; <b>RIGHT&ndash;</b></td><td>ground the chip; OE low = outputs on</td></tr>'
-         '<tr><td>6</td><td><b>0.1&nbsp;&micro;F cap</b></td><td><code>RIGHT+&harr;RIGHT&ndash;</code> by the chip</td><td>decouple VCC</td></tr>'
+         '<tr><td>1</td><td>Pico <b>3V3</b> (pin&nbsp;36) at <code>Rh5</code></td><td><b>R+</b> rail (3.3&nbsp;V bus)</td><td>3.3&nbsp;V for the whole board</td></tr>'
+         '<tr><td>2</td><td>Pico <b>GND</b> (pin&nbsp;18) at <code>Rc18</code></td><td><b>CR&ndash;</b> rail (ground bus)</td><td>common ground</td></tr>'
+         '<tr><td>3</td><td><b>rail ties</b></td><td><code>CR&ndash;&harr;L&ndash;</code>, <code>CR&ndash;&harr;R&ndash;</code>, <code>CR&ndash;&harr;CL&ndash;</code></td><td>ground out to the LED rail (L&ndash;) and the chip&rsquo;s right rail (R&ndash;)</td></tr>'
+         '<tr><td>4</td><td>595 <b>VCC</b> <code>Rf23</code>, <b>MR</b> <code>Rf29</code></td><td><b>R+</b> rail</td><td>power the chip; MR high = never reset</td></tr>'
+         '<tr><td>5</td><td>595 <b>GND&nbsp;(8)</b> <code>Re30</code> ; <b>OE</b> <code>Rf26</code></td><td><code>CR&ndash;</code> ; <b>R&ndash;</b></td><td>ground the chip; OE low = outputs on</td></tr>'
+         '<tr><td>6</td><td><b>0.1&nbsp;&micro;F cap</b></td><td><code>R+&harr;R&ndash;</code> by the chip</td><td>decouple VCC</td></tr>'
          '<tr><td>7</td><td>Pico <b>GP19</b> (pin&nbsp;25) <code>Rh16</code></td><td>595 <b>SER</b> <code>Rf25</code></td><td>serial <b>data</b></td></tr>'
          '<tr><td>8</td><td>Pico <b>GP18</b> (pin&nbsp;24) <code>Rh17</code></td><td>595 <b>SRCLK</b> <code>Rf28</code></td><td>shift <b>clock</b></td></tr>'
          '<tr><td>9</td><td>Pico <b>GP17</b> (pin&nbsp;22) <code>Rh19</code></td><td>595 <b>RCLK</b> <code>Rf27</code></td><td><b>latch</b></td></tr>'
          '<tr><td>10</td><td>each output <b>QB&ndash;QH</b> <code>Re23&ndash;Re29</code></td><td><code>Lj</code> of that LED&rsquo;s row (jumper across the middle)</td><td>output &rarr; left strip, same row</td></tr>'
-         '<tr><td>11</td><td>per LED row: <b>240&nbsp;&Omega;</b> <code>Lh&rarr;Ld</code>, then <b>LED</b> long&nbsp;lead&nbsp;(+) <code>Lb</code>, short&nbsp;lead&nbsp;(&ndash;) &rarr; <b>LEFT&ndash;</b></td><td>rows 23&ndash;29</td><td>resistor bridges the left gap, LED to ground; long lead is +</td></tr>'
+         '<tr><td>11</td><td>per LED row: <b>240&nbsp;&Omega;</b> <code>Lh&rarr;Ld</code>, then <b>LED</b> long&nbsp;lead&nbsp;(+) <code>Lb</code>, short&nbsp;lead&nbsp;(&ndash;) &rarr; <b>L&ndash;</b></td><td>rows 23&ndash;29</td><td>resistor bridges the left gap, LED to ground; long lead is +</td></tr>'
          '</table>')
 P.append('<p class="k"><b>LED rows</b> (notch-up, so outputs run top&ndash;down): QB&rarr;23, QC&rarr;24, QD&rarr;25, QE&rarr;26, QF&rarr;27, QG&rarr;28, QH&rarr;29. QA&rsquo;s output (<code>Rf24</code>) is left unconnected.</p>')
 P.append('<p class="k"><b>Before you plug in USB &mdash; check:</b> &#9744; 595 <b>notch points UP</b> (VCC <code>Rf23</code>, GND <code>Re30</code>) &middot; '
-         '&#9744; the <b>0.1&nbsp;&micro;F cap</b> is across <code>RIGHT+&harr;RIGHT&ndash;</code> &middot; '
+         '&#9744; the <b>0.1&nbsp;&micro;F cap</b> is across <code>R+&harr;R&ndash;</code> &middot; '
          '&#9744; no jumper shorts <b>+ straight to &ndash;</b> &middot; &#9744; <b>OE&rarr;&ndash;</b> (outputs on) and <b>MR&rarr;+</b> (no reset) &middot; '
          '&#9744; every LED&rsquo;s <b>long lead = +</b> (toward its resistor) &middot; &#9744; each lead in its own hole. Then plug in USB and run the test firmware.</p>')
 P.append('<p class="k"><b>Reading the diagram.</b> A <b>line is a jumper you add</b>; the <b>rails are inherent buses</b> (shown by the red/blue tint, not a line) &mdash; you never wire <i>along</i> a rail, you just tap a free hole. '
