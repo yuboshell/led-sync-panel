@@ -46,6 +46,16 @@ It writes each camera's `*_leds.png` (check localization) and prints the offset,
 per-frame spread, and the **identical-count fraction** — the confidence signal: a wrong
 frame alignment decodes the same count only by chance, never ~always.
 
+Two extra modes:
+
+- **`--windows SEC`** — also report the offset per `SEC`-second window. A constant value
+  across windows is a *fixed* offset (e.g. rolling shutter); a trend is a *clock drift*.
+  (The window-to-window stability is robust even where the absolute offset aliases at
+  fine τ; the per-window value still inherits the alignment's identical-count confidence.)
+- **`--montage out.png`** — write a decode-audit grid: sample frames with each camera's
+  LED crop, the **raw on/off Gray bits read from the image**, and the decoded count, so a
+  borderline light/dark LED can be checked against the picture.
+
 ### Verified run (2026-06-26, 2 cameras of the 11×Pixel rig, 4K30)
 Two Pixel phones filming the panel (`firmware/timecode`, τ = 1 ms):
 ```bash

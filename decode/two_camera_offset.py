@@ -24,7 +24,9 @@ Lessons baked in (the hard-won ones from the first real two-camera run):
 * Resolution is one tau per frame, but averaging many frames pins the mean below tau.
 
 Options: --leds N (7) - --tau-us US (1000) - --fps F (30) - --scale W (500) -
---start S --dur D (trim) - --centers-a/-b "x0,x1,..." --row-a/-b Y (manual localize).
+--start S --dur D (trim) - --centers-a/-b "x0,x1,..." --row-a/-b Y (manual localize) -
+--windows SEC (offset per time window: stable vs drifting) -
+--montage PNG (decode-audit grid: LED crop + raw Gray bits + count).
 
 Requires ffmpeg on PATH, plus numpy + pillow.
 """
@@ -54,8 +56,52 @@ def wrap(d, n):
     return (d + n // 2) % n - n // 2
 
 
+def gray_str(onoff, i):
+    """The on/off code read from frame i (LED0..LEDk-1, left-to-right)."""
+    return "".join(str(int(b)) for b in onoff[i])
+
+
+def build_montage(path, cntA, LA, onoffA, cntB, LB, onoffB, s, i0, i1, n_cells, tau_ms, mask, dispw=240):
+    """Decode-audit montage: sample frames showing both cameras' LED crop + the raw Gray
+    bits read from the image + the decoded count (+ per-pair offset). Lets a borderline
+    light/dark LED be checked against the image. Pairing uses the cross-correlation
+    alignment, so the per-pair offset inherits that confidence; the Gray bits/count are a
+    per-camera audit and are valid regardless."""
+    def crop_img(L, i):
+        im = Image.fromarray(np.clip(L[i] * 2.4 + 8, 0, 255).astype("uint8")).convert("RGB")
+        return im.resize((dispw, max(1, int(round(im.height * dispw / im.width)))))
+
+    idxs = [int(round(x)) for x in np.linspace(i0, i1 - 1, min(n_cells, i1 - i0))]
+    cells = []
+    for i in idxs:
+        j = i - s
+        ca, cb = int(cntA[i]), int(cntB[j])
+        d = int(wrap(np.array([ca - cb]), mask + 1)[0])
+        a_im, b_im = crop_img(LA, i), crop_img(LB, j)
+        lh = 18
+        cell = Image.new("RGB", (dispw, a_im.height + b_im.height + 2 * lh), (20, 20, 20))
+        dr = ImageDraw.Draw(cell)
+        y = 0
+        cell.paste(a_im, (0, y)); y += a_im.height
+        dr.text((3, y + 4), f"A {gray_str(onoffA, i)} cnt {ca}", fill=(220, 220, 220)); y += lh
+        cell.paste(b_im, (0, y)); y += b_im.height
+        col = (120, 220, 120) if d == 0 else (255, 185, 70)
+        dr.text((3, y + 4), f"B {gray_str(onoffB, j)} cnt {cb}  {d * tau_ms:+.1f}ms", fill=col)
+        cells.append(cell)
+
+    cols = min(5, len(cells))
+    rows = (len(cells) + cols - 1) // cols
+    cw, chh, pad = cells[0].width, max(c.height for c in cells), 6
+    grid = Image.new("RGB", (cols * (cw + pad) + pad, rows * (chh + pad) + pad), (255, 255, 255))
+    for k, c in enumerate(cells):
+        r, cc = divmod(k, cols)
+        grid.paste(c, (pad + cc * (cw + pad), pad + r * (chh + pad)))
+    grid.save(path)
+    print(f"montage ({len(cells)} frames, Gray bits + count) -> {path}")
+
+
 def decode_counts(video, crop, a, centers, row, label):
-    """Decode the per-frame Gray count for one video. Returns (counts, rate, jitter)."""
+    """Decode one video. Returns (counts, mask, frames_L, onoff_bits)."""
     tmp = tempfile.mkdtemp(prefix="tc2_")
     frames = extract_frames(video, tmp, crop, a.scale, a.fps, a.start, a.dur)
     if not frames:
@@ -101,7 +147,7 @@ def decode_counts(video, crop, a, centers, row, label):
     rate = float(np.median(dc))
     jitter = float(np.std(wrap(dc - np.median(dc), mask + 1)))
     print(f"[{label}] decode: {rate:.0f} counts/frame (expect ~{expect:.0f})  jitter std={jitter:.2f}")
-    return cnt, mask
+    return cnt, mask, L, onoff
 
 
 def main():
@@ -122,12 +168,18 @@ def main():
     p.add_argument("--centers-b", help="comma-separated x centres for cam B")
     p.add_argument("--row-b", type=int)
     p.add_argument("--max-shift", type=int, default=60, help="frame-alignment search range")
+    p.add_argument("--windows", type=float, default=None, metavar="SEC",
+                   help="also report the offset per SEC-second window (stable vs drifting)")
+    p.add_argument("--montage", default=None, metavar="PNG",
+                   help="write a decode-audit montage (sample frames: LED crop + Gray bits + count)")
+    p.add_argument("--montage-n", type=int, default=12, dest="montage_n",
+                   help="number of frames in the montage (default 12)")
     a = p.parse_args()
 
     ca = [int(x) for x in a.centers_a.split(",")] if a.centers_a else None
     cb = [int(x) for x in a.centers_b.split(",")] if a.centers_b else None
-    cntA, mask = decode_counts(a.video_a, a.crop_a, a, ca, a.row_a, "A")
-    cntB, _ = decode_counts(a.video_b, a.crop_b, a, cb, a.row_b, "B")
+    cntA, mask, LA, onoffA = decode_counts(a.video_a, a.crop_a, a, ca, a.row_a, "A")
+    cntB, _, LB, onoffB = decode_counts(a.video_b, a.crop_b, a, cb, a.row_b, "B")
 
     n = mask + 1
     tau_ms = a.tau_us / 1000.0
@@ -165,6 +217,27 @@ def main():
         print("=> NO clean simultaneous alignment -- check --crop/--centers/--tau-us/--fps, "
               "or the cameras are not well synced.")
     print(f"sign: +ve => cam A captures later than cam B.")
+
+    if a.windows:
+        wf = max(1, int(round(a.windows * a.fps)))
+        print(f"\n-- offset per {a.windows:g}-second window (a constant value across windows "
+              f"= a fixed offset; a trend = clock drift) --")
+        meds = []
+        for w in range(0, len(d), wf):
+            seg = d[w:w + wf]
+            if len(seg) < 5:
+                continue
+            m = float(np.median(seg)) * tau_ms
+            meds.append(m)
+            print(f"  {w / a.fps:5.0f}-{(w + len(seg)) / a.fps:<5.0f}s  n={len(seg):4d}  {m:+.2f} ms")
+        if meds:
+            sprd = max(meds) - min(meds)
+            print(f"  window spread {sprd:.2f} ms -> "
+                  f"{'STABLE (fixed offset)' if sprd <= 1.0 else 'DRIFTING (clock skew?)'}")
+
+    if a.montage:
+        build_montage(a.montage, cntA, LA, onoffA, cntB, LB, onoffB, s, i0, i1,
+                      a.montage_n, tau_ms, mask)
 
 
 if __name__ == "__main__":
