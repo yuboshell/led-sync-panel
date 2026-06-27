@@ -720,9 +720,10 @@ def card(img, name, price, role, href, ours=None):
             f'<div class="role">{role}</div>{ours_html}</div>')
 
 P = []  # page body parts
-P.append('<h1>Multi-camera sync evaluation: a large flat LED time-code panel</h1>')
-P.append('<div class="meta">DIY design plan &middot; updated 2026-06-17 &middot; working draft &middot; '
-         'step-time 200&nbsp;µs, driver 74HC595, sweep encoding (Gray-bar upgrade), 2-camera same-row bring-up (sim-validated) &middot; 11&times;Pixel&nbsp;7 / Argus rig</div>')
+P.append('<h1>LED Timecode Panel</h1>')
+P.append('<p style="font-size:18px;color:#475569;font-weight:500;margin:-4px 0 12px">For measuring inter-camera capture sync.</p>')
+P.append('<div class="meta">DIY design + build log &middot; updated 2026-06-26 &middot; 11&times;Pixel&nbsp;7 / Argus rig &middot; '
+         '74HC595 driver, 7-bit Gray timecode (0.5&nbsp;ms step) &middot; hardware-verified end to end &mdash; 2-camera offset measured (cameras synced to &lt;&nbsp;1&nbsp;ms)</div>')
 P.append('<p class="k"><b>Reader&rsquo;s map:</b> <b>build guide first</b> (wire the first light-up, just below) &middot; '
          'then &sect;1 what this tool is for &middot; &sect;2 the order list &middot; &sect;3 the driver choice + exact parts &middot; '
          '&sect;4&ndash;&sect;9 the <b>archived</b> full-panel design.</p>')
@@ -1139,7 +1140,7 @@ P.append('<ul>'
 html = ("<!doctype html><html lang='en'><head><meta charset='utf-8'>"
         "<base target='_blank'>"
         "<meta name='viewport' content='width=device-width,initial-scale=1'>"
-        "<title>LED sync panel — design plan</title>"
+        "<title>LED Timecode Panel — design + build log</title>"
         f"<style>{CSS}</style></head><body>{''.join(P)}</body></html>")
 
 with open(OUT, "w", encoding="utf-8") as f:
