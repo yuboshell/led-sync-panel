@@ -28,7 +28,7 @@ def txt(x, y, s, size=13, fill=INK, anchor="start", weight="normal"):
 # ---------- Diagram 1: geometry (Option C) ----------
 def svg_geometry():
     px, py = 285, 165
-    s  = [txt(165, 70, "Large flat LED time-code panel", 13, INK, "middle", "bold")]
+    s  = [txt(165, 70, "Large LED timecode panel", 13, INK, "middle", "bold")]
     # panel body
     s.append(f'<rect x="40" y="82" width="250" height="160" rx="8" fill="{PANEL}"/>')
     # 16-bit gray bar (schematic), a few lit
@@ -56,7 +56,7 @@ def svg_geometry():
 
 # ---------- Diagram 2: encoding layout ----------
 def svg_encoding():
-    s = [txt(20, 28, "Readout layout (one flat panel)", 14, INK, "start", "bold")]
+    s = [txt(20, 28, "Readout layout (one panel)", 14, INK, "start", "bold")]
     bits = [0,1,1,0,1,0,0,1,1,1,0,0,1,0,1,1]   # sample
     for i in range(16):
         x = 40 + i*36
@@ -764,7 +764,7 @@ P.append('<p style="background:#e8f5e9;border-left:4px solid #2e7d32;padding:10p
          '<b>&#10003; First light-up verified &mdash; 2026-06-26.</b> The 7-LED 595 panel is wired and running on the Pico: the walking dot '
          'sweeps all seven, and the <b>binary counter is confirmed correct</b> &mdash; checked frame-by-frame from video, where each LED&rsquo;s '
          'toggle rate halves cleanly down the row (the signature of a clean binary count). The <b>encode &rarr; shift &rarr; latch &rarr; LED</b> '
-         'chain works end to end. <br><b style="color:#1b5e20">&#10003; Step&nbsp;1 (2026-06-26):</b> the <b>real Gray-coded time-code</b> now runs (<code>firmware/timecode</code>) and is <b>camera-decoded</b> &mdash; a phone video decodes to a clean, monotonic count with <b>zero garbage straddles</b> (the Gray-code guarantee, confirmed on hardware, not just in <code>sim/</code>). Reusable decoder: <code>decode/decode_video.py</code>.</p>')
+         'chain works end to end. <br><b style="color:#1b5e20">&#10003; Step&nbsp;1 (2026-06-26):</b> the <b>real Gray-coded timecode</b> now runs (<code>firmware/timecode</code>) and is <b>camera-decoded</b> &mdash; a phone video decodes to a clean, monotonic count with <b>zero garbage straddles</b> (the Gray-code guarantee, confirmed on hardware, not just in <code>sim/</code>). Reusable decoder: <code>decode/decode_video.py</code>.</p>')
 P.append('<p class="k"><b>Got the parts? Start here.</b> This is the hands-on build; the numbered sections below'
          '(&sect;1 onward) explain what the panel is for and why each part was chosen.</p>')
 P.append('<p class="k"><b>Bring-up</b> = power on the smallest version of the circuit and get it working in verified steps, '
@@ -817,15 +817,15 @@ P.append('<p class="k"><b>First test:</b> plug in USB and run firmware that shif
          'GP18/GP19 are the Pico&rsquo;s hardware <b>SPI0</b> pins (SCK/TX), so the firmware can drive them with the SPI '
          'peripheral; GP17 is a spare GPIO toggled by hand as the latch.</p>')
 P.append('<h2>1. Purpose &mdash; what this is for, and why DIY</h2>')
-P.append('<p class="lead">Build a large, flat LED panel that shows a fast-advancing, '
-         'visually-decodable <b>time code</b>. All 11 cameras film it at once; each frame decodes '
+P.append('<p class="lead">Build a large LED panel that shows a fast-advancing, '
+         'visually-decodable <b>timecode</b>. All 11 cameras film it at once; each frame decodes '
          'to a timestamp; the spread of timestamps across cameras <i>is</i> the inter-camera offset. '
          'One clock, many readers.</p>')
 P.append('<p>The Image&nbsp;Engineering / Imatest <b>LED-Panel</b> (ISO&nbsp;15781) is the calibrated '
          'reference we clone. But it is a <b>240&times;130&times;55&nbsp;mm, 1&nbsp;kg</b> benchtop unit with a '
          '50&ndash;100&deg; viewing cone, built to be filmed by <b>one</b> camera at a time, and it costs '
          '<b>$3,980&ndash;$57,850</b>. It cannot face an 11-camera ring. We keep its principle and rebuild '
-         'it large, flat, and multi-camera-friendly.</p>')
+         'it large and multi-camera-friendly.</p>')
 P.append('<figure><img src="assets/commercial-led-panel.png" style="max-width:420px;width:100%;border:1px solid #e5e7eb;border-radius:8px">'
          '<figcaption><b>Figure 2. The commercial reference panel.</b> Image Engineering / Imatest LED-Panel V5: '
          '110 LEDs (10&times;10 grid + a &times;100 row), step 20&nbsp;µs–10&nbsp;s, accuracy &lt;0.06%.</figcaption></figure>')
@@ -892,14 +892,14 @@ P.append('<p class="k"><b>Reading the diagram:</b> the breadboard carries only t
          'and store link: &sect;3.</p>')
 P.append('<h3>What each part does</h3>')
 P.append('<table><tr><th>Part</th><th>Its job in the rig</th></tr>'
-         '<tr><td><b>Microcontroller</b> <span class="k">(Raspberry Pi Pico)</span></td><td>The clock. Its PIO (or a hardware timer) advances the time code every τ and shifts the new on/off pattern out over 3 SPI wires.</td></tr>'
+         '<tr><td><b>Microcontroller</b> <span class="k">(Raspberry Pi Pico)</span></td><td>The clock. Its PIO (or a hardware timer) advances the timecode every τ and shifts the new on/off pattern out over 3 SPI wires.</td></tr>'
          '<tr><td><b>Static-latch shift register</b> <span class="k">(SN74HC595)</span></td><td>The fan-out. Turns those 3 wires into many parallel outputs that all switch at the same instant (no PWM) — one output per LED.</td></tr>'
-         '<tr><td><b>Direct-emission LEDs</b> <span class="k">(10 mm red)</span></td><td>The display. The time code the cameras film; on/off per LED, with no phosphor tail to smear the edge.</td></tr>'
+         '<tr><td><b>Direct-emission LEDs</b> <span class="k">(10 mm red)</span></td><td>The display. The timecode the cameras film; on/off per LED, with no phosphor tail to smear the edge.</td></tr>'
          '<tr><td><b>Current-limit resistors</b> <span class="k">(one per LED)</span></td><td>Protection. Set each LED&rsquo;s current so it stays bright but does not burn out.</td></tr>'
          '<tr><td><b>Current-buffer array</b> <span class="k">(ULN2803, big panel only)</span></td><td>Muscle. Lets every LED run at full brightness without overloading the shift register; skip it for the first few-LED test.</td></tr>'
          '<tr><td><b>Regulated 5 V supply</b></td><td>Power. Feeds the LED rail — the USB port alone cannot drive ~40 bright LEDs.</td></tr>'
          '<tr><td><b>Breadboard + jumper wires</b></td><td>The chassis. Holds the chips and carries signals out to the panel; no soldering for the first prototype.</td></tr>'
-         '<tr><td><b>Panel board</b> <span class="k">(matte black sheet)</span></td><td>The canvas. The flat surface the LEDs mount on at '
+         '<tr><td><b>Panel board</b> <span class="k">(matte black sheet)</span></td><td>The canvas. The surface the LEDs mount on at '
          '3&ndash;5&nbsp;cm pitch so every camera resolves them. Matte <b>black</b> maximises LED contrast and avoids glare into the camera '
          'ring. First build: black <b>foam-core</b>, 20&times;30&Prime; (craft / dollar store, ~$5) &mdash; knife-cut the 10&nbsp;mm holes, the foam grips '
          'the domes. Permanent build: <b>&#8539;&Prime; hardboard</b> (hardware store, cut to size, ~$12) &mdash; drill, hot-glue the LEDs from behind, '
@@ -1028,13 +1028,13 @@ P.append('<p class="k"><b>Where to buy:</b> the order list in &sect;2 carries th
 P.append('<details style="margin:26px 0 0;border:1px solid #d4d8de;border-radius:6px;background:#f6f7f9;padding:2px 18px">'
          '<summary style="cursor:pointer;font-size:1.12em;font-weight:700;color:#586271;padding:11px 0">Archived &mdash; full-panel target design (reference / later)</summary>')
 P.append('<p class="k" style="margin-top:6px">The end-goal panel: a <b>16&times;16 matrix</b> showing a <b>Gray-coded bar + parity + coarse vernier row</b> at <code>&tau;&nbsp;=&nbsp;200&nbsp;&micro;s</code>, decoded per camera frame. <b>Set aside while we grow the working bring-up step by step</b> &mdash; kept here (and proven in <code>sim/</code>) for when we scale up to it. &sect;4&ndash;&sect;9 below are that design.</p>')
-P.append('<h2>4. Geometry &mdash; Option C: one large flat panel</h2>')
-P.append('<p>You will place the cameras to face one large flat panel, so a single planar matrix is all '
+P.append('<h2>4. Geometry &mdash; Option C: one large panel</h2>')
+P.append('<p>You will place the cameras to face one large panel, so a single planar matrix is all '
          'that is needed (no prism, no multi-face latching). The only requirement is that the panel be '
          'large/bright enough for every camera to resolve individual LEDs. Rule of thumb: ~1&nbsp;cm (10&nbsp;mm) LEDs '
          'at ~3&ndash;5&nbsp;cm pitch make a 16-LED bar ~0.5&ndash;0.8&nbsp;m wide, cleanly resolved by a Pixel&nbsp;7 out to ~5&nbsp;m. '
          'Each 10&nbsp;mm dome is ~4 breadboard holes wide, so the LEDs mount on the panel surface (foam-core / hardboard / 3D-printed grid), not the breadboard &mdash; see &sect;2.</p>')
-P.append(f'<figure>{DIAGRAMS["geometry"]}<figcaption><b>Figure 3. Panel geometry.</b> All 11 cameras are placed to face one large flat panel showing the time code &mdash; a single planar matrix, no prism or multi-face latching.</figcaption></figure>')
+P.append(f'<figure>{DIAGRAMS["geometry"]}<figcaption><b>Figure 3. Panel geometry.</b> All 11 cameras are placed to face one large panel showing the timecode &mdash; a single planar matrix, no prism or multi-face latching.</figcaption></figure>')
 P.append('<p><b>Bring-up scope (current): two cameras.</b> The full rig faces 11 cameras (Figure&nbsp;3); the first '
          'measurement uses just <b>two</b> Pixel&nbsp;7s. Place them so the panel falls on <b>approximately the same sensor '
          'row</b> in each frame. Because both are the same model (same rolling-shutter line time), equal panel rows make the '
