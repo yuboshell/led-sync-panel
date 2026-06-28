@@ -81,6 +81,28 @@ P.append(row(
          "(filmed at a 50&nbsp;ms step).", "max-height:420px"),
 ))
 
+# 3 — glossary (makes the diagram labels readable without any project context)
+P.append("<h2>Glossary</h2>")
+P.append('<p class="k">Every term and label that appears above, in plain language.</p>')
+GLOSSARY = [
+    ("Microcontroller", "A tiny computer on a single chip. Here it&rsquo;s a Raspberry&nbsp;Pi Pico, which runs the code that drives the LEDs."),
+    ("Raspberry Pi Pico", "The microcontroller board used &mdash; the &ldquo;controller&rdquo; in the diagrams."),
+    ("Breadboard", "A reusable board for wiring circuits by pushing parts into rows of holes &mdash; no soldering."),
+    ("LED", "Light-emitting diode &mdash; the small lights that show the code."),
+    ("Resistor (240&nbsp;&Omega;)", "Limits the current through an LED so it lights safely; &Omega; (ohm) is the unit of resistance."),
+    ("Shift register (74HC595)", "A chip that turns a few control wires into many on/off outputs &mdash; here, three wires from the Pico into eight outputs. The &ldquo;driver chip.&rdquo;"),
+    ("Timecode", "A number that counts up at a steady, known rate. Read it off a camera frame and you know when that frame was captured."),
+    ("Gray code", "A way of counting in which only one bit (one LED) changes between consecutive values &mdash; so a frame catching a mid-change still reads a clean value, off by at most one."),
+    ("GP15, GP17&ndash;GP19", "Numbered general-purpose pins on the Pico. GP15 drives the single blink LED; GP17&ndash;GP19 carry the three control signals to the shift register."),
+    ("SER, SRCLK, RCLK", "The shift register&rsquo;s three control inputs &mdash; SER: data in; SRCLK: shift clock (loads each bit); RCLK: latch clock (shows the whole byte on the outputs at once)."),
+    ("QA, QB&ndash;QH", "The shift register&rsquo;s eight outputs. QB&ndash;QH each light one LED (seven in all); QA is unused."),
+    ("OE, MR", "Output&nbsp;Enable and Master&nbsp;Reset &mdash; tied to the levels that keep the outputs on and stop the chip from resetting."),
+    ("VCC, GND, 3V3", "Power and ground: VCC = the chip&rsquo;s supply; GND = 0&nbsp;V (the common return); 3V3 = the Pico&rsquo;s 3.3&nbsp;V output, which powers the chip."),
+]
+P.append('<table><tr><th>Term</th><th>Meaning</th></tr>'
+         + "".join(f"<tr><td><b>{t}</b></td><td>{d}</td></tr>" for t, d in GLOSSARY)
+         + "</table>")
+
 html = ("<!doctype html><html lang='en'><head><meta charset='utf-8'>"
         "<meta name='viewport' content='width=device-width,initial-scale=1'>"
         "<title>LED Timecode Panel &mdash; build report</title>"
