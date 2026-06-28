@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""Build report.html — a concise build report for the LED Timecode Panel.
+"""Build report.html — a concise, SELF-CONTAINED build report for the LED Timecode Panel.
 
-Reuses build.py's inline-SVG DIAGRAMS and CSS, so the report can never drift from
-the design page. Importing build also re-validates the SVGs and regenerates index.html.
+Reuses build.py's inline-SVG diagrams and CSS so the report can't drift from the design
+page. Self-contained means: no design-page-only terms (e.g. no "Option C"), and the
+jargon a general reader wouldn't know (shift register, Gray code, microcontroller) is
+glossed where it appears.
 
     python3 build_report.py    # -> writes report.html next to index.html
 """
@@ -10,11 +12,16 @@ import contextlib
 import io
 import os
 
-with contextlib.redirect_stdout(io.StringIO()):   # build.py prints "SVG ok …" + writes index.html
-    import build                                    # exposes CSS + DIAGRAMS (errors still raise)
+with contextlib.redirect_stdout(io.StringIO()):   # build.py prints + writes index.html
+    import build                                    # exposes CSS, DIAGRAMS, svg_wiring_c
 
 D, CSS = build.DIAGRAMS, build.CSS
 OUT = os.path.join(os.path.dirname(build.OUT), "report.html")
+
+# A report-only breadboard diagram with a plain title. The design page's copy keeps the
+# "Option C" title (where Options A/B/C are actually compared); the report never sees it.
+WIRING = build.svg_wiring_c(
+    title="Breadboard wiring — controller and driver chip on one strip; LEDs in a row")
 
 
 def fig(svg, cap):
@@ -37,37 +44,39 @@ P.append("<h1>LED Timecode Panel</h1>")
 P.append('<p style="font-size:18px;color:#475569;font-weight:500;margin:-4px 0 12px">'
          "Build report &mdash; the design, and the hardware working.</p>")
 P.append('<p class="k" style="margin:0 0 18px"><a href="index.html">&larr; Full design &amp; build log</a></p>')
-P.append('<p class="lead">A row of LEDs shows a fast-advancing, camera-decodable <b>Gray timecode</b>. '
-         "Every camera filming the panel reads its own capture instant from it, so the per-frame "
-         "differences between cameras are their synchronization error.</p>")
+P.append('<p class="lead">A row of LEDs shows a fast-advancing <b>timecode</b> &mdash; a number that '
+         "ticks up many times a second. Every camera pointed at the panel can read that number off each "
+         "frame it captures, so comparing what two cameras read at the same moment shows how far apart "
+         "their shutters actually fired &mdash; their synchronization error.</p>")
 
 # 1 — Step 0
 P.append("<h2>Step 0 &mdash; blink one LED</h2>")
-P.append('<p class="k">The smallest possible test: the Pico drives <b>one</b> LED through <b>one</b> '
-         "resistor to ground. If it blinks, the toolchain, board, and wiring are all good.</p>")
+P.append('<p class="k">The smallest possible test: the microcontroller (a Raspberry&nbsp;Pi Pico) drives '
+         "<b>one</b> LED through <b>one</b> resistor to ground. If it blinks, the code, the board, and the "
+         "wiring are all good &mdash; a foundation to build on.</p>")
 P.append(row(
-    fig(D["blink"], "<b>Figure 1. Simplest blink.</b> GP15 &rarr; 240&nbsp;&Omega; &rarr; LED &rarr; GND."),
+    fig(D["blink"], "<b>Figure 1. The blink test.</b> One Pico pin &rarr; a 240&nbsp;&Omega; resistor "
+        "&rarr; the LED &rarr; ground."),
     clip("assets/report/blink.mp4", "<b>The real thing.</b> One LED blinking on the breadboard.",
          "max-height:340px"),
 ))
 
-# 2 — current circuit
-P.append("<h2>The current circuit</h2>")
-P.append('<p class="k">A <b>74HC595</b> shift register, driven by the Pico over three SPI wires '
-         "(<b>SER</b>, <b>SRCLK</b>, <b>RCLK</b>), latches a byte to seven outputs "
-         "(<b>QB&ndash;QH</b>), each lighting an LED through 240&nbsp;&Omega; &mdash; the timecode "
-         "the cameras read.</p>")
-P.append(fig(D["schematic"],
-             "<b>Figure 2. Circuit schematic.</b> Pico &rarr; 74HC595 &rarr; "
-             "7&times;(240&nbsp;&Omega; + LED); QA unused."))
+# 2 — the circuit
+P.append("<h2>The circuit</h2>")
+P.append('<p class="k">To drive several LEDs from just a few pins, the Pico feeds a '
+         "<b>shift-register chip</b> &mdash; it turns three control wires into eight independent on/off "
+         "outputs. Seven of those outputs each light an LED through a 240&nbsp;&Omega; resistor, and the "
+         "seven on/off states together form one number: the timecode.</p>")
+P.append('<p class="k">That number is shown in <b>Gray code</b> &mdash; a counting scheme in which only '
+         "<b>one</b> LED changes from one step to the next. So a camera frame that happens to catch a "
+         "change still reads a clean value (off by at most one), never a scrambled one.</p>")
+P.append(fig(D["schematic"], "<b>Figure 2. Circuit schematic.</b> Pico &rarr; shift-register chip &rarr; "
+             "seven (240&nbsp;&Omega; + LED) branches."))
 P.append(row(
-    fig(D["wiring_c"],
-        "<b>Figure 3. Option C breadboard layout.</b> Pico + 595 on one strip; "
-        "the seven outputs make one clean LED row."),
-    clip("assets/report/panel.mp4",
-         "<b>The real thing.</b> The 7-LED panel running the Gray timecode "
-         "(filmed at a 50&nbsp;ms step).",
-         "max-width:420px"),
+    fig(WIRING, "<b>Figure 3. Breadboard wiring.</b> The Pico and the driver chip share one strip; their "
+        "seven outputs form a single clean row of LEDs."),
+    clip("assets/report/panel.mp4", "<b>The real thing.</b> The seven-LED panel running the timecode "
+         "(filmed at a 50&nbsp;ms step).", "max-width:420px"),
 ))
 
 html = ("<!doctype html><html lang='en'><head><meta charset='utf-8'>"
