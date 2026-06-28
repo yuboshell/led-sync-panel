@@ -287,7 +287,7 @@ def svg_wiring():
         line(lx,ly,lx+18,ly,col,3); txt(lx+22,ly+3.2,lab,8.5,"#33404e","start"); lx+=34+6.2*len(lab)
     return wrap("".join(s), W, H)
 
-def svg_blink():
+def svg_blink(title="Step 0 — the simplest blink (Pico + resistor + LED + 1 jumper)"):
     # Simplest possible circuit: Pico GP15 -> 240Ω -> LED -> one jumper -> GND. One strip, no rails.
     P=18.0; HOLE=6.5; R0=1; RN=27; LX=78; TY=66
     ORA="#ea580c"; BLUE="#2563eb"; GRN="#22c55e"; TAN="#d6b06a"; HOLEC="#39393c"
@@ -337,7 +337,7 @@ def svg_blink():
     txt(x0-20,(cy(18)+cy(25))/2,"1 jumper",6.2,"#bcd",a="middle",w="bold")
     txt(x0-20,(cy(18)+cy(25))/2+9,"→ GND",6.2,"#bcd","middle")
     # title + flow
-    txt(W/2,24,"Step 0 — the simplest blink (Pico + resistor + LED + 1 jumper)",11,"#ffffff","middle","bold")
+    txt(W/2,24,title,11,"#ffffff","middle","bold")
     txt(W/2,40,"GP15 → 240Ω → LED → GND   (toggle GP15 to blink)",9,"#aab2bd","middle")
     return wrap("".join(s), W, H)
 
@@ -455,7 +455,7 @@ def svg_wiring_b():
         line(lx,ly,lx+18,ly,col,3); txt(lx+22,ly+3.2,lab,8.5,"#33404e","start"); lx+=34+6.2*len(lab)
     return wrap("".join(s), W, H)
 
-def svg_wiring_c(title="Option C — Pico + 595 both on the right; 595 turned 180° so control is same-side; LEDs on the left"):
+def svg_wiring_c(title="Option C — Pico + 595 both on the right; 595 turned 180° so control is same-side; LEDs on the left", subtitle='Control stays on the right; the 7 outputs QB–QH make a clean LED row on the left — no bridging wire (QA·pin15 left unused for the bring-up). A rotated chip ≠ a mirror of A.'):
     # OPTION C: Pico AND 595 both on the RIGHT strip; 595 NOTCH-UP (the chip turned 180deg vs A) so its control
     # pins land on the same side as the Pico's GP -> short same-side control. Outputs face LEFT, fanning across
     # the roomy middle to the comb on the LEFT strip. (A rotated chip is NOT a mirror of A: the pin order flips.)
@@ -572,7 +572,7 @@ def svg_wiring_c(title="Option C — Pico + 595 both on the right; 595 turned 18
         comb_led(cy(ledrow),nm)
     # ---- title / legend ----
     txt(W/2,26,title,10.5,"#15171c","middle","bold")
-    txt(W/2,43,"Control stays on the right; the 7 outputs QB–QH make a clean LED row on the left — no bridging wire (QA·pin15 left unused for the bring-up). A rotated chip ≠ a mirror of A.",8,"#5b6470","middle")
+    txt(W/2,43,subtitle,8,"#5b6470","middle")
     leg=[("3V3",RED),("GND",BLUE),("SER",PUR),("SRCLK",CYN),("RCLK",ORA),("output→LED",TAN)]
     lx=40; ly=H-14
     for lab,col in leg:

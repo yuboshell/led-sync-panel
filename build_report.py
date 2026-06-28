@@ -21,7 +21,9 @@ OUT = os.path.join(os.path.dirname(build.OUT), "report.html")
 # A report-only breadboard diagram with a plain title. The design page's copy keeps the
 # "Option C" title (where Options A/B/C are actually compared); the report never sees it.
 WIRING = build.svg_wiring_c(
-    title="Breadboard wiring — controller and driver chip on one strip; LEDs in a row")
+    title="Breadboard wiring",
+    subtitle="Controller on the right; the seven outputs form an LED row on the left.")
+BLINK = build.svg_blink(title="The simplest test — one LED, one resistor, one jumper")
 
 
 def fig(svg, cap):
@@ -50,14 +52,14 @@ P.append('<p class="lead">A row of LEDs shows a fast-advancing <b>timecode</b> &
          "their shutters actually fired &mdash; their synchronization error.</p>")
 
 # 1 — Step 0
-P.append("<h2>Step 0 &mdash; blink one LED</h2>")
+P.append("<h2>Blink one LED</h2>")
 P.append('<p class="k">The smallest possible test: the microcontroller (a Raspberry&nbsp;Pi Pico) drives '
          "<b>one</b> LED through <b>one</b> resistor to ground. If it blinks, the code, the board, and the "
          "wiring are all good &mdash; a foundation to build on.</p>")
 P.append(row(
-    fig(D["blink"], "<b>Figure 1. The blink test.</b> One Pico pin &rarr; a 240&nbsp;&Omega; resistor "
+    fig(BLINK, "<b>Figure 1. The blink test.</b> One Pico pin &rarr; a 240&nbsp;&Omega; resistor "
         "&rarr; the LED &rarr; ground."),
-    clip("assets/report/blink.mp4", "<b>The real thing.</b> One LED blinking on the breadboard.",
+    clip("assets/report/blink.mp4", "<b>Built and running.</b> One LED blinking on the breadboard.",
          "max-height:340px"),
 ))
 
@@ -75,8 +77,8 @@ P.append(fig(D["schematic"], "<b>Figure 2. Circuit schematic.</b> Pico &rarr; sh
 P.append(row(
     fig(WIRING, "<b>Figure 3. Breadboard wiring.</b> The Pico and the driver chip share one strip; their "
         "seven outputs form a single clean row of LEDs."),
-    clip("assets/report/panel.mp4", "<b>The real thing.</b> The seven-LED panel running the timecode "
-         "(filmed at a 50&nbsp;ms step).", "max-width:420px"),
+    clip("assets/report/panel.mp4", "<b>Built and running.</b> The seven-LED panel running the timecode "
+         "(filmed at a 50&nbsp;ms step).", "max-height:420px"),
 ))
 
 html = ("<!doctype html><html lang='en'><head><meta charset='utf-8'>"
