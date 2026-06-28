@@ -11,6 +11,7 @@ glossed where it appears.
 import contextlib
 import io
 import os
+from datetime import datetime
 
 with contextlib.redirect_stdout(io.StringIO()):   # build.py prints + writes index.html
     import build                                    # exposes CSS, DIAGRAMS, svg_wiring_c
@@ -45,6 +46,8 @@ P = []
 P.append("<h1>LED Timecode Panel</h1>")
 P.append('<p style="font-size:18px;color:#475569;font-weight:500;margin:-4px 0 12px">'
          "Build report &mdash; the design, and the hardware working.</p>")
+P.append(f'<p class="k" style="margin:0 0 12px">Yubo&nbsp;Huang &middot; updated '
+         f'{datetime.now().astimezone().strftime("%Y-%m-%d %H:%M %Z")}</p>')
 P.append('<p class="k" style="margin:0 0 18px"><a href="index.html">&larr; Full design &amp; build log</a></p>')
 P.append('<p class="lead">A row of LEDs shows a fast-advancing <b>timecode</b> &mdash; a number that '
          "ticks up many times a second. Every camera pointed at the panel can read that number off each "
