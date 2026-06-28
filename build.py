@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Build the illustrated LED-sync-panel design doc (single self-contained HTML
 with inline SVG diagrams + downloaded product photos)."""
+import os
 import xml.etree.ElementTree as ET
 
-OUT = "/Users/yubo/github/led-sync-panel/index.html"
+OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "index.html")
 
 # palette (clean / monochrome + one functional accent for "lit" LEDs)
 AMBER = "#b45309"   # lit LED / highlight (matches the site copper)

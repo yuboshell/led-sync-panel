@@ -37,9 +37,17 @@ def clip(src, cap, style):
             f"<figcaption>{cap}</figcaption></figure>")
 
 
-def row(*items):
+def pair(a, wa, b, wb, grow=1):
+    """Diagram | built, side by side. Each goes in a flex column of basis wa/wb px,
+    keeping its own caption. The basis widths are chosen so the two render at equal
+    height (diagram-aspect vs clip-aspect). grow=1 fills the column proportionally
+    (a wide SVG shrinks to its share); grow=0 keeps narrow art at natural width,
+    centered. min-width:0 + flex-wrap keeps it responsive on small screens."""
+    cell = '<div style="flex:{g} 1 {w}px;min-width:0">{c}</div>'
     return ('<div style="display:flex;gap:22px;flex-wrap:wrap;align-items:flex-start;'
-            'margin:14px 0">' + "".join(items) + "</div>")
+            'justify-content:center;margin:14px 0">'
+            + cell.format(g=grow, w=wa, c=a) + cell.format(g=grow, w=wb, c=b)
+            + "</div>")
 
 
 P = []
@@ -59,12 +67,12 @@ P.append("<h2>Blink one LED</h2>")
 P.append('<p class="k">The smallest possible test: the microcontroller (a Raspberry&nbsp;Pi Pico) drives '
          "<b>one</b> LED through <b>one</b> resistor to ground. If it blinks, the code, the board, and the "
          "wiring are all good &mdash; a foundation to build on.</p>")
-P.append(row(
+P.append(pair(
     fig(BLINK, "<b>Figure 1. The blink test.</b> One Pico pin &rarr; a 240&nbsp;&Omega; resistor "
-        "&rarr; the LED &rarr; ground."),
+        "&rarr; the LED &rarr; ground."), 344,
     clip("assets/report/blink.mp4", "<b>Built and running.</b> One LED blinking on the breadboard.",
-         "max-height:340px"),
-))
+         "width:100%"), 325,
+    grow=0))
 
 # 2 — the circuit
 P.append("<h2>The circuit</h2>")
@@ -77,14 +85,45 @@ P.append('<p class="k">That number is shown in <b>Gray code</b> &mdash; a counti
          "change still reads a clean value (off by at most one), never a scrambled one.</p>")
 P.append(fig(D["schematic"], "<b>Figure 2. Circuit schematic.</b> Pico &rarr; shift-register chip &rarr; "
              "seven (240&nbsp;&Omega; + LED) branches."))
-P.append(row(
+P.append(pair(
     fig(WIRING, "<b>Figure 3. Breadboard wiring.</b> The Pico and the driver chip share one strip; their "
-        "seven outputs form a single clean row of LEDs."),
+        "seven outputs form a single clean row of LEDs."), 475,
     clip("assets/report/panel.mp4", "<b>Built and running.</b> The seven-LED panel running the timecode "
-         "(filmed at a 50&nbsp;ms step).", "max-height:420px"),
-))
+         "(filmed at a 50&nbsp;ms step).", "width:100%"), 335,
+    grow=1))
 
-# 3 — glossary (makes the diagram labels readable without any project context)
+# 3 — the raw synchronized footage the analysis runs on (preface to the capture analysis)
+P.append("<h2>What the two cameras filmed</h2>")
+P.append('<p class="k">Before the analysis, the raw input. These are the last 100 frames of the clip, with '
+         "each camera&rsquo;s frame paired to the other camera&rsquo;s nearest frame in time and played side "
+         "by side &mdash; so every pair shows the same moment, seen twice. The timecode steps every "
+         "0.5&nbsp;ms here (the panel&rsquo;s fastest setting), and both cameras film with a matching "
+         "0.5&nbsp;ms exposure &mdash; short enough to freeze each fast-changing pattern into a clean, "
+         "readable frame. The lit pattern tracks together across both views; the small residual difference "
+         "is what the decode below measures.</p>")
+P.append(clip("assets/report/last100_twocam.mp4",
+         "<b>Last 100 synchronized frames &mdash; left: camera&nbsp;1, right: camera&nbsp;2.</b> Paired by "
+         "nearest capture time; the bright cluster is the LED panel each camera reads. The decode below "
+         "turns this footage into a per-frame offset.",
+         "width:100%"))
+
+# 4 — the panel actually measuring camera sync (the payoff; adapted to stand alone here)
+P.append("<h2>Sampled across the whole video</h2>")
+P.append('<p class="k">The payoff. With two cameras pointed at the running panel, every frame each one '
+         "captures carries a readable timecode &mdash; so the gap between what the two cameras read at the "
+         "same instant is how far apart their shutters actually fired: their <b>synchronization error</b>. "
+         "Below it is measured not once but at six points spread across a full 60&nbsp;s clip &mdash; five "
+         "frames around each 10&nbsp;s mark (10, 20, &hellip; 60&nbsp;s). The offset is the same everywhere, "
+         "about <b>+2&nbsp;ms</b>, not just at the end.</p>")
+P.append(fig(
+    '<img src="assets/report/sampled_across_video.jpg" alt="Five frames around each 10 s mark" '
+    'style="display:block;width:100%;border:1px solid #e5e7eb;border-radius:8px">',
+    "<b>Figure 4. The offset holds across the clip.</b> Five frames around each of the "
+    "10/20/30/40/50/60&nbsp;s marks. Each cell shows the two cameras&rsquo; LED crops (one above the "
+    "other), the timecode each one decoded, and the resulting per-frame offset. Every frame at every "
+    "mark reads about +2&nbsp;ms &mdash; a stable, repeatable sync error, not drift."))
+
+# 5 — glossary (makes the diagram labels readable without any project context)
 P.append("<h2>Glossary</h2>")
 P.append('<p class="k">Every term and label that appears above, in plain language.</p>')
 GLOSSARY = [
@@ -96,6 +135,7 @@ GLOSSARY = [
     ("Shift register (74HC595)", "A chip that turns a few control wires into many on/off outputs &mdash; here, three wires from the Pico into eight outputs. The &ldquo;driver chip.&rdquo;"),
     ("Timecode", "A number that counts up at a steady, known rate. Read it off a camera frame and you know when that frame was captured."),
     ("Gray code", "A way of counting in which only one bit (one LED) changes between consecutive values &mdash; so a frame catching a mid-change still reads a clean value, off by at most one."),
+    ("Synchronization error", "How far apart two cameras&rsquo; shutters actually fired for &ldquo;the same&rdquo; frame &mdash; what the panel measures. Read the timecode off each camera at the same instant and the difference is the sync error."),
     ("GP15, GP17&ndash;GP19", "Numbered general-purpose pins on the Pico. GP15 drives the single blink LED; GP17&ndash;GP19 carry the three control signals to the shift register."),
     ("SER, SRCLK, RCLK", "The shift register&rsquo;s three control inputs &mdash; SER: data in; SRCLK: shift clock (loads each bit); RCLK: latch clock (shows the whole byte on the outputs at once)."),
     ("QA, QB&ndash;QH", "The shift register&rsquo;s eight outputs. QB&ndash;QH each light one LED (seven in all); QA is unused."),
