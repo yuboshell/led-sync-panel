@@ -724,7 +724,7 @@ P.append('<h1>LED Timecode Panel</h1>')
 P.append('<p style="font-size:18px;color:#475569;font-weight:500;margin:-4px 0 12px">For measuring inter-camera capture sync.</p>')
 P.append('<div class="meta">DIY design + build log &middot; updated 2026-06-26 &middot; 11&times;Pixel&nbsp;7 / Argus rig &middot; '
          '74HC595 driver, 7-bit Gray timecode (0.5&nbsp;ms step) &middot; hardware-verified end to end &mdash; 2-camera offset measured (cameras synced to &lt;&nbsp;1&nbsp;ms)</div>')
-P.append('<p class="k"><b>Reader&rsquo;s map:</b> <b>build guide first</b> (wire the first light-up, just below) &middot; '
+P.append('<p class="k"><b>Short on time? &rarr; <a href="report.html">1-page report</a>.</b> &nbsp; <b>Reader&rsquo;s map:</b> <b>build guide first</b> (wire the first light-up, just below) &middot; '
          'then &sect;1 what this tool is for &middot; &sect;2 the order list &middot; &sect;3 the driver choice + exact parts &middot; '
          '&sect;4&ndash;&sect;9 the <b>archived</b> full-panel design.</p>')
 P.append('<h2>The circuit &mdash; schematic &amp; Option&nbsp;C (check the wiring net-by-net)</h2>')

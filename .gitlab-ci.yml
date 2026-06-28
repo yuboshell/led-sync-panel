@@ -8,6 +8,7 @@ pages:
   script:
     - mkdir -p public
     - cp index.html public/
+    - cp report.html public/
     - cp -r assets public/
   artifacts:
     paths:
