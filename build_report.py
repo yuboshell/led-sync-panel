@@ -16,7 +16,29 @@ from datetime import datetime
 with contextlib.redirect_stdout(io.StringIO()):   # build.py prints + writes index.html
     import build                                    # exposes CSS, DIAGRAMS, svg_wiring_c
 
-D, CSS = build.DIAGRAMS, build.CSS
+D = build.DIAGRAMS
+
+# Styling matches Yubo's homepage (Jon Barron / Leonid Keselman template): Lato, blue
+# #1772d0 links, white background, a centered single column maxed at 800 px -- replaces the
+# design page's denser CSS so the report reads like the rest of the site.
+CSS = """
+html,body{margin:0;padding:0;background:#fff;}
+body{font-family:'Lato',Verdana,Helvetica,sans-serif;font-size:14px;color:#000;line-height:1.5;max-width:800px;margin:0 auto;padding:22px 18px 64px;}
+a{color:#1772d0;text-decoration:none;}
+a:hover,a:focus{color:#f09228;}
+h1{font-family:'Lato',Verdana,Helvetica,sans-serif;font-size:32px;font-weight:normal;text-align:center;margin:16px 0 4px;}
+h2{font-family:'Lato',Verdana,Helvetica,sans-serif;font-size:22px;font-weight:normal;margin:30px 0 8px;}
+h3{font-family:'Lato',Verdana,Helvetica,sans-serif;font-size:16px;font-weight:700;margin:18px 0 6px;}
+p{line-height:1.5;margin:10px 0;}
+.lead{font-size:15px;}
+.k{color:#555;}
+figure{margin:18px 0;text-align:center;}
+figure svg,figure img,figure video{max-width:100%;height:auto;}
+figcaption{font-size:13px;color:#555;line-height:1.45;margin-top:6px;text-align:left;}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:14px 0;}
+th,td{border:1px solid #e5e7eb;padding:6px 10px;text-align:left;vertical-align:top;}
+th{background:#f6f7f9;font-weight:700;}
+"""
 OUT = os.path.join(os.path.dirname(build.OUT), "report.html")
 
 # A report-only breadboard diagram with a plain title. The design page's copy keeps the
@@ -52,11 +74,11 @@ def pair(a, wa, b, wb, grow=1):
 
 P = []
 P.append("<h1>LED Timecode Panel</h1>")
-P.append('<p style="font-size:18px;color:#475569;font-weight:500;margin:-4px 0 12px">'
-         "Build report &mdash; the design, and the hardware working.</p>")
-P.append(f'<p class="k" style="margin:0 0 12px">Yubo&nbsp;Huang &middot; updated '
+P.append('<p style="text-align:center;font-size:15px;margin:4px 0">'
+         "Build report &mdash; the design, and the hardware working</p>")
+P.append(f'<p class="k" style="text-align:center;margin:6px 0 2px">Yubo&nbsp;Huang &middot; updated '
          f'{datetime.now().astimezone().strftime("%Y-%m-%d %H:%M %Z")}</p>')
-P.append('<p class="k" style="margin:0 0 18px"><a href="index.html">&larr; Full design &amp; build log</a></p>')
+P.append('<p class="k" style="text-align:center;margin:0 0 26px"><a href="index.html">&larr; Full design &amp; build log</a></p>')
 P.append('<p class="lead">A row of LEDs shows a fast-advancing <b>timecode</b> &mdash; a number that '
          "ticks up many times a second. Every camera pointed at the panel can read that number off each "
          "frame it captures, so comparing what two cameras read at the same moment shows how far apart "
@@ -149,6 +171,7 @@ P.append('<table><tr><th>Term</th><th>Meaning</th></tr>'
 html = ("<!doctype html><html lang='en'><head><meta charset='utf-8'>"
         "<meta name='viewport' content='width=device-width,initial-scale=1'>"
         "<title>LED Timecode Panel &mdash; build report</title>"
+        "<link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic' rel='stylesheet'>"
         f"<style>{CSS}</style></head><body>{''.join(P)}</body></html>")
 
 with open(OUT, "w", encoding="utf-8") as f:
