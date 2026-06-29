@@ -23,7 +23,9 @@
 #define SCK   18                 // GP18 -> SRCLK (SPI0 SCK)
 #define TX    19                 // GP19 -> SER   (SPI0 TX)
 
-#define STEP_US 500u             // step interval tau = 0.5 ms (2000 steps/s). Needs camera shutter <= ~0.5 ms (1/2000 s), else exposure smear.
+#ifndef STEP_US                  // overridable at build: cmake -DSTEP_US=<microseconds> -- e.g. flash.sh 500 -> 500000 (0.5 s demo)
+#define STEP_US 500u             // default tau = 0.5 ms (2000 steps/s). Needs camera shutter <= ~0.5 ms (1/2000 s), else exposure smear.
+#endif
 #define NSTEPS  128u             // 7-bit count 0..127; wraps every NSTEPS*tau = 64 ms (still > one 30fps frame = 33 ms)
 
 static void put595(uint8_t bits) {

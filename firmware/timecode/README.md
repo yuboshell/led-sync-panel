@@ -57,3 +57,13 @@ interface, so just rebuild and:
 ```bash
 picotool load -fx build/timecode.uf2   # -f reboots to BOOTSEL over USB, loads, and runs
 ```
+
+## Demo / diagnostic mode — `flash.sh`
+Build + no-touch-flash at any step, to switch between camera speed and a slow, watchable
+version in one command:
+```bash
+./flash.sh        # production: 0.5 ms/step (too fast to see by eye)
+./flash.sh 500    # demo: 500 ms/step — Gray code flips one LED per step, so all 7 visibly
+                  #       cycle over ~30 s. For showing people, or confirming every LED works.
+```
+`STEP_US` is a build-time override (`cmake -DSTEP_US=<microseconds>`); `main.c`'s default stays 0.5 ms.
