@@ -74,6 +74,7 @@ def pair(a, wa, b, wb, grow=1):
 
 
 P = []
+P.append("<p style='margin:0 0 .6rem'><a href='https://yuboshell.github.io/'>&larr; Home</a></p>")
 P.append("<h1>LED Timecode Panel</h1>")
 P.append('<p style="text-align:center;font-size:15px;margin:4px 0">'
          "Build report &mdash; the design, and the hardware working</p>")
