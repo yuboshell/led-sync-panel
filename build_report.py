@@ -19,11 +19,12 @@ with contextlib.redirect_stdout(io.StringIO()):   # build.py prints + writes ind
 D = build.DIAGRAMS
 
 # Styling matches Yubo's homepage (Jon Barron / Leonid Keselman template): Lato, blue
-# #1772d0 links, white background, a centered single column maxed at 800 px -- replaces the
+# #1772d0 links, white background, a centered single column. Width is 1040 px (wider than
+# the homepage's 800 px) so the report's side-by-side figures fit, not stack. Replaces the
 # design page's denser CSS so the report reads like the rest of the site.
 CSS = """
 html,body{margin:0;padding:0;background:#fff;}
-body{font-family:'Lato',Verdana,Helvetica,sans-serif;font-size:14px;color:#000;line-height:1.5;max-width:800px;margin:0 auto;padding:22px 18px 64px;}
+body{font-family:'Lato',Verdana,Helvetica,sans-serif;font-size:14px;color:#000;line-height:1.5;max-width:1040px;margin:0 auto;padding:22px 18px 64px;}
 a{color:#1772d0;text-decoration:none;}
 a:hover,a:focus{color:#f09228;}
 h1{font-family:'Lato',Verdana,Helvetica,sans-serif;font-size:32px;font-weight:normal;text-align:center;margin:16px 0 4px;}
