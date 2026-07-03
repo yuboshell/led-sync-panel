@@ -4,3 +4,6 @@ __pycache__/
 # purchase receipts / item photos — contain personal + payment info, keep local-only
 purchases/
 references/datasheets/
+
+# Large raw capture clips — keep local-only (use Git LFS if you want them versioned)
+assets/recordings/*.MOV
