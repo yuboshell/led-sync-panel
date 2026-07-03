@@ -88,6 +88,28 @@ P.append('<p class="lead">A row of LEDs shows a fast-advancing <b>timecode</b> &
          "frame it captures, so comparing what two cameras read at the same moment shows how far apart "
          "their shutters actually fired &mdash; their synchronization error.</p>")
 
+# 0.5 — Background (the paper's motivation + prior-work landscape)
+P.append("<h2>Background</h2>")
+P.append("<p>Multi-camera rigs &mdash; motion-capture stages, light-stage domes, phone arrays &mdash; "
+         "only work if every camera's shutter fires at the same instant. Yet recent large capture "
+         "datasets report synchronized capture <i>without ever measuring the error</i>: "
+         "<b>HumanOLAT</b> (ICCV&nbsp;2025, 40&nbsp;cameras) and <b>MVHumanNet</b> (CVPR&nbsp;2024, "
+         "48&nbsp;cameras) both claim sync but publish no number for it. Without a measurement a "
+         "sync-quality claim is unverifiable &mdash; so a trustworthy <i>evaluation</i> tool is the "
+         "prerequisite for any work that tries to <i>improve</i> synchronization.</p>")
+P.append("<p>A handful of tools come close, but none is a ready fit. <b>libsoftwaresync</b> "
+         "(Google, ICCP&nbsp;2019) is a 10&times;10 LED panel that encodes time by <i>position</i> on the "
+         "grid, reaching ~200&nbsp;&micro;s. <b>Twist-n-Sync</b> (MDPI&nbsp;Sensors&nbsp;2021) uses an LED "
+         "strip read out by the camera's <b>rolling shutter</b> &mdash; a camera exposes the image one row "
+         "at a time, top to bottom, so a brief flash lands on a specific row, pinning timing to finer than "
+         "one video frame. <b>RecSync</b> (IEEE&nbsp;Sensors&nbsp;2021) and subframe post-processing "
+         "(VISAPP&nbsp;2017) either need special hardware or act at the wrong layer &mdash; aligning "
+         "already-recorded video rather than the capture itself.</p>")
+P.append("<p>This project &mdash; the <b>LED timecode panel</b> described below &mdash; is a small, "
+         "self-built entry in that lineage: neat, affordable, and customizable, and currently resolving "
+         "inter-camera offset to <b>sub-millisecond</b> (0.5&nbsp;ms). Beyond measuring today's rigs, it "
+         "can serve as a reference signal for developing <b>event-based</b> synchronization methods.</p>")
+
 # 1 — Step 0
 P.append("<h2>Blink one LED</h2>")
 P.append('<p class="k">The smallest possible test: the microcontroller (a Raspberry&nbsp;Pi Pico) drives '
