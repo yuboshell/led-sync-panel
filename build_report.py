@@ -88,6 +88,8 @@ P.append("<hr class='rule'>")
 P.append("<p class='authors'>Yubo&nbsp;Huang &nbsp;&nbsp; Antonio&nbsp;Neves &nbsp;&nbsp; "
          "Jun&nbsp;Zhou &nbsp;&nbsp; Pengyu&nbsp;Zhang &nbsp;&nbsp; Li&nbsp;Cheng</p>")
 P.append("<p class='affil'>Affiliations to be added</p>")
+P.append("<p class='affil' style='margin-top:5px'>Code: "
+         "<a href='https://github.com/yuboshell/led-sync-panel'>github.com/yuboshell/led-sync-panel</a></p>")
 
 # --- Abstract ---
 P.append("<div class='abstract-h'>Abstract</div>")
@@ -123,8 +125,8 @@ P.append("<p>We build such a tool. A row of LEDs shows a fast-advancing timecode
 P.append("<h2>2&nbsp;&nbsp;Related Work</h2>")
 P.append("<p>The closest analogue is <b>libsoftwaresync</b> (Google, ICCP&nbsp;2019), a 10&times;10 LED "
          "panel that encodes time by <i>position</i> on the grid and reaches ~200&nbsp;&micro;s. Other "
-         "LED-based rigs (e.g. <b>Twist-n-Sync</b>, MDPI&nbsp;Sensors&nbsp;2021) and camera-side methods "
-         "(<b>RecSync</b>, IEEE&nbsp;Sensors&nbsp;2021; subframe post-processing, VISAPP&nbsp;2017) target a "
+         "LED-based rigs (e.g. <b>Twist-n-Sync</b>, MDPI&nbsp;Sensors&nbsp;2021) and camera-side "
+         "post-processing (subframe alignment, VISAPP&nbsp;2017) target a "
          "different setting or act at the wrong layer &mdash; aligning already-recorded video rather than "
          "the capture itself. None is a drop-in evaluation tool for a small, reconfigurable multi-camera "
          "rig, which is the gap this panel fills.</p>")
@@ -198,7 +200,6 @@ P.append("<h2>References</h2>")
 REFS = [
     "libsoftwaresync &mdash; Wireless software synchronization of multiple distributed cameras. ICCP&nbsp;2019 (Google).",
     "Twist-n-Sync &mdash; software time synchronization. MDPI&nbsp;Sensors, 2021.",
-    "RecSync &mdash; recording-time synchronization for Android multi-camera capture. IEEE&nbsp;Sensors, 2021.",
     "Subframe temporal alignment of multi-view video. VISAPP&nbsp;2017.",
     "HumanOLAT &mdash; a large multi-view relightable human-capture dataset. ICCV&nbsp;2025.",
     "MVHumanNet &mdash; a large-scale multi-view human-capture dataset. CVPR&nbsp;2024.",
