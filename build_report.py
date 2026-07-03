@@ -5,7 +5,7 @@ Reuses build.py's inline-SVG diagrams so the figures can't drift from the design
 The prose is organized as a paper: Abstract, Introduction, Related Work, System Design,
 Evaluation, Conclusion, References, and an Appendix glossary. Visual style follows the
 NeurIPS 2025 template (serif single column, rules around the title, centered abstract,
-bold numbered sections).
+bold numbered sections). Figures and references are cross-referenced with clickable links.
 
     python3 build_report.py    # -> writes report.html next to index.html
 """
@@ -57,12 +57,14 @@ WIRING = build.svg_wiring_c(
 BLINK = build.svg_blink(title="The simplest test — one LED, one resistor, one jumper")
 
 
-def fig(svg, cap):
-    return f"<figure>{svg}<figcaption>{cap}</figcaption></figure>"
+def fig(svg, cap, fid=None):
+    i = f" id='{fid}'" if fid else ""
+    return f"<figure{i}>{svg}<figcaption>{cap}</figcaption></figure>"
 
 
-def clip(src, cap, style):
-    return (f'<figure><video src="{src}" autoplay loop muted playsinline '
+def clip(src, cap, style, fid=None):
+    i = f" id='{fid}'" if fid else ""
+    return (f'<figure{i}><video src="{src}" autoplay loop muted playsinline '
             f'style="{style};border:1px solid #ccc;border-radius:6px;display:block"></video>'
             f"<figcaption>{cap}</figcaption></figure>")
 
@@ -75,6 +77,14 @@ def pair(a, wa, b, wb, grow=1):
             'justify-content:center;margin:16px 0">'
             + cell.format(g=grow, w=wa, c=a) + cell.format(g=grow, w=wb, c=b)
             + "</div>")
+
+
+def figref(n):
+    return f"<a href='#fig{n}'>Figure&nbsp;{n}</a>"
+
+
+def cite(*ns):
+    return "[" + ",&nbsp;".join(f"<a href='#ref{n}'>{n}</a>" for n in ns) + "]"
 
 
 P = []
@@ -108,8 +118,8 @@ P.append("<div class='abstract'><p>Multi-camera capture &mdash; motion-capture s
 P.append("<h2>1&nbsp;&nbsp;Introduction</h2>")
 P.append("<p>Multi-camera rigs only work if every camera's shutter fires at the same instant. Yet recent "
          "large capture datasets report synchronized capture <i>without ever measuring the error</i>: "
-         "<b>HumanOLAT</b> (ICCV&nbsp;2025, 40&nbsp;cameras) and <b>MVHumanNet</b> (CVPR&nbsp;2024, "
-         "48&nbsp;cameras) both claim synchronization but publish no number for it. Without a measurement a "
+         "<b>HumanOLAT</b> " + cite(1) + " (40&nbsp;cameras) and <b>MVHumanNet</b> " + cite(2) + " "
+         "(48&nbsp;cameras) both claim synchronization but publish no number for it. Without a measurement a "
          "sync-quality claim is unverifiable &mdash; so a trustworthy <i>evaluation</i> tool is the "
          "prerequisite for any work that hopes to <i>improve</i> synchronization.</p>")
 P.append("<p>We build such a tool. A row of LEDs shows a fast-advancing timecode &mdash; a number that "
@@ -121,25 +131,24 @@ P.append("<p>We build such a tool. A row of LEDs shows a fast-advancing timecode
          "transition; and (iii)&nbsp;a working demonstration resolving inter-camera offset to 0.5&nbsp;ms on "
          "a two-camera rig.</p>")
 
-# --- 2 Related Work (Twist-n-Sync trimmed to a one-line mention) ---
+# --- 2 Related Work ---
 P.append("<h2>2&nbsp;&nbsp;Related Work</h2>")
-P.append("<p>The closest analogue is <b>libsoftwaresync</b> (Google, ICCP&nbsp;2019), a 10&times;10 LED "
-         "panel that encodes time by <i>position</i> on the grid and reaches ~200&nbsp;&micro;s. Other "
-         "LED-based rigs (e.g. <b>Twist-n-Sync</b>, MDPI&nbsp;Sensors&nbsp;2021) and camera-side "
-         "post-processing (subframe alignment, VISAPP&nbsp;2017) target a "
-         "different setting or act at the wrong layer &mdash; aligning already-recorded video rather than "
-         "the capture itself. None is a drop-in evaluation tool for a small, reconfigurable multi-camera "
-         "rig, which is the gap this panel fills.</p>")
+P.append("<p>The closest analogue is <b>libsoftwaresync</b> " + cite(3) + ", a 10&times;10 LED panel that "
+         "encodes time by <i>position</i> on the grid and reaches ~200&nbsp;&micro;s. Other LED-based rigs "
+         "(e.g. <b>Twist-n-Sync</b> " + cite(4) + ") and camera-side post-processing (subframe alignment "
+         + cite(5) + ") target a different setting or act at the wrong layer &mdash; aligning "
+         "already-recorded video rather than the capture itself. None is a drop-in evaluation tool for a "
+         "small, reconfigurable multi-camera rig, which is the gap this panel fills.</p>")
 
 # --- 3 System Design ---
 P.append("<h2>3&nbsp;&nbsp;System Design</h2>")
 P.append("<h3>3.1&nbsp;&nbsp;A minimal test: blink one LED</h3>")
 P.append("<p>The smallest possible test: the microcontroller (a Raspberry&nbsp;Pi Pico) drives <b>one</b> "
-         "LED through <b>one</b> resistor to ground. If it blinks, the code, the board, and the wiring are "
-         "all sound &mdash; a foundation to build on.</p>")
+         "LED through <b>one</b> resistor to ground (" + figref(1) + "). If it blinks, the code, the board, "
+         "and the wiring are all sound &mdash; a foundation to build on.</p>")
 P.append(pair(
     fig(BLINK, "<b>Figure&nbsp;1: The blink test.</b> One Pico pin &rarr; a 240&nbsp;&Omega; resistor "
-        "&rarr; the LED &rarr; ground."), 344,
+        "&rarr; the LED &rarr; ground.", fid="fig1"), 344,
     clip("assets/report/blink.mp4", "<b>Built and running.</b> One LED blinking on the breadboard.",
          "width:100%"), 325,
     grow=0))
@@ -149,12 +158,13 @@ P.append("<p>To drive several LEDs from just a few pins, the Pico feeds a <b>shi
          "light an LED through a 240&nbsp;&Omega; resistor, and the seven on/off states together form one "
          "number: the timecode. That number is shown in <b>Gray code</b> &mdash; a counting scheme in which "
          "only <b>one</b> LED changes from one step to the next &mdash; so a frame that happens to catch a "
-         "change still reads a clean value (off by at most one), never a scrambled one.</p>")
+         "change still reads a clean value (off by at most one), never a scrambled one. " + figref(2)
+         + " gives the schematic and " + figref(3) + " the breadboard build.</p>")
 P.append(fig(D["schematic"], "<b>Figure&nbsp;2: Circuit schematic.</b> Pico &rarr; shift-register chip "
-             "&rarr; seven (240&nbsp;&Omega; + LED) branches."))
+             "&rarr; seven (240&nbsp;&Omega; + LED) branches.", fid="fig2"))
 P.append(pair(
     fig(WIRING, "<b>Figure&nbsp;3: Breadboard wiring.</b> The Pico and the driver chip share one strip; "
-        "their seven outputs form a single clean row of LEDs."), 475,
+        "their seven outputs form a single clean row of LEDs.", fid="fig3"), 475,
     clip("assets/report/panel.mp4", "<b>Built and running.</b> The seven-LED panel running the timecode "
          "(filmed at a 50&nbsp;ms step).", "width:100%"), 335,
     grow=1))
@@ -167,24 +177,26 @@ P.append("<p>Before the analysis, the raw input. These are the last 100 frames o
          "every pair shows the same moment seen twice. The timecode steps every 0.5&nbsp;ms here (the "
          "panel's fastest setting), and both cameras film with a matching 0.5&nbsp;ms exposure &mdash; short "
          "enough to freeze each fast-changing pattern into a clean, readable frame. The lit pattern tracks "
-         "together across both views; the small residual difference is what the decode measures.</p>")
+         "together across both views; the small residual difference is what the decode measures ("
+         + figref(4) + ").</p>")
 P.append(clip("assets/report/last100_twocam.mp4",
          "<b>Figure&nbsp;4: Last 100 synchronized frames</b> (left: camera&nbsp;1, right: camera&nbsp;2), "
          "paired by nearest capture time. The bright cluster is the LED panel each camera reads.",
-         "width:100%"))
+         "width:100%", fid="fig4"))
 P.append("<h3>4.2&nbsp;&nbsp;Inter-camera offset across the clip</h3>")
 P.append("<p>With two cameras pointed at the running panel, every frame each one captures carries a "
          "readable timecode, so the gap between what the two cameras read at the same instant is how far "
          "apart their shutters actually fired: their <b>synchronization error</b>. We measure it not once "
          "but at six points spread across a full 60&nbsp;s clip &mdash; five frames around each 10&nbsp;s "
          "mark. The offset is the same everywhere, about <b>+2&nbsp;ms</b>: a stable, repeatable error, not "
-         "drift.</p>")
+         "drift (" + figref(5) + ").</p>")
 P.append(fig(
     "<img src='assets/report/sampled_across_video.jpg' alt='Five frames around each 10 s mark' "
     "style='display:block;width:100%;border:1px solid #ccc;border-radius:6px'>",
     "<b>Figure&nbsp;5: The offset holds across the clip.</b> Five frames around each of the "
     "10/20/30/40/50/60&nbsp;s marks. Each cell shows the two cameras' LED crops (one above the other), the "
-    "timecode each decoded, and the resulting per-frame offset &mdash; about +2&nbsp;ms throughout."))
+    "timecode each decoded, and the resulting per-frame offset &mdash; about +2&nbsp;ms throughout.",
+    fid="fig5"))
 
 # --- 5 Conclusion and Future Work ---
 P.append("<h2>5&nbsp;&nbsp;Conclusion and Future Work</h2>")
@@ -195,16 +207,16 @@ P.append("<p>We have built and validated a compact LED timecode panel that makes
          "timing signal, it also makes a natural reference for developing and benchmarking <b>event-based</b> "
          "synchronization methods.</p>")
 
-# --- References (placeholders — full bibliographic details to be completed) ---
+# --- References (citation order; ids let the in-text [N] link here). Placeholders. ---
 P.append("<h2>References</h2>")
 REFS = [
+    "HumanOLAT &mdash; a large multi-view relightable human-capture dataset. ICCV&nbsp;2025.",
+    "MVHumanNet &mdash; a large-scale multi-view human-capture dataset. CVPR&nbsp;2024.",
     "libsoftwaresync &mdash; Wireless software synchronization of multiple distributed cameras. ICCP&nbsp;2019 (Google).",
     "Twist-n-Sync &mdash; software time synchronization. MDPI&nbsp;Sensors, 2021.",
     "Subframe temporal alignment of multi-view video. VISAPP&nbsp;2017.",
-    "HumanOLAT &mdash; a large multi-view relightable human-capture dataset. ICCV&nbsp;2025.",
-    "MVHumanNet &mdash; a large-scale multi-view human-capture dataset. CVPR&nbsp;2024.",
 ]
-P.append("<ol class='refs'>" + "".join(f"<li>{r}</li>" for r in REFS) + "</ol>")
+P.append("<ol class='refs'>" + "".join(f"<li id='ref{i}'>{r}</li>" for i, r in enumerate(REFS, 1)) + "</ol>")
 P.append("<p class='footer'>References are placeholders &mdash; author names, titles, and page numbers "
          "still to be filled in.</p>")
 
